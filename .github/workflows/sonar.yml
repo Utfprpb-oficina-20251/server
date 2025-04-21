@@ -1,5 +1,8 @@
 name: SonarCloud
 
+permissions:
+  checks: write
+  pull-requests: read
 on:
   push:
     branches:
