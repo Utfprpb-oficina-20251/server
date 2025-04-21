@@ -1,0 +1,54 @@
+#Config compartilhada
+spring:
+  profiles:
+    active: dev
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      javax.persistence.validation.mode: none
+      hibernate:
+        format_sql: false
+    show-sql: true
+  flyway:
+    enabled: false
+    baseline-on-migrate: false
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  config:
+    import: optional:file:.env[.properties]
+---
+# Perfil de prod
+spring:
+  config:
+    activate:
+      on-profile: prod
+  flyway:
+    locations: classpath:db/prod
+---
+# Desenvolvimento
+spring:
+  config:
+    activate:
+      on-profile: dev
+  flyway:
+    locations: classpath:db/dev
+
+---
+# Testes
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    driver-class-name: org.h2.Driver
+    username: sa
+  flyway:
+    locations: classpath:db/test
+  h2:
+    console:
+      enabled: true
