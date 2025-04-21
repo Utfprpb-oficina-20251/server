@@ -1,4 +1,4 @@
-#Configurações compartilhadas
+#Config compartilhada
 spring:
   profiles:
     active: dev
@@ -9,7 +9,6 @@ spring:
       javax.persistence.validation.mode: none
       hibernate:
         format_sql: false
-        dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
   flyway:
     enabled: false
@@ -22,7 +21,7 @@ spring:
   config:
     import: optional:file:.env[.properties]
 ---
-# Perfil de Produção
+# Perfil de prod
 spring:
   config:
     activate:
