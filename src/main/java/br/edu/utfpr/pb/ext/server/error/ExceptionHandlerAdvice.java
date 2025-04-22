@@ -16,7 +16,7 @@ public class ExceptionHandlerAdvice {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handlerValidationException(
+    public ApiError handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception,
             HttpServletRequest request) {
         Map<String, String> validationErrors = new HashMap<>();
@@ -26,7 +26,7 @@ public class ExceptionHandlerAdvice {
 
         return ApiError.builder()
                 .status(400)
-                .message("Validation error")
+                .message("Validation Error")
                 .url(request.getServletPath())
                 .validationErrors(validationErrors)
                 .build();

@@ -4,6 +4,7 @@ import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 
@@ -18,7 +19,9 @@ public class ErrorHandler implements ErrorController {
         this.errorAttributes = errorAttributes;
     }
 
-    @RequestMapping("/error")
+    @RequestMapping(value = "/error", method = {
+            RequestMethod.GET, RequestMethod.POST
+    })
     public ApiError handleError(WebRequest webRequest) {
         Map<String, Object> attributes = errorAttributes.getErrorAttributes(
                 webRequest,
