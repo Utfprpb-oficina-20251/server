@@ -54,6 +54,15 @@ class ErrorHandlerTest {
     }
 
     @Test
+    @Description("Erro deve retornar parâmetros quando proveniente de método não seguro (POST/PUT/DELETE)")
+    void handleUnsafeError_WhenAllParametersExist_ShouldReturnApiErrorWithAttributes() {
+        ApiError result = errorHandler.handleUnsafeError(webRequest);
+        assertThat(result.getMessage()).isEqualTo("error message");
+        assertThat(result.getStatus()).isEqualTo(400);
+        assertThat(result.getUrl()).isEqualTo("/url");
+    }
+
+    @Test
     @Description("Erro deve ser retornado no caso do campo mensagem estar nulo")
     void handleError_WhenMessageNotExist_ShouldReturnApiErrorWithAttributes() {
 

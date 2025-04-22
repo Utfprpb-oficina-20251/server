@@ -1,14 +1,13 @@
 package br.edu.utfpr.pb.ext.server.error;
 
+import java.util.Map;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
-
-import java.util.Map;
 
 @RestController
 public class ErrorHandler implements ErrorController {
@@ -19,10 +18,17 @@ public class ErrorHandler implements ErrorController {
         this.errorAttributes = errorAttributes;
     }
 
-    @RequestMapping(value = "/error", method = {
-            RequestMethod.GET, RequestMethod.POST
-    })
+    @GetMapping("/error")
     public ApiError handleError(WebRequest webRequest) {
+        return buildApiError(webRequest);
+    }
+
+    @PostMapping("/error")
+    public ApiError handleUnsafeError(WebRequest webRequest) {
+        return buildApiError(webRequest);
+    }
+
+    private ApiError buildApiError(WebRequest webRequest) {
         Map<String, Object> attributes = errorAttributes.getErrorAttributes(
                 webRequest,
                 ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE));
