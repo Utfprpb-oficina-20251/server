@@ -1,5 +1,8 @@
 name: SonarCloud
 
+permissions:
+  checks: write
+  pull-requests: read
 on:
   push:
     branches:
@@ -37,4 +40,4 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Utfprpb-oficina-20251_server
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=Utfprpb-oficina-20251_server 
