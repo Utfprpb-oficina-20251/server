@@ -21,55 +21,51 @@ import org.springframework.web.context.request.WebRequest;
 @ExtendWith(MockitoExtension.class)
 class ErrorHandlerTest {
 
-    @Mock
-    private ErrorAttributes errorAttributes;
-    @Mock
-    private WebRequest webRequest;
-    @InjectMocks
-    private ErrorHandler errorHandler;
+  @Mock private ErrorAttributes errorAttributes;
+  @Mock private WebRequest webRequest;
+  @InjectMocks private ErrorHandler errorHandler;
 
-    private Map<String, Object> attributes;
+  private Map<String, Object> attributes;
 
-    @BeforeEach
-    void setUp() {
-        attributes = new HashMap<>();
-        attributes.put("message", "error message");
-        attributes.put("path", "/url");
-        attributes.put("status", 400);
+  @BeforeEach
+  void setUp() {
+    attributes = new HashMap<>();
+    attributes.put("message", "error message");
+    attributes.put("path", "/url");
+    attributes.put("status", 400);
 
-        when(errorAttributes.getErrorAttributes(
-                eq(webRequest),
-                any(ErrorAttributeOptions.class)
-        )).thenReturn(attributes);
-    }
+    when(errorAttributes.getErrorAttributes(eq(webRequest), any(ErrorAttributeOptions.class)))
+        .thenReturn(attributes);
+  }
 
-    @Test
-    @Description("Erro deve retornar todos os parâmetros quando existentes")
-    void handleError_WhenAllParametersExist_ShouldReturnApiErrorWithAttributes() {
-        ApiError result = errorHandler.handleError(webRequest);
+  @Test
+  @Description("Erro deve retornar todos os parâmetros quando existentes")
+  void handleError_WhenAllParametersExist_ShouldReturnApiErrorWithAttributes() {
+    ApiError result = errorHandler.handleError(webRequest);
 
-        assertThat(result.getMessage()).isEqualTo("error message");
-        assertThat(result.getStatus()).isEqualTo(400);
-        assertThat(result.getUrl()).isEqualTo("/url");
-    }
+    assertThat(result.getMessage()).isEqualTo("error message");
+    assertThat(result.getStatus()).isEqualTo(400);
+    assertThat(result.getUrl()).isEqualTo("/url");
+  }
 
-    @Test
-    @Description("Erro deve retornar parâmetros quando proveniente de método não seguro (POST/PUT/DELETE)")
-    void handleUnsafeError_WhenAllParametersExist_ShouldReturnApiErrorWithAttributes() {
-        ApiError result = errorHandler.handleUnsafeError(webRequest);
-        assertThat(result.getMessage()).isEqualTo("error message");
-        assertThat(result.getStatus()).isEqualTo(400);
-        assertThat(result.getUrl()).isEqualTo("/url");
-    }
+  @Test
+  @Description(
+      "Erro deve retornar parâmetros quando proveniente de método não seguro (POST/PUT/DELETE)")
+  void handleUnsafeError_WhenAllParametersExist_ShouldReturnApiErrorWithAttributes() {
+    ApiError result = errorHandler.handleUnsafeError(webRequest);
+    assertThat(result.getMessage()).isEqualTo("error message");
+    assertThat(result.getStatus()).isEqualTo(400);
+    assertThat(result.getUrl()).isEqualTo("/url");
+  }
 
-    @Test
-    @Description("Erro deve ser retornado no caso do campo mensagem estar nulo")
-    void handleError_WhenMessageNotExist_ShouldReturnApiErrorWithAttributes() {
+  @Test
+  @Description("Erro deve ser retornado no caso do campo mensagem estar nulo")
+  void handleError_WhenMessageNotExist_ShouldReturnApiErrorWithAttributes() {
 
-        attributes.remove("message");
+    attributes.remove("message");
 
-        ApiError result = errorHandler.handleError(webRequest);
+    ApiError result = errorHandler.handleError(webRequest);
 
-        assertThat(result.getMessage()).isNull();
-    }
+    assertThat(result.getMessage()).isNull();
+  }
 }

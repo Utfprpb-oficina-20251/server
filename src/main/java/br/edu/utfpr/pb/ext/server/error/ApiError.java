@@ -1,10 +1,9 @@
 package br.edu.utfpr.pb.ext.server.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
-
 import java.util.Date;
 import java.util.Map;
+import lombok.*;
 
 @Getter
 @Setter
@@ -13,9 +12,9 @@ import java.util.Map;
 @Builder
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ApiError {
-    private long timestamp = new Date().getTime();
-    private int status;
-    private String message;
-    private String url;
-    private Map<String, String> validationErrors;
+  private long timestamp = new Date().getTime();
+  private int status;
+  private String message;
+  private String url;
+  private Map<String, String> validationErrors;
 }
