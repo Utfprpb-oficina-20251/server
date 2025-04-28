@@ -28,6 +28,12 @@ spring:
       on-profile: prod
   flyway:
     locations: classpath:db/prod
+  security:
+    user:
+      name: ${SECURITY_USER_NAME}
+      password: ${SECURITY_USER_PASSWORD}
+      roles: ${SECURITY_USER_ROLES}
+
 ---
 # Desenvolvimento
 spring:
@@ -36,6 +42,11 @@ spring:
       on-profile: dev
   flyway:
     locations: classpath:db/dev
+  security:
+    user:
+      name: devuser
+      password: devpass
+      roles: ADMIN
 
 ---
 # Testes
@@ -52,3 +63,10 @@ spring:
   h2:
     console:
       enabled: true
+  security:
+    user:
+      name: testuser
+      password: testpass
+      roles: SERVIDOR
+
+---
