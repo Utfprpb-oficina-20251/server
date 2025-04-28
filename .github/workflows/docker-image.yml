@@ -53,6 +53,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{secrets.DOCKER_USERNAME}}/${{secrets.REPOSITORY_NAME}}:server-{{ env.TAG }}
+        tags: ${{secrets.DOCKER_USERNAME}}/${{secrets.REPOSITORY_NAME}}:server.latest
 
       
