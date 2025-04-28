@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  build:
+  docker:
     name: Build and Upload Docker Image
     runs-on: ubuntu-latest
 
@@ -40,12 +40,19 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Create tag
-      run: echo "TAG=$(date +'%d%m%Y:%H%M')" >> $GITHUB_ENV
-  
-    - name: Build Docker image
-      run: docker build . --file Dockerfile --tag ${{secrets.DOCKER_USERNAME}}/${{secrets.REPOSITORY_NAME}}:Server-{{ env.TAG }}
+      run: echo "TAG=$(date +'%d%m%Y.%H%M')" >> $GITHUB_ENV
 
-    - name: Push the image to DockerHub
-      run: docker push ${{secrets.DOCKER_USERNAME}}/${{secrets.REPOSITORY_NAME}}:server-{{ env.TAG }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        tags: ${{secrets.DOCKER_USERNAME}}/${{secrets.REPOSITORY_NAME}}:server-{{ env.TAG }}
 
       
