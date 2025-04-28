@@ -1,7 +1,9 @@
 package br.edu.utfpr.pb.ext.server.security;
 
-// Enumera e padroniza os roles e garante o acesso de forma correta
+import lombok.Getter;
 
+// Enumera e padroniza os roles e garante o acesso de forma correta
+@Getter
 public enum Roles{
     ADMINISTRADOR("ADMINISTRADOR"),
     SERVIDOR("SERVIDOR"),
@@ -11,9 +13,5 @@ public enum Roles{
 
     Roles(String role) {
         this.authority = role;
-    }
-
-    public String getAuthority() {
-        return authority;
     }
 }
