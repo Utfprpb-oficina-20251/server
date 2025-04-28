@@ -43,7 +43,7 @@ jobs:
       run: echo "TAG=$(date +'%d%m%Y:%H%M')" >> $GITHUB_ENV
   
     - name: Build Docker image
-      run: docker build -t ${{secrets.DOCKER_USERNAME}}/${{secrets.REPOSITORY_NAME}}:Server-{{ env.TAG }}
+      run: docker build . --file Dockerfile --tag ${{secrets.DOCKER_USERNAME}}/${{secrets.REPOSITORY_NAME}}:Server-{{ env.TAG }}
 
     - name: Push the image to DockerHub
       run: docker push ${{secrets.DOCKER_USERNAME}}/${{secrets.REPOSITORY_NAME}}:server-{{ env.TAG }}
