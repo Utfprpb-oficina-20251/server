@@ -1,0 +1,58 @@
+[1mdiff --git a/src/main/java/br/edu/utfpr/pb/ext/server/config/SecurityConfig.java b/src/main/java/br/edu/utfpr/pb/ext/server/config/SecurityConfig.java[m
+[1mindex 62268f7..0b679d6 100644[m
+[1m--- a/src/main/java/br/edu/utfpr/pb/ext/server/config/SecurityConfig.java[m
+[1m+++ b/src/main/java/br/edu/utfpr/pb/ext/server/config/SecurityConfig.java[m
+[36m@@ -6,7 +6,6 @@[m [mimport org.springframework.context.annotation.Configuration;[m
+ import org.springframework.http.HttpMethod;[m
+ import org.springframework.security.config.annotation.web.builders.HttpSecurity;[m
+ import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;[m
+[31m-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;[m
+ import org.springframework.security.config.http.SessionCreationPolicy;[m
+ import org.springframework.security.core.userdetails.User;[m
+ import org.springframework.security.core.userdetails.UserDetails;[m
+[36m@@ -15,7 +14,7 @@[m [mimport org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;[m
+ import org.springframework.security.crypto.password.PasswordEncoder;[m
+ import org.springframework.security.provisioning.InMemoryUserDetailsManager;[m
+ import org.springframework.security.web.SecurityFilterChain;[m
+[31m-[m
+[32m+[m[32mimport org.springframework.security.web.csrf.CookieCsrfTokenRepository;[m
+ /*[m
+  * Define endpoints publicos e restringe por cargos[m
+  * Define politica stateless[m
+[36m@@ -27,7 +26,10 @@[m [mpublic class SecurityConfig {[m
+ [m
+     @Bean[m
+     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {[m
+[31m-        http.csrf(AbstractHttpConfigurer::disable)[m
+[32m+[m[32m        http.csrf(csrf -> csrf[m
+[32m+[m[32m                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())[m
+[32m+[m[32m                        .ignoringRequestMatchers("/api/auth/**") // Ignora endpoints públicos[m
+[32m+[m[32m                )[m
+                 .authorizeHttpRequests(authorize -> authorize[m
+                         // Endpoints de acesso públicos[m
+                         .requestMatchers(HttpMethod.GET, "/api/projects/**").permitAll() // endPoint projects como pedido no pext-12[m
+[1mdiff --git a/src/main/java/br/edu/utfpr/pb/ext/server/security/Roles.java b/src/main/java/br/edu/utfpr/pb/ext/server/security/Roles.java[m
+[1mindex 1e8bb54..e484b54 100644[m
+[1m--- a/src/main/java/br/edu/utfpr/pb/ext/server/security/Roles.java[m
+[1m+++ b/src/main/java/br/edu/utfpr/pb/ext/server/security/Roles.java[m
+[36m@@ -1,9 +1,7 @@[m
+ package br.edu.utfpr.pb.ext.server.security;[m
+ [m
+[31m-import lombok.Getter;[m
+[31m-[m
+ // Enumera e padroniza os roles e garante o acesso de forma correta[m
+[31m-@Getter[m
+[32m+[m
+ public enum Roles{[m
+     ADMINISTRADOR("ADMINISTRADOR"),[m
+     SERVIDOR("SERVIDOR"),[m
+[36m@@ -14,4 +12,8 @@[m [mpublic enum Roles{[m
+     Roles(String role) {[m
+         this.authority = role;[m
+     }[m
+[32m+[m
+[32m+[m[32m    public String getAuthority() {[m
+[32m+[m[32m        return authority;[m
+[32m+[m[32m    }[m
+ }[m
+\ No newline at end of file[m
