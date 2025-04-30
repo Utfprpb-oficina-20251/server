@@ -4,14 +4,14 @@ import lombok.Getter;
 
 // Enumera e padroniza os roles e garante o acesso de forma correta
 @Getter
-public enum Roles{
-    ADMINISTRADOR("ADMINISTRADOR"),
-    SERVIDOR("SERVIDOR"),
-    ESTUDANTE("ESTUDANTE");
+public enum Roles {
+  ADMINISTRADOR("ADMINISTRADOR"),
+  SERVIDOR("SERVIDOR"),
+  ESTUDANTE("ESTUDANTE");
 
-    private final String authority;
+  private final String authority;
 
-    Roles(String role) {
-        this.authority = role;
-    }
+  Roles(String role) {
+    this.authority = role;
+  }
 }

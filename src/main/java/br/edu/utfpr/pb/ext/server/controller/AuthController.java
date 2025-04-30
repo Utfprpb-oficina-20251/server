@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @GetMapping("/public")
-    public String publicEndpoint() {
-        return "Endpoint de acesso publico";
-    }
+  @GetMapping("/public")
+  public String publicEndpoint() {
+    return "Endpoint de acesso publico";
+  }
 }

@@ -33,21 +33,6 @@ spring:
       name: ${SECURITY_USER_NAME}
       password: ${SECURITY_USER_PASSWORD}
       roles: ${SECURITY_USER_ROLES}
-
----
-# Desenvolvimento
-spring:
-  config:
-    activate:
-      on-profile: dev
-  flyway:
-    locations: classpath:db/dev
-  security:
-    user:
-      name: devuser
-      password: devpass
-      roles: ADMIN
-
 ---
 # Testes
 spring:
@@ -68,5 +53,3 @@ spring:
       name: testuser
       password: testpass
       roles: SERVIDOR
-
----
