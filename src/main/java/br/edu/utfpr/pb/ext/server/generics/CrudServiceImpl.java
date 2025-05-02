@@ -8,7 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class CrudServiceImpl<T, ID extends Serializable> implements ICrudService<T, ID> {
+public abstract class CrudServiceImpl<T, I extends Serializable> implements ICrudService<T, I> {
 
   /**
    * Retorna a instância de {@link JpaRepository} responsável pelas operações de persistência para a
@@ -16,7 +16,7 @@ public abstract class CrudServiceImpl<T, ID extends Serializable> implements ICr
    *
    * @return o repositório JPA associado à entidade
    */
-  protected abstract JpaRepository<T, ID> getRepository();
+  protected abstract JpaRepository<T, I> getRepository();
 
   /**
    * Retorna uma lista com todas as entidades do tipo T.
@@ -94,24 +94,24 @@ public abstract class CrudServiceImpl<T, ID extends Serializable> implements ICr
   /**
    * Recupera uma entidade pelo seu identificador.
    *
-   * @param id identificador da entidade a ser buscada
+   * @param i identificador da entidade a ser buscada
    * @return a entidade correspondente ao ID informado, ou {@code null} se não encontrada
    */
   @Override
-  public T findOne(ID id) {
-    return getRepository().findById(id).orElse(null);
+  public T findOne(I i) {
+    return getRepository().findById(i).orElse(null);
   }
 
   /**
    * Verifica se existe uma entidade com o identificador fornecido.
    *
-   * @param id identificador da entidade a ser verificada
+   * @param i identificador da entidade a ser verificada
    * @return {@code true} se uma entidade com o ID especificado existir, caso contrário {@code
    *     false}
    */
   @Override
-  public boolean exists(ID id) {
-    return getRepository().existsById(id);
+  public boolean exists(I i) {
+    return getRepository().existsById(i);
   }
 
   /**
@@ -128,11 +128,11 @@ public abstract class CrudServiceImpl<T, ID extends Serializable> implements ICr
   /**
    * Remove a entidade correspondente ao identificador fornecido.
    *
-   * @param id identificador da entidade a ser removida
+   * @param i identificador da entidade a ser removida
    */
   @Override
-  public void delete(ID id) {
-    getRepository().deleteById(id);
+  public void delete(I i) {
+    getRepository().deleteById(i);
   }
 
   /**

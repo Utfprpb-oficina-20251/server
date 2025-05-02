@@ -3,7 +3,6 @@ package br.edu.utfpr.pb.ext.server.generics;
 import jakarta.validation.Valid;
 import java.io.Serializable;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public abstract class CrudController<T extends BaseEntity, D, ID extends Serializable> {
+public abstract class CrudController<T extends BaseEntity, D, I extends Serializable> {
 
   /**
    * Fornece a instância do serviço CRUD responsável pelas operações de persistência para a
@@ -21,7 +20,7 @@ public abstract class CrudController<T extends BaseEntity, D, ID extends Seriali
    *
    * @return implementação de ICrudService para a entidade e identificador especificados
    */
-  protected abstract ICrudService<T, ID> getService();
+  protected abstract ICrudService<T, I> getService();
 
   /**
    * Retorna a instância de ModelMapper utilizada para conversão entre entidades e DTOs.
@@ -39,7 +38,7 @@ public abstract class CrudController<T extends BaseEntity, D, ID extends Seriali
    * @param typeClass classe da entidade gerenciada pelo controlador
    * @param typeDtoClass classe do DTO correspondente à entidade
    */
-  public CrudController(Class<T> typeClass, Class<D> typeDtoClass) {
+  protected CrudController(Class<T> typeClass, Class<D> typeDtoClass) {
     this.typeClass = typeClass;
     this.typeDtoClass = typeDtoClass;
   }
@@ -71,8 +70,7 @@ public abstract class CrudController<T extends BaseEntity, D, ID extends Seriali
    */
   @GetMapping // http://ip.api:port/classname
   public ResponseEntity<List<D>> findAll() {
-    return ResponseEntity.ok(
-        getService().findAll().stream().map(this::convertToDto).collect(Collectors.toList()));
+    return ResponseEntity.ok(getService().findAll().stream().map(this::convertToDto).toList());
   }
 
   /**
@@ -104,12 +102,12 @@ public abstract class CrudController<T extends BaseEntity, D, ID extends Seriali
    *
    * <p>Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 204 se não existir.
    *
-   * @param id identificador da entidade a ser buscada
+   * @param i identificador da entidade a ser buscada
    * @return ResponseEntity contendo o DTO da entidade ou status 204 se não encontrada
    */
-  @GetMapping("{id}")
-  public ResponseEntity<D> findOne(@PathVariable ID id) {
-    T entity = getService().findOne(id);
+  @GetMapping("{i}")
+  public ResponseEntity<D> findOne(@PathVariable I i) {
+    T entity = getService().findOne(i);
     if (entity != null) {
       return ResponseEntity.ok(convertToDto(entity));
     } else {
@@ -132,15 +130,15 @@ public abstract class CrudController<T extends BaseEntity, D, ID extends Seriali
   /**
    * Atualiza uma entidade existente identificada pelo ID com os dados fornecidos no DTO.
    *
-   * @param id identificador da entidade a ser atualizada
+   * @param i identificador da entidade a ser atualizada
    * @param entity DTO contendo os novos dados para atualização
    * @return ResponseEntity com o DTO atualizado e status HTTP 200 OK
    */
-  @PutMapping("{id}")
-  public ResponseEntity<D> update(@PathVariable ID id, @RequestBody @Valid D entity) {
+  @PutMapping("{i}")
+  public ResponseEntity<D> update(@PathVariable I i, @RequestBody @Valid D entity) {
     T entityToUpdate = convertToEntity(entity);
-    ID entityId = (ID) entityToUpdate.getId();
-    if (!id.equals(entityId)) {
+    I entityI = (I) entityToUpdate.getId();
+    if (!i.equals(entityI)) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(null); // or provide an error message DTO if applicable
     }
@@ -151,12 +149,12 @@ public abstract class CrudController<T extends BaseEntity, D, ID extends Seriali
   /**
    * Verifica se uma entidade com o ID especificado existe.
    *
-   * @param id identificador da entidade a ser verificada
+   * @param i identificador da entidade a ser verificada
    * @return ResponseEntity contendo true se a entidade existe, ou false caso contrário
    */
-  @GetMapping("exists/{id}")
-  public ResponseEntity<Boolean> exists(@PathVariable ID id) {
-    return ResponseEntity.ok(getService().exists(id));
+  @GetMapping("exists/{i}")
+  public ResponseEntity<Boolean> exists(@PathVariable I i) {
+    return ResponseEntity.ok(getService().exists(i));
   }
 
   /**
@@ -174,12 +172,12 @@ public abstract class CrudController<T extends BaseEntity, D, ID extends Seriali
    *
    * <p>Retorna HTTP 204 No Content após a exclusão, independentemente de a entidade existir ou não.
    *
-   * @param id identificador da entidade a ser excluída
+   * @param i identificador da entidade a ser excluída
    * @return resposta HTTP 204 No Content
    */
-  @DeleteMapping("{id}")
-  public ResponseEntity<Void> delete(@PathVariable ID id) {
-    getService().delete(id);
+  @DeleteMapping("{i}")
+  public ResponseEntity<Void> delete(@PathVariable I i) {
+    getService().delete(i);
     return ResponseEntity.noContent().build();
   }
 }
