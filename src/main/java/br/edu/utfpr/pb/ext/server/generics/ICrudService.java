@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public interface ICrudService<T, ID extends Serializable> {
+public interface ICrudService<T, I extends Serializable> {
 
   /**
    * Recupera todas as entidades do tipo T.
@@ -64,18 +64,18 @@ public interface ICrudService<T, ID extends Serializable> {
   /**
    * Recupera uma entidade pelo seu identificador exclusivo.
    *
-   * @param id identificador da entidade a ser buscada
+   * @param i identificador da entidade a ser buscada
    * @return a entidade correspondente ao identificador, ou {@code null} se não encontrada
    */
-  T findOne(ID id);
+  T findOne(I i);
 
   /**
    * Verifica se existe uma entidade com o identificador fornecido.
    *
-   * @param id identificador da entidade a ser verificada
+   * @param i identificador da entidade a ser verificada
    * @return true se a entidade existir, false caso contrário
    */
-  boolean exists(ID id);
+  boolean exists(I i);
 
   /**
    * Retorna o número total de entidades persistidas.
@@ -87,9 +87,9 @@ public interface ICrudService<T, ID extends Serializable> {
   /**
    * Remove a entidade correspondente ao identificador fornecido.
    *
-   * @param id identificador da entidade a ser removida
+   * @param i identificador da entidade a ser removida
    */
-  void delete(ID id);
+  void delete(I i);
 
   /****
    * Remove todas as entidades fornecidas pelo iterável.
