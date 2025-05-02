@@ -117,7 +117,7 @@ protected abstract ModelMapper getModelMapper();
         if ( entity != null) {
             return ResponseEntity.ok(convertToDto(entity));
         } else {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
