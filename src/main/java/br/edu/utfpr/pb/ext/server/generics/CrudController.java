@@ -143,9 +143,14 @@ protected abstract ModelMapper getModelMapper();
      */
     @PutMapping("{id}")
     public ResponseEntity<D> update(@PathVariable ID id, @RequestBody @Valid D entity) {
+        T entityToUpdate = convertToEntity(entity);
+        ID entityId = getService().getIdentifier(entityToUpdate);
+        if (!id.equals(entityId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null); // or provide an error message DTO if applicable
+        }
         return ResponseEntity.status(HttpStatus.OK)
-                .body(convertToDto(getService().save(convertToEntity(entity))));
-
+                .body(convertToDto(getService().save(entityToUpdate)));
     }
 
     /**
