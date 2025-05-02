@@ -11,10 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class TestDTO {
-    private Long id;
-    
-    @NotEmpty(message = "Name is required")
-    private String name;
-    
-    private String description;
+  private Long id;
+
+  @NotEmpty(message = "Name is required") private String name;
+
+  private String description;
 }

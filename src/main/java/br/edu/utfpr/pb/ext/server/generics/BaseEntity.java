@@ -5,23 +5,21 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import java.io.Serializable;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Objeto de domínio que inclui propriedade ID. Usado como base para demais entidades.
  *
  * @author Rodrigo
  */
-@Setter
-@Getter
 @MappedSuperclass
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Setter
+@SuperBuilder
 public abstract class BaseEntity implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
-  public boolean isNew() {
-    return this.id == null;
-  }
 }
