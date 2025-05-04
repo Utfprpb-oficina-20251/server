@@ -9,8 +9,6 @@ CREATE TABLE tb_usuario (
     registro VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(150) NOT NULL UNIQUE,
     telefone VARCHAR(20),
-    professor BOOLEAN NOT NULL DEFAULT FALSE,
-    administrador BOOLEAN NOT NULL DEFAULT FALSE,
     senha VARCHAR(255) NOT NULL,
     curso_id BIGINT,
     CONSTRAINT fk_usuario_curso FOREIGN KEY (curso_id) REFERENCES tb_curso(id)

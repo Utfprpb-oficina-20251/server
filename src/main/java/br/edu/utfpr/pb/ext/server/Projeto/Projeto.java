@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.Projeto;
 
 import br.edu.utfpr.pb.ext.server.Usuario.Usuario;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.Date;
@@ -20,18 +21,24 @@ public class Projeto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private String titulo;
 
+    @NotNull
     private String descricao;
 
+    @NotNull
     private String justificativa;
 
+    @NotNull
     private Date dataInicio;
 
     private Date dataFim;
 
+    @NotNull
     private String publicoAlvo;
 
+    @NotNull
     private boolean vinculadoDisciplina;
 
     private String restricaoPublico;
