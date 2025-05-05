@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.Usuario;
+package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
