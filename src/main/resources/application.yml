@@ -9,8 +9,10 @@ spring:
         format_sql: false
     show-sql: true
   flyway:
-    enabled: false
-    baseline-on-migrate: false
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/postgres
+
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME:postgres}
