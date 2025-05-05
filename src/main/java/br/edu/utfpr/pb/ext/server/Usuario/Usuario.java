@@ -54,6 +54,8 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getPassword() {
+        // Retornando null intencionalmente pois autenticação será via OTP/JWT
+        // e será implementada em tarefa futura
         return null;
     }
 
