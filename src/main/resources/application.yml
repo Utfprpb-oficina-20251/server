@@ -1,5 +1,4 @@
-
-#Config compartilhada
+# Config compartilhada
 spring:
   jpa:
     hibernate:
@@ -24,10 +23,13 @@ spring:
       name: ${SECURITY_USER_NAME}
       password: ${SECURITY_USER_PASSWORD}
       roles: ${SECURITY_USER_ROLES}
-  # SendGrid API Key configuration. In production, set SENDGRID_API_KEY as an environment variable or manage via a secrets manager.
+  # SendGrid API Key configuration. Em produção, defina SENDGRID_API_KEY como variável de ambiente ou utilize um gerenciador de segredos.
   sendgrid:
-    api-key: ${SENDGRID_API_KEY}
+      api-key: FAKE_TEST_KEY
+   # api-key: ${SENDGRID_API_KEY}
+
 ---
+
 # Testes
 spring:
   config:

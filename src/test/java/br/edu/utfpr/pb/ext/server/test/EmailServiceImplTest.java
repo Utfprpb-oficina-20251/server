@@ -10,10 +10,12 @@ import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,6 +40,10 @@ class EmailServiceImplTest {
     String email = "teste@utfpr.edu.br";
     String tipo = "cadastro";
 
+    // Simula que ainda não há códigos gerados
+    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(Collections.emptyList());
+
     // Mock da resposta positiva da API SendGrid
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
 
@@ -45,8 +51,22 @@ class EmailServiceImplTest {
 
     assertEquals(202, response.getStatusCode());
 
-    // Verifica se salvou o código no banco
-    verify(emailCodeRepository).save(any(EmailCode.class));
+    // Captura e valida o objeto salvo no banco
+    ArgumentCaptor<EmailCode> codeCaptor = ArgumentCaptor.forClass(EmailCode.class);
+    verify(emailCodeRepository).save(codeCaptor.capture());
+
+    EmailCode savedCode = codeCaptor.getValue();
+    assertEquals(email, savedCode.getEmail());
+    assertEquals(tipo, savedCode.getType());
+    assertNotNull(savedCode.getCode());
+    assertFalse(savedCode.isUsed());
+    assertNotNull(savedCode.getGeneratedAt());
+    assertNotNull(savedCode.getExpiration());
+
+    // Validações adicionais
+    assertTrue(savedCode.getCode().length() > 0);
+    assertTrue(savedCode.getExpiration().isAfter(savedCode.getGeneratedAt()));
+    assertTrue(savedCode.getExpiration().isAfter(LocalDateTime.now()));
   }
 
   /** Teste para validar que o limite de envio diário é respeitado. */
@@ -82,6 +102,10 @@ class EmailServiceImplTest {
     String email = "teste@utfpr.edu.br";
     String tipo = "cadastro";
     Response errorResponse = new Response(400, "", null);
+
+    // Simula que ainda não há códigos gerados
+    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(Collections.emptyList());
 
     // Mock da resposta com erro
     when(sendGrid.api(any())).thenReturn(errorResponse);
