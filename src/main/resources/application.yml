@@ -1,7 +1,5 @@
 #Config compartilhada
 spring:
-  profiles:
-    active: dev
   jpa:
     hibernate:
       ddl-auto: none
@@ -22,23 +20,11 @@ spring:
     driver-class-name: org.postgresql.Driver
   config:
     import: optional:file:.env[.properties]
----
-# Perfil de prod
-spring:
-  config:
-    activate:
-      on-profile: prod
-  flyway:
-    locations: classpath:db/prod
----
-# Desenvolvimento
-spring:
-  config:
-    activate:
-      on-profile: dev
-  flyway:
-    locations: classpath:db/dev
-
+  security:
+    user:
+      name: ${SECURITY_USER_NAME}
+      password: ${SECURITY_USER_PASSWORD}
+      roles: ${SECURITY_USER_ROLES}
 ---
 # Testes
 spring:
@@ -54,3 +40,8 @@ spring:
   h2:
     console:
       enabled: true
+  security:
+    user:
+      name: testuser
+      password: testpass
+      roles: SERVIDOR

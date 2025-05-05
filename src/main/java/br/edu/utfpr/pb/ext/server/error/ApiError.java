@@ -12,7 +12,7 @@ import lombok.*;
 @Builder
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ApiError {
-  private long timestamp = new Date().getTime();
+  @Builder.Default private long timestamp = new Date().getTime();
   private int status;
   private String message;
   private String url;
