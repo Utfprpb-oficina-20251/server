@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.Usuario;
 
 import br.edu.utfpr.pb.ext.server.Curso.Curso;
+import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -22,7 +23,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Usuario implements UserDetails {
+public class Usuario extends BaseEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
