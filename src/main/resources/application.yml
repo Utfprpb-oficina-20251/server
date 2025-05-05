@@ -1,3 +1,4 @@
+
 #Config compartilhada
 spring:
   jpa:
@@ -23,6 +24,9 @@ spring:
       name: ${SECURITY_USER_NAME}
       password: ${SECURITY_USER_PASSWORD}
       roles: ${SECURITY_USER_ROLES}
+  # SendGrid API Key configuration. In production, set SENDGRID_API_KEY as an environment variable or manage via a secrets manager.
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY}
 ---
 # Testes
 spring:
