@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.Inscricao;
 
 import br.edu.utfpr.pb.ext.server.Projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.Usuario.Usuario;
+import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -15,10 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Inscricao {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Inscricao extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

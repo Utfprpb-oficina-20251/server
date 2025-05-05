@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.SujestaoDeProjeto;
 
 import br.edu.utfpr.pb.ext.server.Curso.Curso;
 import br.edu.utfpr.pb.ext.server.Usuario.Usuario;
+import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -13,11 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SujestaoDeProjeto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
-    private Long id;
+public class SujestaoDeProjeto extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "aluno_id")
