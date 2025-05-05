@@ -11,7 +11,8 @@ public class EmailConfig {
   private String apiKey;
 
   /**
-   * Cria e fornece um bean SendGrid configurado com a chave de API definida nas propriedades da aplicação.
+   * Cria e fornece um bean SendGrid configurado com a chave de API definida nas propriedades da
+   * aplicação.
    *
    * @return uma instância de SendGrid pronta para envio de e-mails
    */

@@ -22,8 +22,9 @@ public class EmailCodeValidationService {
   }
 
   /**
-   * Valida se o código de e-mail informado é o mais recente, corresponde ao tipo solicitado, não foi utilizado e está dentro do prazo de validade.
-   * Se todas as condições forem atendidas, marca o código como usado e retorna true.
+   * Valida se o código de e-mail informado é o mais recente, corresponde ao tipo solicitado, não
+   * foi utilizado e está dentro do prazo de validade. Se todas as condições forem atendidas, marca
+   * o código como usado e retorna true.
    *
    * @param email Endereço de e-mail para o qual o código foi enviado.
    * @param type Tipo do código (por exemplo, "cadastro", "recuperacao").
