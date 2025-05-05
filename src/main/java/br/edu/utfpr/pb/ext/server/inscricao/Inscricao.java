@@ -1,6 +1,6 @@
-package br.edu.utfpr.pb.ext.server.Inscricao;
+package br.edu.utfpr.pb.ext.server.inscricao;
 
-import br.edu.utfpr.pb.ext.server.Projeto.Projeto;
+import br.edu.utfpr.pb.ext.server.projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.Usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;
@@ -18,12 +18,12 @@ import java.util.Date;
 @Builder
 public class Inscricao extends BaseEntity {
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "usuario_id")
     @NotNull
     private Usuario usuario;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "projeto_id")
     @NotNull
     private Projeto projeto;

@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.Curso;
+package br.edu.utfpr.pb.ext.server.curso;
 
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;

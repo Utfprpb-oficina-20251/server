@@ -1,6 +1,6 @@
 package br.edu.utfpr.pb.ext.server.SujestaoDeProjeto;
 
-import br.edu.utfpr.pb.ext.server.Curso.Curso;
+import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.Usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;

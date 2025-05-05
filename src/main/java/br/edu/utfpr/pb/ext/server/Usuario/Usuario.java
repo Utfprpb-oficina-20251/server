@@ -1,6 +1,6 @@
 package br.edu.utfpr.pb.ext.server.Usuario;
 
-import br.edu.utfpr.pb.ext.server.Curso.Curso;
+import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
