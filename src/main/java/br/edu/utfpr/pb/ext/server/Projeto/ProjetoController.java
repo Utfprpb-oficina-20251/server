@@ -10,22 +10,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/projetos")
 public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long> {
 
-    private static IProjetoService projetoService;
-    private static ModelMapper modelMapper;
+    private final IProjetoService projetoService;
+    private final ModelMapper modelMapper;
 
     public ProjetoController(IProjetoService projetoService, ModelMapper modelMapper) {
         super(Projeto.class, ProjetoDTO.class);
-        ProjetoController.projetoService = projetoService;
-        ProjetoController.modelMapper = modelMapper;
+        this.projetoService = projetoService;
+        this.modelMapper = modelMapper;
     }
 
     @Override
     protected ICrudService<Projeto, Long> getService() {
-        return projetoService;
+        return this.projetoService;
     }
 
     @Override
     protected ModelMapper getModelMapper() {
-        return modelMapper;
+        return this.modelMapper;
     }
 }
