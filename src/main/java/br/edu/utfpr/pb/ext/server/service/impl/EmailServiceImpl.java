@@ -31,12 +31,16 @@ public class EmailServiceImpl {
   @Autowired private SendGrid sendGrid;
 
   /**
-   * Gera um código e envia para o e-mail informado com a finalidade informada.
+   * Gera e envia um código de verificação para o e-mail informado, respeitando o limite diário de envios.
    *
-   * @param email E-mail destinatário
-   * @param type Tipo do código ("cadastro", "recuperacao", etc.)
-   * @return resposta da API SendGrid
-   * @throws IOException em caso de falha no envio
+   * Caso o limite de 3 códigos por e-mail e tipo nas últimas 24 horas seja excedido, lança uma exceção.
+   * O código gerado é salvo no banco de dados com informações de expiração e uso.
+   *
+   * @param email endereço de e-mail do destinatário
+   * @param type finalidade do código (por exemplo, "cadastro" ou "recuperacao")
+   * @return resposta da API SendGrid referente ao envio do e-mail
+   * @throws IOException se houver falha no envio do e-mail via SendGrid
+   * @throws IllegalArgumentException se o limite diário de códigos for excedido para o e-mail e tipo informados
    */
   public Response generateAndSendCode(String email, String type) throws IOException {
     // Valida limite de envio por e-mail nas últimas 24 horas
@@ -83,12 +87,24 @@ public class EmailServiceImpl {
     return response;
   }
 
-  /** Gera código aleatório de 6 caracteres em maiúsculas. */
+  /**
+   * Gera um código de verificação aleatório de 6 caracteres em letras maiúsculas.
+   *
+   * @return código de verificação de 6 caracteres
+   */
   private String generateRandomCode() {
     return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
   }
 
-  /** Envia e-mail simples com título e corpo. */
+  /**
+   * Envia um e-mail simples para o destinatário especificado com o assunto e corpo fornecidos, utilizando a API SendGrid.
+   *
+   * @param email endereço de e-mail do destinatário
+   * @param subject assunto do e-mail
+   * @param body corpo do e-mail em texto simples
+   * @return resposta da API SendGrid referente ao envio do e-mail
+   * @throws IOException se ocorrer uma falha ao se comunicar com a API SendGrid
+   */
   private Response sendEmail(String email, String subject, String body) throws IOException {
     Email from = new Email("webprojeto2@gmail.com");
     Email to = new Email(email);
