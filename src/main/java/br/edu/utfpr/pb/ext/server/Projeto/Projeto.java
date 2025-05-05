@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.Projeto;
 
 
 import br.edu.utfpr.pb.ext.server.Usuario.Usuario;
+import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -16,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Projeto {
+public class Projeto extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
