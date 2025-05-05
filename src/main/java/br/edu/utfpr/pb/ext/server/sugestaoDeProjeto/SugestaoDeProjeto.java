@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.SujestaoDeProjeto;
+package br.edu.utfpr.pb.ext.server.sugestaoDeProjeto;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.Usuario.Usuario;
@@ -8,13 +8,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
-@Table(name="tb_sujestao_de_projeto")
+@Table(name="tb_sugestao_de_projeto")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SujestaoDeProjeto extends BaseEntity {
+public class SugestaoDeProjeto extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "aluno_id")
@@ -30,4 +30,7 @@ public class SujestaoDeProjeto extends BaseEntity {
     @JoinColumn(name = "curso_id")
     @NotNull
     private Curso curso;
+
+    @NotNull
+    private String descricao;
 }

@@ -45,7 +45,7 @@ public class Usuario  extends BaseEntity implements UserDetails{
     @Transient
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList("Role_USER");
+        return AuthorityUtils.createAuthorityList("ROLE_USER");
     }
 
     @Override

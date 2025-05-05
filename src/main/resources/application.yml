@@ -8,7 +8,6 @@ spring:
       hibernate:
         format_sql: false
     show-sql: true
-  spring:
     flyway:
       enabled: true
       baseline-on-migrate: true

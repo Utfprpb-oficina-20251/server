@@ -13,6 +13,7 @@ CREATE TABLE tb_usuario (
     CONSTRAINT fk_usuario_curso FOREIGN KEY (curso_id) REFERENCES tb_curso(id)
 );
 CREATE TABLE tb_projeto (
+   id BIGSERIAL PRIMARY KEY,
    titulo VARCHAR(255) NOT NULL,
    descricao TEXT NOT NULL,
    justificativa TEXT NOT NULL,

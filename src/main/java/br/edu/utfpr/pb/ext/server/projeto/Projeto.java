@@ -47,5 +47,5 @@ public class Projeto extends BaseEntity {
             joinColumns = @JoinColumn(name = "id_projeto"),
             inverseJoinColumns = @JoinColumn(name = "id_usuario")
     )
-    private List<Usuario> EquipeExecutora;
+    private List<Usuario> equipeExecutora;
 }
