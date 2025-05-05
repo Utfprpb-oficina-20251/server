@@ -88,10 +88,7 @@ class EmailServiceImplTest {
 
     IllegalArgumentException ex =
         assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-              emailService.generateAndSendCode(email, tipo);
-            });
+            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
 
     assertEquals("Limite de códigos enviados para este e-mail nas últimas 24h.", ex.getMessage());
   }
@@ -111,12 +108,36 @@ class EmailServiceImplTest {
     when(sendGrid.api(any())).thenReturn(errorResponse);
 
     IOException ex =
-        assertThrows(
-            IOException.class,
-            () -> {
-              emailService.generateAndSendCode(email, tipo);
-            });
+        assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
 
     assertTrue(ex.getMessage().contains("Erro ao enviar e-mail via SendGrid"));
+  }
+
+  /** Teste para e-mail inválido (regex não passa). */
+  @Test
+  void testGenerateAndSendCode_InvalidEmail() {
+    String email = "email_invalido";
+    String tipo = "cadastro";
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
+
+    assertEquals("Endereço de e-mail inválido.", ex.getMessage());
+  }
+
+  /** Teste para tipo nulo (se a regra permitir). */
+  @Test
+  void testGenerateAndSendCode_NullTypeButValidEmail() throws IOException {
+    String email = "teste@utfpr.edu.br";
+    String tipo = null;
+
+    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(Collections.emptyList());
+
+    when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
+
+    // Não lança exceção pois o tipo nulo é aceito no service
+    assertDoesNotThrow(() -> emailService.generateAndSendCode(email, tipo));
   }
 }
