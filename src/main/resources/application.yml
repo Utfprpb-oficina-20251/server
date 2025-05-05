@@ -25,8 +25,7 @@ spring:
       roles: ${SECURITY_USER_ROLES}
   # SendGrid API Key configuration. Em produção, defina SENDGRID_API_KEY como variável de ambiente ou utilize um gerenciador de segredos.
   sendgrid:
-      api-key: FAKE_TEST_KEY
-   # api-key: ${SENDGRID_API_KEY}
+    api-key: ${SENDGRID_API_KEY:sendgridkey}
 
 ---
 
