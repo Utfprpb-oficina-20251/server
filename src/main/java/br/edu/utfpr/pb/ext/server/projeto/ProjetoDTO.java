@@ -1,0 +1,36 @@
+package br.edu.utfpr.pb.ext.server.projeto;
+
+import br.edu.utfpr.pb.ext.server.enums.StatusProjeto;
+import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.util.Date;
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class ProjetoDTO {
+
+  private Long id;
+
+  @NotNull @Size(min = 5, max = 100) private String titulo;
+
+  @NotNull @Size(min = 20, max = 500) private String descricao;
+
+  @NotNull @Size(min = 20, max = 500) private String justificativa;
+
+  @NotNull private Date dataInicio;
+
+  @NotNull private Date dataFim;
+
+  @NotNull @Size(max = 500) private String publicoAlvo;
+
+  @NotNull private boolean vinculadoDisciplina;
+
+  @NotNull @Size(max = 500) private String restricaoPublico;
+
+  @NotNull private List<Usuario> equipeExecutora;
+
+  @NotNull private StatusProjeto status;
+}
