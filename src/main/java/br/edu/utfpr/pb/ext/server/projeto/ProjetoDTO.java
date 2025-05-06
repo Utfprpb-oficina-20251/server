@@ -29,7 +29,5 @@ public class ProjetoDTO {
 
   @NotNull private String equipeExecutora;
 
-  @Size(min = 10, max = 11) private String telefoneOrientador;
-
   @NotNull private StatusProjeto status;
 }
