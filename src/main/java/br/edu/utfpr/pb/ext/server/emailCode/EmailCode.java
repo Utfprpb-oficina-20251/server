@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.model;
+package br.edu.utfpr.pb.ext.server.emailCode;
 
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;

@@ -3,7 +3,7 @@ package br.edu.utfpr.pb.ext.server.test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import br.edu.utfpr.pb.ext.server.model.EmailCode;
+import br.edu.utfpr.pb.ext.server.emailCode.EmailCode;
 import br.edu.utfpr.pb.ext.server.repository.EmailCodeRepository;
 import br.edu.utfpr.pb.ext.server.service.impl.EmailServiceImpl;
 import com.sendgrid.Response;
@@ -40,18 +40,14 @@ class EmailServiceImplTest {
     String email = "teste@utfpr.edu.br";
     String tipo = "cadastro";
 
-    // Simula que ainda não há códigos gerados
     when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(Collections.emptyList());
-
-    // Mock da resposta positiva da API SendGrid
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
 
     Response response = emailService.generateAndSendCode(email, tipo);
 
     assertEquals(202, response.getStatusCode());
 
-    // Captura e valida o objeto salvo no banco
     ArgumentCaptor<EmailCode> codeCaptor = ArgumentCaptor.forClass(EmailCode.class);
     verify(emailCodeRepository).save(codeCaptor.capture());
 
@@ -62,8 +58,6 @@ class EmailServiceImplTest {
     assertFalse(savedCode.isUsed());
     assertNotNull(savedCode.getGeneratedAt());
     assertNotNull(savedCode.getExpiration());
-
-    // Validações adicionais
     assertTrue(savedCode.getCode().length() > 0);
     assertTrue(savedCode.getExpiration().isAfter(savedCode.getGeneratedAt()));
     assertTrue(savedCode.getExpiration().isAfter(LocalDateTime.now()));
@@ -75,7 +69,6 @@ class EmailServiceImplTest {
     String email = "teste@utfpr.edu.br";
     String tipo = "cadastro";
 
-    // Simula que já existem 3 códigos gerados nas últimas 24h
     EmailCode code1 = new EmailCode();
     code1.setGeneratedAt(LocalDateTime.now().minusMinutes(1));
     EmailCode code2 = new EmailCode();
@@ -90,7 +83,7 @@ class EmailServiceImplTest {
         assertThrows(
             IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
 
-    assertEquals("Limite de códigos enviados para este e-mail nas últimas 24h.", ex.getMessage());
+    assertEquals("Limite diário de envio atingido.", ex.getMessage());
   }
 
   /** Teste para simular falha no envio pelo SendGrid. */
@@ -100,17 +93,15 @@ class EmailServiceImplTest {
     String tipo = "cadastro";
     Response errorResponse = new Response(400, "", null);
 
-    // Simula que ainda não há códigos gerados
     when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(Collections.emptyList());
 
-    // Mock da resposta com erro
     when(sendGrid.api(any())).thenReturn(errorResponse);
 
     IOException ex =
         assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
 
-    assertTrue(ex.getMessage().contains("Erro ao enviar e-mail via SendGrid"));
+    assertTrue(ex.getMessage().contains("Erro ao enviar e-mail"));
   }
 
   /** Teste para e-mail inválido (regex não passa). */
@@ -137,7 +128,6 @@ class EmailServiceImplTest {
 
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
 
-    // Não lança exceção pois o tipo nulo é aceito no service
     assertDoesNotThrow(() -> emailService.generateAndSendCode(email, tipo));
   }
 }

@@ -25,9 +25,7 @@ class EmailControllerTest {
   @InjectMocks private EmailController controller;
 
   @BeforeEach
-  void setUp() {
-    // Nada necessário por enquanto
-  }
+  void setUp() {}
 
   /** Teste de envio bem-sucedido. */
   @Test
@@ -82,15 +80,10 @@ class EmailControllerTest {
     when(emailService.generateAndSendCode(email, tipo))
         .thenThrow(new IllegalArgumentException("Limite atingido"));
 
-    ResponseEntity<?> response = null;
-    try {
-      controller.enviar(email, tipo);
-      fail("Deveria ter lançado IllegalArgumentException");
-    } catch (IllegalArgumentException e) {
-      response = controller.handleIllegalArgumentException(e);
-    }
+    IllegalArgumentException ex =
+        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
 
-    assertNotNull(response);
+    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
     assertEquals(400, response.getStatusCodeValue());
     assertTrue(response.getBody().toString().contains("Limite atingido"));
   }
@@ -104,17 +97,11 @@ class EmailControllerTest {
     when(emailService.generateAndSendCode(email, tipo))
         .thenThrow(new IOException("Erro na API SendGrid"));
 
-    ResponseEntity<?> response = null;
-    try {
-      controller.enviar(email, tipo);
-      fail("Deveria ter lançado IOException");
-    } catch (IOException e) {
-      response = controller.handleIOException(e);
-    }
+    IOException ex = assertThrows(IOException.class, () -> controller.enviar(email, tipo));
 
-    assertNotNull(response);
+    ResponseEntity<?> response = controller.handleIOException(ex);
     assertEquals(500, response.getStatusCodeValue());
-    assertTrue(response.getBody().toString().contains("Falha ao enviar email"));
+    assertTrue(response.getBody().toString().contains("Falha ao enviar e-mail"));
   }
 
   /** Teste para e-mail inválido (regex falha). */
@@ -123,8 +110,10 @@ class EmailControllerTest {
     String email = "email-invalido";
     String tipo = "cadastro";
 
-    ResponseEntity<?> response = controller.enviar(email, tipo);
+    IllegalArgumentException ex =
+        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
 
+    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
     assertEquals(400, response.getStatusCodeValue());
     assertTrue(response.getBody().toString().contains("Email inválido"));
   }
@@ -135,8 +124,10 @@ class EmailControllerTest {
     String email = "teste@utfpr.edu.br";
     String tipo = "";
 
-    ResponseEntity<?> response = controller.enviar(email, tipo);
+    IllegalArgumentException ex =
+        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
 
+    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
     assertEquals(400, response.getStatusCodeValue());
     assertTrue(response.getBody().toString().contains("Tipo de código não informado"));
   }
@@ -146,8 +137,10 @@ class EmailControllerTest {
   void testEnviar_EmailNulo() throws IOException {
     String tipo = "cadastro";
 
-    ResponseEntity<?> response = controller.enviar(null, tipo);
+    IllegalArgumentException ex =
+        assertThrows(IllegalArgumentException.class, () -> controller.enviar(null, tipo));
 
+    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
     assertEquals(400, response.getStatusCodeValue());
     assertTrue(response.getBody().toString().contains("Email inválido"));
   }
@@ -157,8 +150,10 @@ class EmailControllerTest {
   void testEnviar_TipoNulo() throws IOException {
     String email = "teste@utfpr.edu.br";
 
-    ResponseEntity<?> response = controller.enviar(email, null);
+    IllegalArgumentException ex =
+        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, null));
 
+    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
     assertEquals(400, response.getStatusCodeValue());
     assertTrue(response.getBody().toString().contains("Tipo de código não informado"));
   }

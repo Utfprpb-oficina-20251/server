@@ -1,6 +1,6 @@
 package br.edu.utfpr.pb.ext.server.service.impl;
 
-import br.edu.utfpr.pb.ext.server.model.EmailCode;
+import br.edu.utfpr.pb.ext.server.emailCode.EmailCode;
 import br.edu.utfpr.pb.ext.server.repository.EmailCodeRepository;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
