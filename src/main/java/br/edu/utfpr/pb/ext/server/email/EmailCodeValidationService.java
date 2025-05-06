@@ -1,6 +1,5 @@
-package br.edu.utfpr.pb.ext.server.service;
+package br.edu.utfpr.pb.ext.server.email;
 
-import br.edu.utfpr.pb.ext.server.repository.EmailCodeRepository;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 

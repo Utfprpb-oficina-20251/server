@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.config;
+package br.edu.utfpr.pb.ext.server.email;
 
 import com.sendgrid.SendGrid;
 import org.springframework.beans.factory.annotation.Value;

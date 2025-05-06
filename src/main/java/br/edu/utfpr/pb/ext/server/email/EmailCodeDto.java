@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.dto;
+package br.edu.utfpr.pb.ext.server.email;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

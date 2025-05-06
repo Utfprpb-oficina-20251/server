@@ -1,10 +1,9 @@
-package br.edu.utfpr.pb.ext.server.controller;
+package br.edu.utfpr.pb.ext.server.email;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import br.edu.utfpr.pb.ext.server.service.EmailCodeValidationService;
-import br.edu.utfpr.pb.ext.server.service.impl.EmailServiceImpl;
+import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /** Testes unitários para EmailController, verificando os retornos de envio e validação. */
@@ -37,7 +37,7 @@ class EmailControllerTest {
 
     ResponseEntity<?> response = controller.enviar(email, tipo);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Código enviado com sucesso"));
   }
 
@@ -52,7 +52,7 @@ class EmailControllerTest {
 
     ResponseEntity<Boolean> response = controller.validar(email, tipo, codigo);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertTrue(response.getBody());
   }
 
@@ -67,7 +67,7 @@ class EmailControllerTest {
 
     ResponseEntity<Boolean> response = controller.validar(email, tipo, codigo);
 
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertFalse(response.getBody());
   }
 
@@ -84,7 +84,7 @@ class EmailControllerTest {
         assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
 
     ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Limite atingido"));
   }
 
@@ -100,7 +100,7 @@ class EmailControllerTest {
     IOException ex = assertThrows(IOException.class, () -> controller.enviar(email, tipo));
 
     ResponseEntity<?> response = controller.handleIOException(ex);
-    assertEquals(500, response.getStatusCodeValue());
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Falha ao enviar e-mail"));
   }
 
@@ -114,7 +114,7 @@ class EmailControllerTest {
         assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
 
     ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Email inválido"));
   }
 
@@ -128,7 +128,7 @@ class EmailControllerTest {
         assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
 
     ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Tipo de código não informado"));
   }
 
@@ -141,7 +141,7 @@ class EmailControllerTest {
         assertThrows(IllegalArgumentException.class, () -> controller.enviar(null, tipo));
 
     ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Email inválido"));
   }
 
@@ -154,7 +154,7 @@ class EmailControllerTest {
         assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, null));
 
     ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(400, response.getStatusCodeValue());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Tipo de código não informado"));
   }
 }

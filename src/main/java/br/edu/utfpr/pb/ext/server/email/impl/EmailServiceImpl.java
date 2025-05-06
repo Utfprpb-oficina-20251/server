@@ -1,7 +1,7 @@
-package br.edu.utfpr.pb.ext.server.service.impl;
+package br.edu.utfpr.pb.ext.server.email.impl;
 
-import br.edu.utfpr.pb.ext.server.emailCode.EmailCode;
-import br.edu.utfpr.pb.ext.server.repository.EmailCodeRepository;
+import br.edu.utfpr.pb.ext.server.email.EmailCode;
+import br.edu.utfpr.pb.ext.server.email.EmailCodeRepository;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 
-/** Serviço responsável por gerar códigos, enviar e-mails e registrar códigos no banco. */
+/** Serviço responsável por gerar códigos, enviar e-mails e registrar os dados no banco. */
 @Service
 public class EmailServiceImpl {
 
@@ -30,7 +30,7 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Gera e envia um código de verificação por e-mail.
+   * Gera um código, envia para o e-mail e salva no banco.
    *
    * @param email destinatário
    * @param type tipo do código ("cadastro", "recuperacao", etc)
@@ -38,42 +38,45 @@ public class EmailServiceImpl {
    * @throws IOException falha no envio
    */
   public Response generateAndSendCode(String email, String type) throws IOException {
-    if (!isValidEmail(email)) {
-      throw new IllegalArgumentException("Endereço de e-mail inválido.");
-    }
+    validarEmail(email);
+    verificarLimiteEnvio(email, type);
 
-    if (hasExceededLimit(email, type)) {
-      throw new IllegalArgumentException("Limite diário de envio atingido.");
-    }
-
-    String code = generateRandomCode();
-    Response response = sendVerificationEmail(email, code, type);
+    String code = gerarCodigoAleatorio();
+    Response response = enviarEmailDeVerificacao(email, code, type);
 
     if (response.getStatusCode() == 202) {
-      saveEmailCode(email, code, type);
-    } else {
-      throw new IOException("Erro ao enviar e-mail. Código: " + response.getStatusCode());
+      salvarCodigo(email, code, type);
+      return response;
     }
 
-    return response;
+    throw new IOException("Erro ao enviar e-mail. Código: " + response.getStatusCode());
   }
 
-  private boolean isValidEmail(String email) {
-    return email != null && EMAIL_REGEX.matcher(email).matches();
+  // ======================
+  // Métodos auxiliares
+  // ======================
+
+  private void validarEmail(String email) {
+    if (email == null || !EMAIL_REGEX.matcher(email).matches()) {
+      throw new IllegalArgumentException("Endereço de e-mail inválido.");
+    }
   }
 
-  private boolean hasExceededLimit(String email, String type) {
-    LocalDateTime since = LocalDateTime.now().minusHours(24);
-    List<EmailCode> recent =
-        repository.findAllByEmailAndTypeAndGeneratedAtAfter(email, type, since);
-    return recent.size() >= MAX_CODES_PER_DAY;
+  private void verificarLimiteEnvio(String email, String type) {
+    LocalDateTime inicio = LocalDateTime.now().minusHours(24);
+    List<EmailCode> codigosRecentes =
+        repository.findAllByEmailAndTypeAndGeneratedAtAfter(email, type, inicio);
+
+    if (codigosRecentes.size() >= MAX_CODES_PER_DAY) {
+      throw new IllegalArgumentException("Limite diário de envio atingido.");
+    }
   }
 
-  private String generateRandomCode() {
+  private String gerarCodigoAleatorio() {
     return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
   }
 
-  private void saveEmailCode(String email, String code, String type) {
+  private void salvarCodigo(String email, String code, String type) {
     EmailCode ec = new EmailCode();
     ec.setEmail(email);
     ec.setCode(code);
@@ -84,19 +87,20 @@ public class EmailServiceImpl {
     repository.save(ec);
   }
 
-  private Response sendVerificationEmail(String email, String code, String type)
+  private Response enviarEmailDeVerificacao(String email, String code, String type)
       throws IOException {
-    String subject = "Código de Verificação - " + type;
-    String content =
+    String assunto = "Código de Verificação - " + type;
+    String mensagem =
         "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
-    return sendEmail(email, subject, content);
+    return enviarEmail(email, assunto, mensagem);
   }
 
-  private Response sendEmail(String email, String subject, String body) throws IOException {
+  private Response enviarEmail(String destinatario, String assunto, String corpo)
+      throws IOException {
     Email from = new Email("webprojeto2@gmail.com");
-    Email to = new Email(email);
-    Content content = new Content("text/plain", body);
-    Mail mail = new Mail(from, subject, to, content);
+    Email to = new Email(destinatario);
+    Content content = new Content("text/plain", corpo);
+    Mail mail = new Mail(from, assunto, to, content);
 
     Request request = new Request();
     request.setMethod(Method.POST);

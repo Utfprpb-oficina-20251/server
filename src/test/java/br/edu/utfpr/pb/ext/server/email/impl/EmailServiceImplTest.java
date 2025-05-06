@@ -1,11 +1,10 @@
-package br.edu.utfpr.pb.ext.server.test;
+package br.edu.utfpr.pb.ext.server.email.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import br.edu.utfpr.pb.ext.server.emailCode.EmailCode;
-import br.edu.utfpr.pb.ext.server.repository.EmailCodeRepository;
-import br.edu.utfpr.pb.ext.server.service.impl.EmailServiceImpl;
+import br.edu.utfpr.pb.ext.server.email.EmailCode;
+import br.edu.utfpr.pb.ext.server.email.EmailCodeRepository;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import java.io.IOException;
@@ -95,7 +94,6 @@ class EmailServiceImplTest {
 
     when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(Collections.emptyList());
-
     when(sendGrid.api(any())).thenReturn(errorResponse);
 
     IOException ex =
@@ -125,7 +123,6 @@ class EmailServiceImplTest {
 
     when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(Collections.emptyList());
-
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
 
     assertDoesNotThrow(() -> emailService.generateAndSendCode(email, tipo));

@@ -1,6 +1,5 @@
-package br.edu.utfpr.pb.ext.server.repository;
+package br.edu.utfpr.pb.ext.server.email;
 
-import br.edu.utfpr.pb.ext.server.emailCode.EmailCode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
