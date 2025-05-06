@@ -1,24 +1,22 @@
 package br.edu.utfpr.pb.ext.server.model;
 
+import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Entidade que representa um código temporário enviado por e-mail, usado para validação em
  * processos como cadastro ou recuperação de senha.
  */
 @Entity
+@Table(name = "tb_access_code")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "tb_access_code")
-public class EmailCode {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class EmailCode extends BaseEntity {
 
   // E-mail destinatário do código
   @Column(nullable = false)
@@ -43,4 +41,15 @@ public class EmailCode {
   // Tipo do código: "cadastro", "recuperacao", etc.
   @Column(nullable = false)
   private String type;
+
+  // Construtor auxiliar para testes ou uso direto
+  public EmailCode(
+      String email, String code, LocalDateTime generatedAt, LocalDateTime expiration, String type) {
+    this.email = email;
+    this.code = code;
+    this.generatedAt = generatedAt;
+    this.expiration = expiration;
+    this.type = type;
+    this.used = false;
+  }
 }

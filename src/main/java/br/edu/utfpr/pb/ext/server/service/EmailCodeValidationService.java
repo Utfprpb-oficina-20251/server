@@ -1,53 +1,40 @@
 package br.edu.utfpr.pb.ext.server.service;
 
-import br.edu.utfpr.pb.ext.server.model.EmailCode;
 import br.edu.utfpr.pb.ext.server.repository.EmailCodeRepository;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /** Serviço responsável por validar códigos enviados por e-mail. */
 @Service
 public class EmailCodeValidationService {
 
-  private final EmailCodeRepository emailCodeRepository;
+  private final EmailCodeRepository repository;
 
-  /**
-   * Cria uma instância do serviço de validação de códigos de e-mail com o repositório fornecido.
-   *
-   * @param emailCodeRepository repositório utilizado para acessar os códigos de e-mail
-   */
-  public EmailCodeValidationService(EmailCodeRepository emailCodeRepository) {
-    this.emailCodeRepository = emailCodeRepository;
+  public EmailCodeValidationService(EmailCodeRepository repository) {
+    this.repository = repository;
   }
 
   /**
-   * Valida se o código de e-mail informado é o mais recente, corresponde ao tipo solicitado, não
-   * foi utilizado e está dentro do prazo de validade. Se todas as condições forem atendidas, marca
-   * o código como usado e retorna true.
+   * Valida se o código informado é o mais recente, corresponde ao tipo, não foi utilizado e está
+   * válido. Se for válido, marca como usado e salva.
    *
-   * @param email Endereço de e-mail para o qual o código foi enviado.
-   * @param type Tipo do código (por exemplo, "cadastro", "recuperacao").
-   * @param code Código informado pelo usuário.
-   * @return true se o código for válido e atualizado com sucesso; false caso contrário.
+   * @param email endereço de e-mail
+   * @param type tipo do código (ex: cadastro, recuperação)
+   * @param code código informado pelo usuário
+   * @return true se válido, false se inválido ou expirado
    */
   public boolean validateCode(String email, String type, String code) {
-    Optional<EmailCode> optional =
-        emailCodeRepository.findTopByEmailAndTypeOrderByGeneratedAtDesc(email, type);
-
-    if (optional.isEmpty()) return false;
-
-    EmailCode emailCode = optional.get();
-    boolean valido =
-        emailCode.getCode().equals(code)
-            && !emailCode.isUsed()
-            && emailCode.getExpiration().isAfter(LocalDateTime.now());
-
-    if (valido) {
-      emailCode.setUsed(true);
-      emailCodeRepository.save(emailCode);
-    }
-
-    return valido;
+    return repository
+        .findTopByEmailAndTypeOrderByGeneratedAtDesc(email, type)
+        .filter(ec -> ec.getCode().equals(code))
+        .filter(ec -> !ec.isUsed())
+        .filter(ec -> ec.getExpiration().isAfter(LocalDateTime.now()))
+        .map(
+            ec -> {
+              ec.setUsed(true);
+              repository.save(ec);
+              return true;
+            })
+        .orElse(false);
   }
 }
