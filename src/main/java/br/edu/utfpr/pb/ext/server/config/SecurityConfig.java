@@ -34,15 +34,6 @@ public class SecurityConfig {
 
   private final UsuarioRepository usuarioRepository;
 
-  @Value("${spring.security.user.name}")
-  private String username;
-
-  @Value("${spring.security.user.password}")
-  private String password;
-
-  @Value("${spring.security.user.roles}")
-  private String role;
-
   /**
    * Injeta a chave app.client.origins e os valores existentes separados por vírgula configurado no
    * yml
@@ -75,7 +66,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers(HttpMethod.GET, "/projeto/**")
+                    .requestMatchers(HttpMethod.GET, "/api/projeto/**")
                     .permitAll()
                     .requestMatchers("/api/auth/**")
                     .permitAll()
@@ -131,10 +122,10 @@ public class SecurityConfig {
 
   @Bean
   UserDetailsService userDetailsService() {
-    return username ->
+    return u ->
         usuarioRepository
-            .findByEmail(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            .findByEmail(u)
+            .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
   }
 
   @Bean

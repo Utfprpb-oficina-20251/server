@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -42,9 +43,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Column(updatable = false, name = "data_criacao")
   private Date dataCriacao;
 
-  @CreationTimestamp
+  @UpdateTimestamp
   @Column(name = "data_atualizacao")
-  private Date data_atualizacao;
+  private Date dataAtualizacao;
 
   /**
    * Retorna a lista de autoridades concedidas ao usuário, contendo apenas o papel "ROLE_USER".
@@ -68,7 +69,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   public String getPassword() {
     // Retornando null intencionalmente pois autenticação será via OTP/JWT
     // e será implementada em tarefa futura
-    //senha temporária até a implementação do OTP, significa password
+    // senha temporária até a implementação do OTP, significa password
     return "$2a$12$a8kcoUlLHvBlhrEebCYe0uZ2Ofvzijj14HkAfKJmdUGzUCWcUOd7m";
   }
 
