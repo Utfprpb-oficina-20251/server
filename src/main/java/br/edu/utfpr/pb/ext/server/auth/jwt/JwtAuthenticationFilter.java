@@ -40,9 +40,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       final String jwt = authHeader.substring(BEARER_TOKEN_PREFIX.length());
       final String username = jwtService.extractUsername(jwt);
 
+      if (authHeader.substring(BEARER_TOKEN_PREFIX.length()).trim().isEmpty() || username == null) {
+        filterChain.doFilter(request, response);
+        return;
+      }
+
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-      if (username != null && authentication == null) {
+      if (authentication == null) {
         UserDetails userdetails = this.userDetailsService.loadUserByUsername(username);
 
         if (jwtService.isTokenValid(jwt, userdetails)) {

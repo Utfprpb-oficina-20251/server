@@ -6,6 +6,7 @@ import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.UsuarioCadastradoDTO;
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtService;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +22,14 @@ public class AuthController {
 
   @PostMapping("/cadastro")
   public ResponseEntity<UsuarioCadastradoDTO> cadastro(
-      @RequestBody CadastroUsuarioDTO cadastroUsuarioDTO) {
+      @RequestBody @Valid CadastroUsuarioDTO cadastroUsuarioDTO) {
     Usuario usuarioRegistrado = authService.cadastro(cadastroUsuarioDTO);
     return ResponseEntity.ok(modelMapper.map(usuarioRegistrado, UsuarioCadastradoDTO.class));
   }
 
   @PostMapping("/login")
   public ResponseEntity<RespostaLoginDTO> autenticacao(
-      @RequestBody LoginUsuarioDTO loginUsuarioDTO) {
+      @RequestBody @Valid LoginUsuarioDTO loginUsuarioDTO) {
     Usuario usuarioAutenticado = authService.autenticacao(loginUsuarioDTO);
     String tokenJwt = jwtService.generateToken(usuarioAutenticado);
     RespostaLoginDTO respostaLoginDTO =
