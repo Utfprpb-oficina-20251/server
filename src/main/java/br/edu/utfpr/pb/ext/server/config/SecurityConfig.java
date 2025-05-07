@@ -125,7 +125,7 @@ public class SecurityConfig {
     return u ->
         usuarioRepository
             .findByEmail(u)
-            .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
+            .orElseThrow(() -> new UsernameNotFoundException("Credenciais inválidas"));
   }
 
   @Bean
