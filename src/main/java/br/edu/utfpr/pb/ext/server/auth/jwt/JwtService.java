@@ -90,7 +90,7 @@ public class JwtService {
     } catch (IllegalArgumentException e) {
       logger.error("Formato de claims inválido: {}", e.getMessage(), e);
     }
-      return null;
+    return null;
   }
 
   private SecretKey getSignInKey() {
