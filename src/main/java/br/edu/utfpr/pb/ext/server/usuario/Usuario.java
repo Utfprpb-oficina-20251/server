@@ -7,9 +7,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -23,7 +25,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;
 
-  @NotNull private String registro;
+  private String registro;
 
   @NotNull @Email private String email;
 
@@ -32,6 +34,17 @@ public class Usuario extends BaseEntity implements UserDetails {
   @NotNull @ManyToOne
   @JoinColumn(name = "curso_id")
   private Curso curso;
+
+  @Column(name = "ativo")
+  private boolean ativo;
+
+  @CreationTimestamp
+  @Column(updatable = false, name = "data_criacao")
+  private Date dataCriacao;
+
+  @CreationTimestamp
+  @Column(name = "data_atualizacao")
+  private Date data_atualizacao;
 
   /**
    * Retorna a lista de autoridades concedidas ao usuário, contendo apenas o papel "ROLE_USER".
@@ -42,7 +55,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Transient
   @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return AuthorityUtils.createAuthorityList("ROLE_USER");
+    return List.of();
   }
 
   /**
@@ -55,17 +68,18 @@ public class Usuario extends BaseEntity implements UserDetails {
   public String getPassword() {
     // Retornando null intencionalmente pois autenticação será via OTP/JWT
     // e será implementada em tarefa futura
-    return null;
+    //senha temporária até a implementação do OTP, significa password
+    return "$2a$12$a8kcoUlLHvBlhrEebCYe0uZ2Ofvzijj14HkAfKJmdUGzUCWcUOd7m";
   }
 
   /**
-   * Retorna o nome do usuário, utilizado como identificador de login.
+   * Retorna o email do usuário, utilizado como identificador de login.
    *
-   * @return o nome do usuário
+   * @return o email do usuário
    */
   @Override
   public String getUsername() {
-    return nome;
+    return email;
   }
 
   /**
@@ -102,9 +116,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Indica que a conta do usuário está sempre habilitada.
+   * Indica o estado de ativação da conta do usuário
    *
-   * @return sempre retorna {@code true}
+   * @return boolean indicando o estado de ativação da conta
    */
   @Override
   @Transient

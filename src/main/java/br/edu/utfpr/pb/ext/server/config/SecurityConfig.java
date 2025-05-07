@@ -1,23 +1,28 @@
 package br.edu.utfpr.pb.ext.server.config;
 
+import br.edu.utfpr.pb.ext.server.auth.jwt.JwtAuthenticationFilter;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,6 +31,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+  private final UsuarioRepository usuarioRepository;
+
   @Value("${spring.security.user.name}")
   private String username;
 
@@ -42,6 +50,10 @@ public class SecurityConfig {
   @Value("#{'${app.client.origins}'.split(',')}")
   private List<String> allowedOrigins;
 
+  public SecurityConfig(UsuarioRepository usuarioRepository) {
+    this.usuarioRepository = usuarioRepository;
+  }
+
   /**
    * Configura a cadeia de filtros de segurança HTTP para a aplicação.
    *
@@ -55,14 +67,15 @@ public class SecurityConfig {
    * @throws Exception se ocorrer erro na configuração de segurança
    */
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain securityFilterChain(
+      HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
     http.cors(Customizer.withDefaults())
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/h2-console/**"))
         .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers(HttpMethod.GET, "/api/projects/**")
+                    .requestMatchers(HttpMethod.GET, "/projeto/**")
                     .permitAll()
                     .requestMatchers("/api/auth/**")
                     .permitAll()
@@ -79,7 +92,9 @@ public class SecurityConfig {
                     .anyRequest()
                     .authenticated())
         .sessionManagement(
-            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 
@@ -114,24 +129,25 @@ public class SecurityConfig {
     return source;
   }
 
-  /**
-   * Cria um usuário padrão em memória para autenticação temporária até a implementação completa do
-   * JWT.
-   *
-   * @deprecated Este metodo será removido após a conclusão da autorização baseada em JWT; utilizado
-   *     apenas para testes temporários.
-   * @param passwordEncoder Codificador de senha utilizado para gerar o hash da senha do usuário.
-   * @return Um InMemoryUserDetailsManager contendo o usuário padrão configurado.
-   */
   @Bean
-  @Deprecated(forRemoval = true)
-  public UserDetailsService usuarioPadraoAteImplementacaoJWT(PasswordEncoder passwordEncoder) {
-    UserDetails user =
-        User.builder()
-            .username(username)
-            .password(passwordEncoder.encode(password))
-            .roles(role)
-            .build();
-    return new InMemoryUserDetailsManager(user);
+  UserDetailsService userDetailsService() {
+    return username ->
+        usuarioRepository
+            .findByEmail(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+  }
+
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+      throws Exception {
+    return config.getAuthenticationManager();
+  }
+
+  @Bean
+  AuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    authProvider.setUserDetailsService(userDetailsService());
+    authProvider.setPasswordEncoder(passwordEncoder());
+    return authProvider;
   }
 }

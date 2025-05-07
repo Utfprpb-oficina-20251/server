@@ -1,7 +1,11 @@
-#Config compartilhada
+
 app:
   client:
     origins: ${APP_ALLOWED_ORIGINS:http://localhost:3000}
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration-time: ${JWT_EXPIRATION_TIME:7200000}
 spring:
   jpa:
     hibernate:
@@ -27,6 +31,11 @@ spring:
       name: ${SECURITY_USER_NAME}
       password: ${SECURITY_USER_PASSWORD}
       roles: ${SECURITY_USER_ROLES}
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
 ---
 # Testes
 spring:
