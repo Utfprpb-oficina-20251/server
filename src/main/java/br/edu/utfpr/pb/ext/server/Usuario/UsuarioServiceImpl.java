@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.Usuario;
+package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import org.springframework.data.jpa.repository.JpaRepository;
