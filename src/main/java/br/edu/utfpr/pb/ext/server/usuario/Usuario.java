@@ -34,6 +34,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   private String siape;
 
+  @Column(name = "registro_academico")
   private String registroAcademico;
 
   @NotNull @Email private String email;
