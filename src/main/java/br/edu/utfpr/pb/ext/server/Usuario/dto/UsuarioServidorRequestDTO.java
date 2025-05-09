@@ -1,5 +1,8 @@
 package br.edu.utfpr.pb.ext.server.usuario.dto;
 
+import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
+import br.edu.utfpr.pb.ext.server.usuario.validation.anotation.UniqueCpf;
+import br.edu.utfpr.pb.ext.server.usuario.validation.anotation.UniqueSiape;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.validator.constraints.br.CPF;
@@ -14,13 +17,17 @@ public class UsuarioServidorRequestDTO {
 
     @NotNull
     @CPF
+    @UniqueCpf
     private String cpf;
 
     @NotNull
+    @UniqueSiape
+    @Size(min = 7, max = 7, message = "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.siape}")
     private String siape;
 
     @NotNull
-    @Email(message = "Endereço de e-mail inválido", regexp = "^[a-zA-Z0-9._%+-]+@(utfpr\\.edu\\.br)$")
+    @Email(regexp = "^[a-zA-Z0-9._%+-]+@(utfpr\\.edu\\.br)$",
+            message = "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.Email}")
     private String emailInstitucional;
 
     @Size(min = 11, max = 11)
@@ -30,5 +37,5 @@ public class UsuarioServidorRequestDTO {
     private String enderecoCompleto;
 
     @NotNull
-    private String departamento;
+    private Departamentos departamento;
 }

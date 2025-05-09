@@ -80,6 +80,8 @@ public class SecurityConfig {
                     .hasRole("ESTUDANTE")
                     .requestMatchers("/h2-console/**")
                     .permitAll()
+                    .requestMatchers(HttpMethod.POST,"/api/usuarios/**")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .sessionManagement(
