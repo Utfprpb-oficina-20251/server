@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 class ServerApplicationTests {
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
   @Test
   void contextLoads() {
@@ -28,13 +27,13 @@ class ServerApplicationTests {
   @Description("Consultar OPTIONS deve retornar cabeçalhos CORS")
   void options_whenCorsRequest_ShouldReturnCORSHeaders() throws Exception {
     mockMvc
-            .perform(
-                    MockMvcRequestBuilders.options("/api/auth/login")
-                            .header("Origin", "http://localhost:3000")
-                            .header("Access-Control-Request-Method", "POST"))
-            .andExpect(status().isOk())
-            .andExpect(header().exists("Access-Control-Allow-Origin"))
-            .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:3000"))
-            .andExpect(header().exists("Access-Control-Allow-Methods"));
+        .perform(
+            MockMvcRequestBuilders.options("/api/auth/login")
+                .header("Origin", "http://localhost:3000")
+                .header("Access-Control-Request-Method", "POST"))
+        .andExpect(status().isOk())
+        .andExpect(header().exists("Access-Control-Allow-Origin"))
+        .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:3000"))
+        .andExpect(header().exists("Access-Control-Allow-Methods"));
   }
 }

@@ -21,9 +21,11 @@ public class WebConfig implements WebMvcConfigurer {
   }
 
   /**
-   * Adiciona o prefixo "/api/" a todas as rotas de controladores que implementam ou estendem {@code CrudController}.
+   * Adiciona o prefixo "/api/" a todas as rotas de controladores que implementam ou estendem {@code
+   * CrudController}.
    *
-   * Isso centraliza o versionamento e a organização dos endpoints de CRUD sob o namespace "/api/".
+   * <p>Isso centraliza o versionamento e a organização dos endpoints de CRUD sob o namespace
+   * "/api/".
    *
    * @param configurer objeto utilizado para configurar o mapeamento de caminhos no Spring MVC
    */

@@ -27,19 +27,15 @@ public class AuthService {
    */
   public Usuario cadastro(CadastroUsuarioDTO dto) {
     Usuario usuario =
-        Usuario.builder()
-            .nome(dto.getNome())
-            .email(dto.getEmail())
-            .registro(dto.getRegistro())
-            .build();
+        Usuario.builder().nome(dto.getNome()).email(dto.getEmail()).cpf(dto.getRegistro()).build();
     return usuarioRepository.save(usuario);
   }
 
   /**
    * Autentica um usuário com base nas credenciais fornecidas.
    *
-   * Caso as credenciais estejam incorretas, lança uma exceção com status HTTP 401.
-   * Se o e-mail não estiver cadastrado, lança uma exceção indicando que o e-mail não foi encontrado.
+   * <p>Caso as credenciais estejam incorretas, lança uma exceção com status HTTP 401. Se o e-mail
+   * não estiver cadastrado, lança uma exceção indicando que o e-mail não foi encontrado.
    *
    * @param dto objeto contendo e-mail e senha para autenticação
    * @return o usuário autenticado

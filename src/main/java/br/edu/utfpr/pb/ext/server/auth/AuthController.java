@@ -21,7 +21,8 @@ public class AuthController {
   private final ModelMapper modelMapper;
 
   /**
-   * Registra um novo usuário a partir dos dados fornecidos e retorna as informações do usuário cadastrado.
+   * Registra um novo usuário a partir dos dados fornecidos e retorna as informações do usuário
+   * cadastrado.
    *
    * @param cadastroUsuarioDTO dados para cadastro do novo usuário
    * @return resposta HTTP contendo o DTO do usuário cadastrado
@@ -36,7 +37,8 @@ public class AuthController {
   /**
    * Autentica um usuário e retorna um token JWT com o tempo de expiração.
    *
-   * Recebe as credenciais de login, autentica o usuário e gera um token JWT para acesso autenticado.
+   * <p>Recebe as credenciais de login, autentica o usuário e gera um token JWT para acesso
+   * autenticado.
    *
    * @param loginUsuarioDTO dados de login do usuário
    * @return resposta contendo o token JWT e o tempo de expiração
