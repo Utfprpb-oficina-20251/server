@@ -39,5 +39,6 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build and analyze
         env:
+          JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=Utfprpb-oficina-20251_server 

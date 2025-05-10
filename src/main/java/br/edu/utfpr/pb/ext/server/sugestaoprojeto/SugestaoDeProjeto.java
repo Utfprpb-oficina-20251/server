@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.sugestaoDeProjeto;
+package br.edu.utfpr.pb.ext.server.sugestaoprojeto;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;

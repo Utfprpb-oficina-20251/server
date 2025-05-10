@@ -7,9 +7,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -23,7 +26,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;
 
-  @NotNull private String registro;
+   private String registro;
 
   @NotNull @Email private String email;
 
@@ -33,37 +36,48 @@ public class Usuario extends BaseEntity implements UserDetails {
   @JoinColumn(name = "curso_id")
   private Curso curso;
 
-  /**
-   * Retorna a lista de autoridades concedidas ao usuário, contendo apenas o papel "ROLE_USER".
+  @Column(name = "ativo")
+  private boolean ativo;
+
+  @CreationTimestamp
+  @Column(updatable = false, name = "data_criacao")
+  private Date dataCriacao;
+
+  @UpdateTimestamp
+  @Column(name = "data_atualizacao")
+  private Date dataAtualizacao;/**
+   * Retorna uma coleção vazia de autoridades concedidas ao usuário.
    *
-   * @return coleção de autoridades do usuário
+   * @return coleção vazia de autoridades
    */
   @Override
   @Transient
   @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return AuthorityUtils.createAuthorityList("ROLE_USER");
+    return List.of();
   }
 
   /**
-   * Retorna sempre {@code null}, indicando que a senha do usuário não é armazenada ou gerenciada
-   * nesta entidade.
+   * Retorna uma senha hash fixa como valor temporário para autenticação.
    *
-   * @return sempre {@code null}
+   * @return hash bcrypt temporário utilizado como senha do usuário
    */
   @Override
   public String getPassword() {
-    return null;
+    // Retornando null intencionalmente pois autenticação será via OTP/JWT
+    // e será implementada em tarefa futura
+    // senha temporária até a implementação do OTP, significa password
+    return "$2a$12$a8kcoUlLHvBlhrEebCYe0uZ2Ofvzijj14HkAfKJmdUGzUCWcUOd7m";
   }
 
   /**
-   * Retorna o nome do usuário, utilizado como identificador de login.
+   * Retorna o email do usuário para autenticação.
    *
-   * @return o nome do usuário
+   * @return o email cadastrado do usuário
    */
   @Override
   public String getUsername() {
-    return nome;
+    return email;
   }
 
   /**
@@ -89,7 +103,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Indica que as credenciais do usuário nunca expiram.
+   * Indica que as credenciais do usuário estão sempre válidas e não expiram.
    *
    * @return sempre retorna {@code true}
    */
@@ -100,9 +114,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Indica que a conta do usuário está sempre habilitada.
+   * Indica se a conta do usuário está habilitada.
    *
-   * @return sempre retorna {@code true}
+   * @return sempre retorna {@code true}, indicando que a conta está habilitada independentemente do estado real de ativação.
    */
   @Override
   @Transient

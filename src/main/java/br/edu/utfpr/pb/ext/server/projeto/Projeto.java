@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.util.Date;
@@ -39,4 +40,6 @@ public class Projeto extends BaseEntity {
       joinColumns = @JoinColumn(name = "id_projeto"),
       inverseJoinColumns = @JoinColumn(name = "id_usuario"))
   private List<Usuario> equipeExecutora;
+
+  @NotNull private StatusProjeto status;
 }
