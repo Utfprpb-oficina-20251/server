@@ -101,7 +101,7 @@ public class SecurityConfig {
 
   /**
    * Configura as definições de CORS para a aplicação. Utiliza a propriedade {@code
-   * react.client.origins} para definir as origens permitidas. Permite os métodos HTTP mais comuns e
+   * app.client.origins} para definir as origens permitidas. Permite os métodos HTTP mais comuns e
    * cabeçalhos como Authorization e Content-Type. Permite o envio de credenciais.
    *
    * @return uma instância de {@link CorsConfigurationSource} configurada.
