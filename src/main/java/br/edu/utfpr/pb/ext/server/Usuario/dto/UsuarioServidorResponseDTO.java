@@ -5,15 +5,15 @@ import lombok.Data;
 @Data
 public class UsuarioServidorResponseDTO {
 
-    private Long id;
+  private Long id;
 
-    private String nomeCompleto;
+  private String nomeCompleto;
 
-    private String emailInstitucional;
+  private String emailInstitucional;
 
-    private String telefone;
+  private String telefone;
 
-    private String enderecoCompleto;
+  private String enderecoCompleto;
 
-    private String departamento;
+  private String departamento;
 }

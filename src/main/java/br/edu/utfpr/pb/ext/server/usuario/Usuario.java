@@ -28,7 +28,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;
 
-   @NotNull @CPF private String cpf;
+  @NotNull @CPF private String cpf;
 
   private String siape;
 
@@ -54,7 +54,9 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @UpdateTimestamp
   @Column(name = "data_atualizacao")
-  private Date dataAtualizacao;/**
+  private Date dataAtualizacao;
+
+  /**
    * Retorna uma coleção vazia de autoridades concedidas ao usuário.
    *
    * @return coleção vazia de autoridades
@@ -125,7 +127,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   /**
    * Indica se a conta do usuário está habilitada.
    *
-   * @return sempre retorna {@code true}, indicando que a conta está habilitada independentemente do estado real de ativação.
+   * @return sempre retorna {@code true}, indicando que a conta está habilitada independentemente do
+   *     estado real de ativação.
    */
   @Override
   @Transient
