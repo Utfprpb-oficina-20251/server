@@ -19,6 +19,12 @@ public class AuthService {
   private final UsuarioRepository usuarioRepository;
   private final AuthenticationManager authenticationManager;
 
+  /**
+   * Realiza o cadastro de um novo usuário com base nos dados fornecidos.
+   *
+   * @param dto objeto contendo nome, e-mail e registro do usuário a ser cadastrado
+   * @return o usuário salvo após o cadastro
+   */
   public Usuario cadastro(CadastroUsuarioDTO dto) {
     Usuario usuario =
         Usuario.builder()
@@ -29,6 +35,15 @@ public class AuthService {
     return usuarioRepository.save(usuario);
   }
 
+  /**
+   * Autentica um usuário com base nas credenciais fornecidas.
+   *
+   * Caso as credenciais estejam incorretas, lança uma exceção com status HTTP 401.
+   * Se o e-mail não estiver cadastrado, lança uma exceção indicando que o e-mail não foi encontrado.
+   *
+   * @param dto objeto contendo e-mail e senha para autenticação
+   * @return o usuário autenticado
+   */
   public Usuario autenticacao(LoginUsuarioDTO dto) {
     try {
       authenticationManager.authenticate(
