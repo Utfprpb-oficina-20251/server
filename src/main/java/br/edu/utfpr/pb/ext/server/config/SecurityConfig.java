@@ -38,7 +38,7 @@ public class SecurityConfig {
    * Injeta a chave app.client.origins e os valores existentes separados por vírgula configurado no
    * yml
    */
-  @Value("#{'${app.client.origins}'.split(',')}")
+  @Value("#{'${app.client.origins}'}")
   private List<String> allowedOrigins;
 
   public SecurityConfig(UsuarioRepository usuarioRepository) {
@@ -80,7 +80,7 @@ public class SecurityConfig {
                     .hasRole("ESTUDANTE")
                     .requestMatchers("/h2-console/**")
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST,"/api/usuarios/**")
+                    .requestMatchers(HttpMethod.POST, "/api/usuarios/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

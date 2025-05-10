@@ -28,9 +28,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;
 
-  @NotNull
-  @CPF
-  private String cpf;
+  @NotNull @CPF private String cpf;
 
   private String siape;
 

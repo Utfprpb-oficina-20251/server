@@ -21,11 +21,7 @@ public class AuthService {
 
   public Usuario cadastro(CadastroUsuarioDTO dto) {
     Usuario usuario =
-        Usuario.builder()
-            .nome(dto.getNome())
-            .email(dto.getEmail())
-            .cpf(dto.getRegistro())
-            .build();
+        Usuario.builder().nome(dto.getNome()).email(dto.getEmail()).cpf(dto.getRegistro()).build();
     return usuarioRepository.save(usuario);
   }
 

@@ -44,6 +44,9 @@ public class JwtService {
 
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
+    if (claims == null) {
+      return null;
+    }
     return claimsResolver.apply(claims);
   }
 
@@ -71,11 +74,14 @@ public class JwtService {
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    return username != null
+        && (username.equals(userDetails.getUsername()))
+        && !isTokenExpired(token);
   }
 
   public boolean isTokenExpired(String token) {
-    return extractExpiration(token).before(new Date());
+    Date expiration = extractExpiration(token);
+    return expiration == null || extractExpiration(token).before(new Date());
   }
 
   private Date extractExpiration(String token) {
@@ -90,7 +96,7 @@ public class JwtService {
     } catch (IllegalArgumentException e) {
       logger.error("Formato de claims inválido: {}", e.getMessage(), e);
     }
-    return null;
+    return Jwts.claims().build();
   }
 
   private SecretKey getSignInKey() {

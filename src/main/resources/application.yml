@@ -1,6 +1,7 @@
 app:
   client:
-    origins: ${APP_ALLOWED_ORIGINS:http://localhost:3000}
+    origins:
+      - ${APP_ALLOWED_ORIGINS:http://localhost:3000}
   security:
     jwt:
       secret-key: ${JWT_SECRET_KEY}
