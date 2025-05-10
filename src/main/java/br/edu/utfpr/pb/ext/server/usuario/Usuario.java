@@ -26,7 +26,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;
 
-  private String registro;
+   private String registro;
 
   @NotNull @Email private String email;
 
@@ -45,9 +45,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @UpdateTimestamp
   @Column(name = "data_atualizacao")
-  private Date dataAtualizacao;
-
-  /**
+  private Date dataAtualizacao;/**
    * Retorna uma coleção vazia de autoridades concedidas ao usuário.
    *
    * @return coleção vazia de autoridades
