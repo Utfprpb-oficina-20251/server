@@ -25,11 +25,6 @@ spring:
     driver-class-name: org.postgresql.Driver
   config:
     import: optional:file:.env[.properties]
-  security:
-    user:
-      name: ${SECURITY_USER_NAME}
-      password: ${SECURITY_USER_PASSWORD}
-      roles: ${SECURITY_USER_ROLES}
 ---
 # Testes
 spring:
@@ -46,11 +41,6 @@ spring:
   h2:
     console:
       enabled: true
-  security:
-    user:
-      name: testuser
-      password: testpass
-      roles: SERVIDOR
 logging:
   level:
     org:
