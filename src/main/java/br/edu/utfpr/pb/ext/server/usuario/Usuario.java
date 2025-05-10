@@ -28,7 +28,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;
 
-  @NotNull @CPF private String cpf;
+   @NotNull @CPF private String cpf;
 
   private String siape;
 
@@ -54,12 +54,10 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @UpdateTimestamp
   @Column(name = "data_atualizacao")
-  private Date dataAtualizacao;
-
-  /**
-   * Retorna a lista de autoridades concedidas ao usuário, contendo apenas o papel "ROLE_USER".
+  private Date dataAtualizacao;/**
+   * Retorna uma coleção vazia de autoridades concedidas ao usuário.
    *
-   * @return coleção de autoridades do usuário
+   * @return coleção vazia de autoridades
    */
   @Override
   @Transient
@@ -69,10 +67,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna sempre {@code null}, indicando que a senha do usuário não é armazenada ou gerenciada
-   * nesta entidade.
+   * Retorna uma senha hash fixa como valor temporário para autenticação.
    *
-   * @return sempre {@code null}
+   * @return hash bcrypt temporário utilizado como senha do usuário
    */
   @Override
   public String getPassword() {
@@ -83,9 +80,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna o email do usuário, utilizado como identificador de login.
+   * Retorna o email do usuário para autenticação.
    *
-   * @return o email do usuário
+   * @return o email cadastrado do usuário
    */
   @Override
   public String getUsername() {
@@ -115,7 +112,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Indica que as credenciais do usuário nunca expiram.
+   * Indica que as credenciais do usuário estão sempre válidas e não expiram.
    *
    * @return sempre retorna {@code true}
    */
@@ -126,9 +123,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Indica o estado de ativação da conta do usuário
+   * Indica se a conta do usuário está habilitada.
    *
-   * @return boolean indicando o estado de ativação da conta
+   * @return sempre retorna {@code true}, indicando que a conta está habilitada independentemente do estado real de ativação.
    */
   @Override
   @Transient

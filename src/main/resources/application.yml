@@ -26,12 +26,11 @@ spring:
     driver-class-name: org.postgresql.Driver
   config:
     import: optional:file:.env[.properties]
-  security:
-    user:
-      name: ${SECURITY_USER_NAME}
-      password: ${SECURITY_USER_PASSWORD}
-      roles: ${SECURITY_USER_ROLES}
+  # SendGrid API Key configuration. Em produção, defina SENDGRID_API_KEY como variável de ambiente ou utilize um gerenciador de segredos.
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY:sendgridkey}
 ---
+
 # Testes
 spring:
   config:
@@ -47,11 +46,6 @@ spring:
   h2:
     console:
       enabled: true
-  security:
-    user:
-      name: testuser
-      password: testpass
-      roles: SERVIDOR
 logging:
   level:
     org:
