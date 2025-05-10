@@ -1,12 +1,11 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
-import br.edu.utfpr.pb.ext.server.enums.StatusProjeto;
+import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
-
 import lombok.Data;
 
 @Data

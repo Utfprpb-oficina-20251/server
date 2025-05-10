@@ -1,7 +1,7 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
-import br.edu.utfpr.pb.ext.server.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
+import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.security;
+package br.edu.utfpr.pb.ext.server.auth.enums;
 
 import lombok.Getter;
 

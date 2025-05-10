@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/projetos")
+@RequestMapping("projeto")
 public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long> {
 
   private final IProjetoService projetoService;
