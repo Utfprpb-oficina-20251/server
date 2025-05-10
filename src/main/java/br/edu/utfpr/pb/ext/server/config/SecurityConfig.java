@@ -46,21 +46,24 @@ public class SecurityConfig {
   @Value("#{'${app.client.origins}'.split(',')}")
   private List<String> allowedOrigins;
 
+  /**
+   * Cria uma instância de configuração de segurança com as dependências necessárias.
+   *
+   * @param environment ambiente Spring utilizado para acessar propriedades e perfis ativos
+   * @param usuarioRepository repositório para acesso aos dados de usuários
+   */
   public SecurityConfig(Environment environment, UsuarioRepository usuarioRepository) {
       this.environment = environment;
       this.usuarioRepository = usuarioRepository;
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP para a aplicação.
+   * Configura a cadeia de filtros de segurança HTTP, definindo autenticação, autorização, CORS, CSRF e política de sessão para a aplicação.
    *
-   * <p>Define regras de autorização para diferentes endpoints da API, desabilita CSRF para rotas
-   * sob `/api/**` e exige autenticação ou papéis específicos conforme o caminho. Permite acesso
-   * público a requisições GET em `/api/projects/**` e a todas as rotas em `/api/auth/**`. Define a
-   * política de sessão como stateless.
+   * <p>Permite acesso público a requisições GET em `/api/projeto/**` e a todas as rotas em `/api/auth/**`. Restringe o acesso a rotas específicas conforme o papel do usuário, exige autenticação para demais endpoints e permite acesso ao console H2 apenas em perfil de teste. Define sessões como stateless, habilita CORS e adiciona filtro de autenticação JWT.
    *
-   * @param http objeto de configuração de segurança HTTP do Spring
-   * @return a cadeia de filtros de segurança configurada
+   * @param http configuração de segurança HTTP do Spring
+   * @return cadeia de filtros de segurança configurada
    * @throws Exception se ocorrer erro na configuração de segurança
    */
   @Bean
@@ -95,6 +98,11 @@ public class SecurityConfig {
     return http.build();
   }
 
+  /**
+   * Retorna um AuthorizationManager que permite acesso apenas se o perfil ativo incluir "test".
+   *
+   * @return AuthorizationManager que concede autorização somente quando o perfil "test" está ativo.
+   */
   private AuthorizationManager<RequestAuthorizationContext> isTestProfile() {
     return (authentication, context) ->
         Arrays.stream(environment.getActiveProfiles()).toList().contains("test")
@@ -103,9 +111,9 @@ public class SecurityConfig {
   }
 
   /**
-   * Fornece um codificador de senhas baseado em BCrypt para hashing seguro de senhas.
+   * Retorna um codificador de senhas que utiliza o algoritmo BCrypt para garantir o armazenamento seguro das senhas dos usuários.
    *
-   * @return uma instância de BCryptPasswordEncoder
+   * @return instância de PasswordEncoder baseada em BCrypt
    */
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -113,11 +121,11 @@ public class SecurityConfig {
   }
 
   /**
-   * Configura as definições de CORS para a aplicação. Utiliza a propriedade {@code
-   * app.client.origins} para definir as origens permitidas. Permite os métodos HTTP mais comuns e
-   * cabeçalhos como Authorization e Content-Type. Permite o envio de credenciais.
+   * Define a configuração de CORS para a aplicação, permitindo origens, métodos e cabeçalhos específicos.
    *
-   * @return uma instância de {@link CorsConfigurationSource} configurada.
+   * Utiliza as origens permitidas definidas na propriedade {@code app.client.origins}, autoriza os métodos HTTP GET, POST, PUT, DELETE e OPTIONS, e os cabeçalhos Authorization, Content-Type, X-Requested-With e Accept. Permite o envio de credenciais.
+   *
+   * @return uma instância configurada de {@link CorsConfigurationSource}
    */
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
@@ -133,6 +141,11 @@ public class SecurityConfig {
     return source;
   }
 
+  /**
+   * Fornece um serviço de autenticação que carrega detalhes do usuário pelo e-mail.
+   *
+   * @return um UserDetailsService que busca usuários no repositório pelo e-mail e lança UsernameNotFoundException se não encontrado
+   */
   @Bean
   UserDetailsService userDetailsService() {
     return u ->
@@ -141,12 +154,24 @@ public class SecurityConfig {
             .orElseThrow(() -> new UsernameNotFoundException("Credenciais inválidas"));
   }
 
+  /**
+   * Fornece o bean {@link AuthenticationManager} a partir da configuração de autenticação do Spring.
+   *
+   * @param config configuração de autenticação do Spring Security
+   * @return instância do {@link AuthenticationManager} configurada
+   * @throws Exception se ocorrer erro ao obter o gerenciador de autenticação
+   */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
       throws Exception {
     return config.getAuthenticationManager();
   }
 
+  /**
+   * Cria e configura um AuthenticationProvider baseado em DAO com UserDetailsService e PasswordEncoder personalizados.
+   *
+   * @return o AuthenticationProvider configurado para autenticação de usuários.
+   */
   @Bean
   AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

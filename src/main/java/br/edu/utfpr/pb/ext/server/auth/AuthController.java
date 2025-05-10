@@ -20,6 +20,12 @@ public class AuthController {
   private final AuthService authService;
   private final ModelMapper modelMapper;
 
+  /**
+   * Registra um novo usuário a partir dos dados fornecidos e retorna as informações do usuário cadastrado.
+   *
+   * @param cadastroUsuarioDTO dados para cadastro do novo usuário
+   * @return resposta HTTP contendo o DTO do usuário cadastrado
+   */
   @PostMapping("/cadastro")
   public ResponseEntity<UsuarioCadastradoDTO> cadastro(
       @RequestBody @Valid CadastroUsuarioDTO cadastroUsuarioDTO) {
@@ -27,6 +33,14 @@ public class AuthController {
     return ResponseEntity.ok(modelMapper.map(usuarioRegistrado, UsuarioCadastradoDTO.class));
   }
 
+  /**
+   * Autentica um usuário e retorna um token JWT com o tempo de expiração.
+   *
+   * Recebe as credenciais de login, autentica o usuário e gera um token JWT para acesso autenticado.
+   *
+   * @param loginUsuarioDTO dados de login do usuário
+   * @return resposta contendo o token JWT e o tempo de expiração
+   */
   @PostMapping("/login")
   public ResponseEntity<RespostaLoginDTO> autenticacao(
       @RequestBody @Valid LoginUsuarioDTO loginUsuarioDTO) {
