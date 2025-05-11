@@ -7,7 +7,7 @@ public enum Departamentos {
   CALEM("Centro Acadêmico Lingua Estrangeira Moderna"),
   DAADM("Departamento de Administração"),
   DAAGR("Departamento de Agronomia"),
-  DACOC("Departamento de "),
+  DACOC("Departamento Acadêmico de Construção Civil"),
   DACON("Departamento de Ciências Contábeis"),
   DAELE("Departamento de Engenharia Elétrica"),
   DAFIS("Departamento de Física"),

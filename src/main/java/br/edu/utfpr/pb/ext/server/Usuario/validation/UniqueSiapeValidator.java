@@ -11,9 +11,6 @@ public class UniqueSiapeValidator implements ConstraintValidator<UniqueSiape, St
 
   @Override
   public boolean isValid(String siape, jakarta.validation.ConstraintValidatorContext context) {
-    if (usuarioRepository.findBySiape(siape).isEmpty()) {
-      return true;
-    }
     return usuarioRepository.findBySiape(siape).isEmpty();
   }
 }
