@@ -32,6 +32,17 @@ class UsuarioControllerTest {
     }
 
     @Test
+    void postUser_whenUserIsValidAndComplete_receiveOk() {
+        UsuarioServidorRequestDTO request = createUsuarioServidorRequestDTO();
+        request.setTelefone("46999999999");
+        request.setEnderecoCompleto("Rua Teste");
+
+        ResponseEntity<Object> response = testRestTemplate.postForEntity(API_USERS, request, Object.class);
+
+        assertEquals(200, response.getStatusCode().value());
+    }
+
+    @Test
     void postUser_whenUserIsValid_receiveOkAndToken() {
         UsuarioServidorRequestDTO request = createUsuarioServidorRequestDTO();
 
