@@ -113,22 +113,20 @@ public class EmailServiceImpl {
     String assunto = "";
     String mensagemHtml = "";
 
-    switch (tipo) {
-      case INSCRICAO_ALUNO:
-        assunto = "Inscrição no projeto: " + projeto;
-        mensagemHtml = montarMensagem("Você se cadastrou com sucesso no projeto", projeto, link);
-        break;
-
-      case INSCRICAO_ALUNO_PROFESSOR:
-        assunto = "Inscrição no projeto: " + projeto;
-        mensagemHtml = montarMensagem("Um aluno acabou de se cadastrar no projeto", projeto, link);
-        break;
-
-      case ATUALIZACAO_STATUS:
-        assunto = "Atualização no status da sugestão de projeto: " + projeto;
-        mensagemHtml = montarMensagem("Houve uma atualização no status da sua sugestão de projeto", projeto, link);
-        break;
-    }
+      switch (tipo) {
+          case INSCRICAO_ALUNO -> {
+              assunto = "Inscrição no projeto: " + projeto;
+              mensagemHtml = montarMensagem("Você se cadastrou com sucesso no projeto", projeto, link);
+          }
+          case INSCRICAO_ALUNO_PROFESSOR -> {
+              assunto = "Inscrição no projeto: " + projeto;
+              mensagemHtml = montarMensagem("Um aluno acabou de se cadastrar no projeto", projeto, link);
+          }
+          case ATUALIZACAO_STATUS -> {
+              assunto = "Atualização no status da sugestão de projeto: " + projeto;
+              mensagemHtml = montarMensagem("Houve uma atualização no status da sua sugestão de projeto", projeto, link);
+          }
+      }
     return enviarEmail(email, assunto, mensagemHtml);
   }
 

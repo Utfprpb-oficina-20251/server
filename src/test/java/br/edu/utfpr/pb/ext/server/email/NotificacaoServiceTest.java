@@ -82,7 +82,7 @@ class EmailServiceImplTest {
         String link = "https://utfpr.edu.br/link";
 
         var ex = assertThrows(IllegalArgumentException.class, () -> {
-            Response response = emailService.enviarEmailDeNotificacao(email, null, projeto, link);
+            emailService.enviarEmailDeNotificacao(email, null, projeto, link);
         });
 
         assertEquals("Tipo de notificação não pode ser nulo.", ex.getMessage());
