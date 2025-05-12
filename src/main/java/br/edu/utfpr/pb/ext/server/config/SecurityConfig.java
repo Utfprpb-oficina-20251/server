@@ -95,6 +95,8 @@ public class SecurityConfig {
                     .access(isTestProfile())
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**")
                     .access(isTestProfile())
+                    .requestMatchers(HttpMethod.POST, "/api/usuarios/**")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .sessionManagement(

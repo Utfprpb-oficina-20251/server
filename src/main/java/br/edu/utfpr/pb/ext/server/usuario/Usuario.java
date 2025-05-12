@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
+import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -12,6 +13,7 @@ import java.util.List;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -26,7 +28,12 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;
 
-  private String registro;
+  @NotNull @CPF private String cpf;
+
+  private String siape;
+
+  @Column(name = "registro_academico")
+  private String registroAcademico;
 
   @NotNull @Email private String email;
 
@@ -35,6 +42,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   @NotNull @ManyToOne
   @JoinColumn(name = "curso_id")
   private Curso curso;
+
+  private Departamentos departamento;
 
   @Column(name = "ativo")
   private boolean ativo;

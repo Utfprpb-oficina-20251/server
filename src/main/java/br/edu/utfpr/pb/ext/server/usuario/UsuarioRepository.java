@@ -13,4 +13,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
    * @return um Optional contendo o usuário correspondente, caso exista
    */
   Optional<Usuario> findByEmail(String email);
+
+  Optional<Usuario> findByCpf(String cpf);
+
+  Optional<Usuario> findBySiape(String siape);
 }
