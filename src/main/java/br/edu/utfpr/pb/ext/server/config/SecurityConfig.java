@@ -53,14 +53,18 @@ public class SecurityConfig {
    * @param usuarioRepository repositório para acesso aos dados de usuários
    */
   public SecurityConfig(Environment environment, UsuarioRepository usuarioRepository) {
-      this.environment = environment;
-      this.usuarioRepository = usuarioRepository;
+    this.environment = environment;
+    this.usuarioRepository = usuarioRepository;
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP, definindo autenticação, autorização, CORS, CSRF e política de sessão para a aplicação.
+   * Configura a cadeia de filtros de segurança HTTP, definindo autenticação, autorização, CORS,
+   * CSRF e política de sessão para a aplicação.
    *
-   * <p>Permite acesso público a requisições GET em `/api/projeto/**` e a todas as rotas em `/api/auth/**`. Restringe o acesso a rotas específicas conforme o papel do usuário, exige autenticação para demais endpoints e permite acesso ao console H2 apenas em perfil de teste. Define sessões como stateless, habilita CORS e adiciona filtro de autenticação JWT.
+   * <p>Permite acesso público a requisições GET em `/api/projeto/**` e a todas as rotas em
+   * `/api/auth/**`. Restringe o acesso a rotas específicas conforme o papel do usuário, exige
+   * autenticação para demais endpoints e permite acesso ao console H2 apenas em perfil de teste.
+   * Define sessões como stateless, habilita CORS e adiciona filtro de autenticação JWT.
    *
    * @param http configuração de segurança HTTP do Spring
    * @return cadeia de filtros de segurança configurada
@@ -89,6 +93,8 @@ public class SecurityConfig {
                     .hasRole("ESTUDANTE")
                     .requestMatchers("/h2-console/**")
                     .access(isTestProfile())
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**")
+                    .access(isTestProfile())
                     .anyRequest()
                     .authenticated())
         .sessionManagement(
@@ -111,7 +117,8 @@ public class SecurityConfig {
   }
 
   /**
-   * Retorna um codificador de senhas que utiliza o algoritmo BCrypt para garantir o armazenamento seguro das senhas dos usuários.
+   * Retorna um codificador de senhas que utiliza o algoritmo BCrypt para garantir o armazenamento
+   * seguro das senhas dos usuários.
    *
    * @return instância de PasswordEncoder baseada em BCrypt
    */
@@ -121,9 +128,12 @@ public class SecurityConfig {
   }
 
   /**
-   * Define a configuração de CORS para a aplicação, permitindo origens, métodos e cabeçalhos específicos.
+   * Define a configuração de CORS para a aplicação, permitindo origens, métodos e cabeçalhos
+   * específicos.
    *
-   * Utiliza as origens permitidas definidas na propriedade {@code app.client.origins}, autoriza os métodos HTTP GET, POST, PUT, DELETE e OPTIONS, e os cabeçalhos Authorization, Content-Type, X-Requested-With e Accept. Permite o envio de credenciais.
+   * <p>Utiliza as origens permitidas definidas na propriedade {@code app.client.origins}, autoriza
+   * os métodos HTTP GET, POST, PUT, DELETE e OPTIONS, e os cabeçalhos Authorization, Content-Type,
+   * X-Requested-With e Accept. Permite o envio de credenciais.
    *
    * @return uma instância configurada de {@link CorsConfigurationSource}
    */
@@ -144,7 +154,8 @@ public class SecurityConfig {
   /**
    * Fornece um serviço de autenticação que carrega detalhes do usuário pelo e-mail.
    *
-   * @return um UserDetailsService que busca usuários no repositório pelo e-mail e lança UsernameNotFoundException se não encontrado
+   * @return um UserDetailsService que busca usuários no repositório pelo e-mail e lança
+   *     UsernameNotFoundException se não encontrado
    */
   @Bean
   UserDetailsService userDetailsService() {
@@ -155,7 +166,8 @@ public class SecurityConfig {
   }
 
   /**
-   * Fornece o bean {@link AuthenticationManager} a partir da configuração de autenticação do Spring.
+   * Fornece o bean {@link AuthenticationManager} a partir da configuração de autenticação do
+   * Spring.
    *
    * @param config configuração de autenticação do Spring Security
    * @return instância do {@link AuthenticationManager} configurada
@@ -168,7 +180,8 @@ public class SecurityConfig {
   }
 
   /**
-   * Cria e configura um AuthenticationProvider baseado em DAO com UserDetailsService e PasswordEncoder personalizados.
+   * Cria e configura um AuthenticationProvider baseado em DAO com UserDetailsService e
+   * PasswordEncoder personalizados.
    *
    * @return o AuthenticationProvider configurado para autenticação de usuários.
    */

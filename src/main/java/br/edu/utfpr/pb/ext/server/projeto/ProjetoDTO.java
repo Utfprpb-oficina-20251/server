@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
+@Schema(name = "ProjetoDTO", description = "DTO para detalhamento de projeto")
 public class ProjetoDTO {
 
   private Long id;

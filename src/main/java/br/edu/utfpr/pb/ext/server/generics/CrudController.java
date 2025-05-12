@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.generics;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.io.Serializable;
 import java.util.List;
@@ -43,6 +44,10 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
     this.typeDtoClass = typeDtoClass;
   }
 
+  public Class<D> getTypeDtoClass() {
+    return typeDtoClass;
+  }
+
   /**
    * Converte uma entidade do tipo T para seu DTO correspondente do tipo D usando ModelMapper.
    *
@@ -68,7 +73,8 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    *
    * @return ResponseEntity contendo uma lista de DTOs e status HTTP 200 OK
    */
-  @GetMapping // http://ip.api:port/classname
+  @GetMapping
+  @Operation(summary = "Retorna uma lista de todos os registros")
   public ResponseEntity<List<D>> findAll() {
     return ResponseEntity.ok(getService().findAll().stream().map(this::convertToDto).toList());
   }
@@ -83,7 +89,9 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    * @param asc (opcional) define se a ordenação é ascendente (true) ou descendente (false)
    * @return página de DTOs correspondente aos critérios informados
    */
-  @GetMapping("page") // http://ip.api:port/classname/page
+  @GetMapping("page")
+  @Operation(
+      summary = "Retorna um paginável com os registros de acordo com os critérios fornecidos")
   public ResponseEntity<Page<D>> findAll(
       @RequestParam int page,
       @RequestParam int size,
@@ -106,6 +114,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    * @return ResponseEntity contendo o DTO da entidade ou status 204 se não encontrada
    */
   @GetMapping("{i}")
+  @Operation(summary = "Retorna um registro de acordo com o identificador fornecido")
   public ResponseEntity<D> findOne(@PathVariable I i) {
     T entity = getService().findOne(i);
     if (entity != null) {
@@ -122,6 +131,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    * @return ResponseEntity contendo o DTO salvo e status HTTP 201 Created
    */
   @PostMapping
+  @Operation(summary = "Cria um novo registro com os dados fornecidos")
   public ResponseEntity<D> create(@RequestBody @Valid D entity) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(convertToDto(getService().save(convertToEntity(entity))));
@@ -135,6 +145,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    * @return ResponseEntity com o DTO atualizado e status HTTP 200 OK
    */
   @PutMapping("{i}")
+  @Operation(summary = "Atualiza um registro de acordo com o identificador fornecido")
   public ResponseEntity<D> update(@PathVariable I i, @RequestBody @Valid D entity) {
     T entityToUpdate = convertToEntity(entity);
     I entityI = (I) entityToUpdate.getId();
@@ -153,6 +164,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    * @return ResponseEntity contendo true se a entidade existe, ou false caso contrário
    */
   @GetMapping("exists/{i}")
+  @Operation(summary = "Verifica se um registro existe de acordo com o identificador fornecido")
   public ResponseEntity<Boolean> exists(@PathVariable I i) {
     return ResponseEntity.ok(getService().exists(i));
   }
@@ -163,6 +175,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    * @return ResponseEntity contendo o número total de entidades cadastradas
    */
   @GetMapping("count")
+  @Operation(summary = "Retorna a quantidade total de registros")
   public ResponseEntity<Long> count() {
     return ResponseEntity.ok(getService().count());
   }
@@ -176,6 +189,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    * @return resposta HTTP 204 No Content
    */
   @DeleteMapping("{i}")
+  @Operation(summary = "Exclui um registro de acordo com o identificador fornecido")
   public ResponseEntity<Void> delete(@PathVariable I i) {
     getService().delete(i);
     return ResponseEntity.noContent().build();
