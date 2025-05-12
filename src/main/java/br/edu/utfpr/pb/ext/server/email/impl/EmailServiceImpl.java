@@ -93,7 +93,7 @@ public class EmailServiceImpl {
     String assunto = "Código de Verificação - " + type;
     String mensagem =
         "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
-    return enviarEmail(email, assunto, mensagem);
+    return enviarEmail(email, assunto, mensagem,"text/plain");
   }
   public Response enviarEmailDeNotificacao(String email, TipoDeNotificacao tipo, String projeto, String link  ) throws IOException {
 
@@ -127,14 +127,14 @@ public class EmailServiceImpl {
               mensagemHtml = montarMensagem("Houve uma atualização no status da sua sugestão de projeto", projeto, link);
           }
       }
-    return enviarEmail(email, assunto, mensagemHtml);
+    return enviarEmail(email, assunto, mensagemHtml,"text/html");
   }
 
-  private Response enviarEmail(String destinatario, String assunto, String corpo)
+  private Response enviarEmail(String destinatario, String assunto, String corpo, String tipo)
       throws IOException {
     Email from = new Email("webprojeto2@gmail.com");
     Email to = new Email(destinatario);
-    Content content = new Content("text/plain", corpo);
+    Content content = new Content(tipo, corpo);
     Mail mail = new Mail(from, assunto, to, content);
 
     Request request = new Request();

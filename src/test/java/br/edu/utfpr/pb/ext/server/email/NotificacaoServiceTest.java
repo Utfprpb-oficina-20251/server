@@ -105,4 +105,65 @@ class EmailServiceImplTest {
 
         assertTrue(ex.getMessage().toLowerCase().contains("projeto"));
     }
+    @Test
+    void testEnviarEmailDeNotificacao_EmailVazio_DeveLancarExcecao() {
+                TipoDeNotificacao tipo = TipoDeNotificacao.INSCRICAO_ALUNO;
+                String email = "";
+                String projeto = "Projeto Qualquer";
+                String link = "https://utfpr.edu.br/link";
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> emailService.enviarEmailDeNotificacao(email, tipo, projeto, link));
+                assertTrue(ex.getMessage().toLowerCase().contains("email"));
+            }
+
+            @Test
+    void testEnviarEmailDeNotificacao_EmailEmBranco_DeveLancarExcecao() {
+                TipoDeNotificacao tipo = TipoDeNotificacao.INSCRICAO_ALUNO;
+                String email = "   ";
+                String projeto = "Projeto Qualquer";
+                String link = "https://utfpr.edu.br/link";
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> emailService.enviarEmailDeNotificacao(email, tipo, projeto, link));
+                assertTrue(ex.getMessage().toLowerCase().contains("email"));
+            }
+            @Test
+        void testConteudoEmailGeradoCorretamente() throws IOException {
+            Response fakeResponse = new Response(202, "Accepted", null);
+            when(sendGrid.api(any(Request.class))).thenReturn(fakeResponse);
+                    ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+                    emailService.enviarEmailDeNotificacao(email, TipoDeNotificacao.INSCRICAO_ALUNO, projeto, link);
+                    verify(sendGrid).api(requestCaptor.capture());
+            Request capturedRequest = requestCaptor.getValue();
+
+                    String requestBody = capturedRequest.getBody();
+
+                    // Verifique se o corpo da requisição contém os dados esperados
+                            assertTrue(requestBody.contains("Você se cadastrou com sucesso no projeto"));
+            assertTrue(requestBody.contains(projeto));
+            assertTrue(requestBody.contains(link));
+        }
+        @Test
+        void testEnviarEmailDeNotificacao_LinkNulo_DeveLancarExcecao() {
+            TipoDeNotificacao tipo = TipoDeNotificacao.INSCRICAO_ALUNO;
+            String email = "teste@utfpr.edu.br";
+            String projeto = "Projeto X";
+
+                    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                        () -> emailService.enviarEmailDeNotificacao(email, tipo, projeto, null));
+
+                    assertTrue(ex.getMessage().toLowerCase().contains("link"));
+        }
+
+        @Test
+    void testEnviarEmailDeNotificacao_LinkVazio_DeveLancarExcecao() {
+        TipoDeNotificacao tipo = TipoDeNotificacao.INSCRICAO_ALUNO;
+        String email = "teste@utfpr.edu.br";
+        String projeto = "Projeto X";
+        String link = "";
+
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> emailService.enviarEmailDeNotificacao(email, tipo, projeto, link));
+
+                assertTrue(ex.getMessage().toLowerCase().contains("link"));
+    }
 }
