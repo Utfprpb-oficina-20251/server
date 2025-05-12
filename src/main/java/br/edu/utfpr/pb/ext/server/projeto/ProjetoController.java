@@ -2,12 +2,14 @@ package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.generics.CrudController;
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("projeto")
+@Tag(name = "Projeto", description = "Endpoints responsáveis por manipulação de projeto")
 public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long> {
 
   private final IProjetoService projetoService;

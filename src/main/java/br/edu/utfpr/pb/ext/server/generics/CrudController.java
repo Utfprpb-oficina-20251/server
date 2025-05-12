@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.generics;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.io.Serializable;
 import java.util.List;
@@ -33,14 +34,23 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   private final Class<D> typeDtoClass;
 
   /**
-   * Cria um controlador CRUD genérico para a entidade e DTO especificados.
+   * Constrói um controlador CRUD genérico para a entidade e DTO informados.
    *
-   * @param typeClass classe da entidade gerenciada pelo controlador
-   * @param typeDtoClass classe do DTO correspondente à entidade
+   * @param typeClass classe da entidade que será gerenciada
+   * @param typeDtoClass classe do DTO associado à entidade
    */
   protected CrudController(Class<T> typeClass, Class<D> typeDtoClass) {
     this.typeClass = typeClass;
     this.typeDtoClass = typeDtoClass;
+  }
+
+  /**
+   * Retorna a classe do tipo DTO associado ao controlador.
+   *
+   * @return a classe correspondente ao tipo DTO
+   */
+  public Class<D> getTypeDtoClass() {
+    return typeDtoClass;
   }
 
   /**
@@ -64,26 +74,28 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna uma lista de todos os registros convertidos para DTO.
+   * Recupera todos os registros e os retorna convertidos para DTOs.
    *
-   * @return ResponseEntity contendo uma lista de DTOs e status HTTP 200 OK
+   * @return ResponseEntity com a lista de DTOs e status HTTP 200 OK
    */
-  @GetMapping // http://ip.api:port/classname
+  @GetMapping
+  @Operation(summary = "Retorna uma lista de todos os registros")
   public ResponseEntity<List<D>> findAll() {
     return ResponseEntity.ok(getService().findAll().stream().map(this::convertToDto).toList());
   }
 
   /**
-   * Retorna uma página de entidades convertidas para DTOs, com suporte a paginação e ordenação
-   * opcionais.
+   * Retorna uma página de entidades convertidas para DTOs, com suporte a paginação e ordenação opcionais.
    *
-   * @param page número da página a ser retornada (iniciando em 0)
+   * @param page número da página a ser retornada (começando em 0)
    * @param size quantidade de itens por página
-   * @param order (opcional) campo para ordenação
-   * @param asc (opcional) define se a ordenação é ascendente (true) ou descendente (false)
-   * @return página de DTOs correspondente aos critérios informados
+   * @param order campo opcional para ordenação dos resultados
+   * @param asc define se a ordenação é ascendente (true) ou descendente (false)
+   * @return página de DTOs conforme os critérios de paginação e ordenação especificados
    */
-  @GetMapping("page") // http://ip.api:port/classname/page
+  @GetMapping("page")
+  @Operation(
+      summary = "Retorna um paginável com os registros de acordo com os critérios fornecidos")
   public ResponseEntity<Page<D>> findAll(
       @RequestParam int page,
       @RequestParam int size,
@@ -98,14 +110,15 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Recupera uma entidade pelo seu identificador e retorna seu DTO correspondente.
+   * Busca uma entidade pelo identificador e retorna seu DTO correspondente.
    *
-   * <p>Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 204 se não existir.
+   * <p>Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não existir.
    *
    * @param i identificador da entidade a ser buscada
-   * @return ResponseEntity contendo o DTO da entidade ou status 204 se não encontrada
+   * @return ResponseEntity contendo o DTO da entidade ou status 404 se não encontrada
    */
   @GetMapping("{i}")
+  @Operation(summary = "Retorna um registro de acordo com o identificador fornecido")
   public ResponseEntity<D> findOne(@PathVariable I i) {
     T entity = getService().findOne(i);
     if (entity != null) {
@@ -116,25 +129,29 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Cria uma nova entidade a partir do DTO fornecido e retorna o DTO salvo.
+   * Cria uma nova entidade com base no DTO fornecido e retorna o DTO persistido.
    *
-   * @param entity DTO da entidade a ser criada (validação aplicada)
-   * @return ResponseEntity contendo o DTO salvo e status HTTP 201 Created
+   * @param entity DTO representando os dados da nova entidade (validação aplicada)
+   * @return ResponseEntity com o DTO salvo e status HTTP 201 Created
    */
   @PostMapping
+  @Operation(summary = "Cria um novo registro com os dados fornecidos")
   public ResponseEntity<D> create(@RequestBody @Valid D entity) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(convertToDto(getService().save(convertToEntity(entity))));
   }
 
   /**
-   * Atualiza uma entidade existente identificada pelo ID com os dados fornecidos no DTO.
+   * Atualiza uma entidade existente com base no identificador fornecido e nos dados do DTO.
+   *
+   * Retorna HTTP 400 se o ID do caminho não corresponder ao ID do DTO.
    *
    * @param i identificador da entidade a ser atualizada
-   * @param entity DTO contendo os novos dados para atualização
-   * @return ResponseEntity com o DTO atualizado e status HTTP 200 OK
+   * @param entity DTO com os dados atualizados
+   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou 400 em caso de inconsistência de IDs
    */
   @PutMapping("{i}")
+  @Operation(summary = "Atualiza um registro de acordo com o identificador fornecido")
   public ResponseEntity<D> update(@PathVariable I i, @RequestBody @Valid D entity) {
     T entityToUpdate = convertToEntity(entity);
     I entityI = (I) entityToUpdate.getId();
@@ -147,35 +164,38 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Verifica se uma entidade com o ID especificado existe.
+   * Retorna se existe uma entidade com o identificador fornecido.
    *
-   * @param i identificador da entidade a ser verificada
-   * @return ResponseEntity contendo true se a entidade existe, ou false caso contrário
+   * @param i identificador da entidade
+   * @return ResponseEntity com true se a entidade existe, ou false caso contrário
    */
   @GetMapping("exists/{i}")
+  @Operation(summary = "Verifica se um registro existe de acordo com o identificador fornecido")
   public ResponseEntity<Boolean> exists(@PathVariable I i) {
     return ResponseEntity.ok(getService().exists(i));
   }
 
   /**
-   * Retorna a quantidade total de entidades.
+   * Retorna o número total de entidades cadastradas.
    *
-   * @return ResponseEntity contendo o número total de entidades cadastradas
+   * @return ResponseEntity com a contagem total de entidades
    */
   @GetMapping("count")
+  @Operation(summary = "Retorna a quantidade total de registros")
   public ResponseEntity<Long> count() {
     return ResponseEntity.ok(getService().count());
   }
 
   /**
-   * Exclui a entidade identificada pelo ID fornecido.
+   * Remove a entidade correspondente ao identificador fornecido.
    *
-   * <p>Retorna HTTP 204 No Content após a exclusão, independentemente de a entidade existir ou não.
+   * <p>Retorna HTTP 204 No Content após a tentativa de exclusão, independentemente da existência da entidade.
    *
-   * @param i identificador da entidade a ser excluída
+   * @param i identificador da entidade a ser removida
    * @return resposta HTTP 204 No Content
    */
   @DeleteMapping("{i}")
+  @Operation(summary = "Exclui um registro de acordo com o identificador fornecido")
   public ResponseEntity<Void> delete(@PathVariable I i) {
     getService().delete(i);
     return ResponseEntity.noContent().build();
