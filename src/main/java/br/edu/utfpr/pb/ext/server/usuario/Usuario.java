@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+
+import java.util.*;
+
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -55,6 +55,11 @@ public class Usuario extends BaseEntity implements UserDetails {
   @UpdateTimestamp
   @Column(name = "data_atualizacao")
   private Date dataAtualizacao;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "usuario_roles", joinColumns = @JoinColumn(name = "usuario_id"))
+  @Column(name = "role")
+  private Set<String> roles = new HashSet<>();
 
   /**
    * Retorna uma coleção vazia de autoridades concedidas ao usuário.

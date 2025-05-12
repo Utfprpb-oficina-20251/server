@@ -13,5 +13,5 @@ public class UsuarioProjetoDTO {
 
     @NotNull
     @Email(regexp = "^[a-zA-Z0-9._%+-]+@(utfpr\\.edu\\.br)$")
-    private String email;
+    private String emailInstitucional;
 }

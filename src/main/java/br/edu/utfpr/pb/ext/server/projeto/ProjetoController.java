@@ -50,7 +50,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   public ResponseEntity<ProjetoDTO> create
           (@Valid @RequestBody ProjetoDTO dto) {
     Projeto projeto = new Projeto();
-    List<String> emails = dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmail).toList();
+    List<String> emails = dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmailInstitucional).toList();
     if (emails.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
     }

@@ -95,8 +95,8 @@ public class SecurityConfig {
                     .access(isTestProfile())
                     .requestMatchers(HttpMethod.POST, "/api/usuarios/**")
                     .permitAll()
-                    .requestMatchers("/api/projeto/**")
-                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/projeto/**")
+                    .hasRole("SERVIDOR")
                     .anyRequest()
                     .authenticated())
         .sessionManagement(

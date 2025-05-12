@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.Date;
@@ -19,9 +20,9 @@ public class ProjetoDTO {
 
   @NotNull @Size(min = 20, max = 500) private String justificativa;
 
-  @NotNull private Date dataInicio;
+  @NotNull @JsonFormat(pattern="yyyy-MM-dd") private Date dataInicio;
 
-  @NotNull private Date dataFim;
+  @NotNull @JsonFormat(pattern="yyyy-MM-dd") private Date dataFim;
 
   @NotNull @Size(max = 500) private String publicoAlvo;
 
