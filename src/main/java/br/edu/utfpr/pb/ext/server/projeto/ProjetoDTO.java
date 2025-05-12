@@ -1,7 +1,7 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
-import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.Date;
@@ -29,7 +29,7 @@ public class ProjetoDTO {
 
   @NotNull @Size(max = 500) private String restricaoPublico;
 
-  @NotNull private List<Usuario> equipeExecutora;
+  @NotNull private List<UsuarioProjetoDTO> equipeExecutora;
 
-  @NotNull private StatusProjeto status;
+  private StatusProjeto status;
 }

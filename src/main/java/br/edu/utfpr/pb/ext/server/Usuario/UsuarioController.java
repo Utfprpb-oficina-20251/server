@@ -43,6 +43,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   public ResponseEntity<RespostaLoginDTO> createServidor(
       @Valid @RequestBody UsuarioServidorRequestDTO usuarioServidorRequestDTO) {
     Usuario usuario = modelMapper.map(usuarioServidorRequestDTO, Usuario.class);
+
     Usuario salvo = usuarioService.save(usuario);
     String token = jwtService.generateToken(salvo);
     long expiration = jwtService.getExpirationTime();
