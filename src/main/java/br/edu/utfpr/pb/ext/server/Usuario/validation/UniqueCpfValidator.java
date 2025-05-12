@@ -11,6 +11,6 @@ public class UniqueCpfValidator implements ConstraintValidator<UniqueCpf, String
 
   @Override
   public boolean isValid(String cpf, jakarta.validation.ConstraintValidatorContext context) {
-      return usuarioRepository.findByCpf(cpf).isEmpty(); // CPF is not provided, so we skip validation
+    return usuarioRepository.findByCpf(cpf).isEmpty(); // CPF is not provided, so we skip validation
   }
 }
