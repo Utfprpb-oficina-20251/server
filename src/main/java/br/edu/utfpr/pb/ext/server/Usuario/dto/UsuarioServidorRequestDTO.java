@@ -25,7 +25,8 @@ public class UsuarioServidorRequestDTO {
 
   @NotNull @Email(
       regexp = "^[a-zA-Z0-9._%+-]+@(utfpr\\.edu\\.br)$",
-      message = "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.emailInstitucional}")
+      message =
+          "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.emailInstitucional}")
   private String emailInstitucional;
 
   @Size(min = 11, max = 11) private String telefone;
