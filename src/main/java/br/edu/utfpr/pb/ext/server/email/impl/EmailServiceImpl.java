@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.email.impl;
 
 import br.edu.utfpr.pb.ext.server.email.EmailCode;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeRepository;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoDeNotificacao;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -94,6 +95,42 @@ public class EmailServiceImpl {
         "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
     return enviarEmail(email, assunto, mensagem);
   }
+  public Response enviarEmailDeNotificacao(String email, TipoDeNotificacao tipo, String projeto, String link  ) throws IOException {
+
+    if (email == null || email.isBlank()) {
+      throw new IllegalArgumentException("Email não pode ser nulo ou vazio.");
+    }
+    if (tipo == null) {
+      throw new IllegalArgumentException("Tipo de notificação não pode ser nulo.");
+    }
+    if (projeto == null || projeto.isBlank()) {
+      throw new IllegalArgumentException("Projeto não pode ser nulo ou vazio.");
+    }
+    if (link == null || link.isBlank()) {
+      throw new IllegalArgumentException("Link não pode ser nulo ou vazio.");
+    }
+
+    String assunto = "";
+    String mensagemHtml = "";
+
+    switch (tipo) {
+      case INSCRICAO_ALUNO:
+        assunto = "Inscrição no projeto: " + projeto;
+        mensagemHtml = montarMensagem("Você se cadastrou com sucesso no projeto", projeto, link);
+        break;
+
+      case INSCRICAO_ALUNO_PROFESSOR:
+        assunto = "Inscrição no projeto: " + projeto;
+        mensagemHtml = montarMensagem("Um aluno acabou de se cadastrar no projeto", projeto, link);
+        break;
+
+      case ATUALIZACAO_STATUS:
+        assunto = "Atualização no status da sugestão de projeto: " + projeto;
+        mensagemHtml = montarMensagem("Houve uma atualização no status da sua sugestão de projeto", projeto, link);
+        break;
+    }
+    return enviarEmail(email, assunto, mensagemHtml);
+  }
 
   private Response enviarEmail(String destinatario, String assunto, String corpo)
       throws IOException {
@@ -108,5 +145,11 @@ public class EmailServiceImpl {
     request.setBody(mail.build());
 
     return sendGrid.api(request);
+  }
+  private String montarMensagem(String conteudo, String projeto, String link) {
+    return String.format(
+            "<h1>Olá!</h1><p>%s: <strong>%s</strong></p><a href=\"%s\">Conferir</a>",
+            conteudo, projeto, link
+    );
   }
 }
