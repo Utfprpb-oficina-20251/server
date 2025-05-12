@@ -23,16 +23,33 @@ public class ErrorHandler implements ErrorController {
 
   private final ErrorAttributes errorAttributes;
 
+  /**
+   * Cria uma instância do controlador de erros utilizando o ErrorAttributes fornecido.
+   *
+   * @param errorAttributes objeto utilizado para extrair detalhes do erro da requisição web
+   */
   public ErrorHandler(ErrorAttributes errorAttributes) {
     this.errorAttributes = errorAttributes;
   }
 
+  /**
+   * Retorna um objeto de erro formatado para requisições HTTP sem efeito colateral (como GET).
+   *
+   * @param webRequest contexto da requisição web atual
+   * @return instância de {@link ApiError} representando os detalhes do erro ocorrido
+   */
   @GetMapping("/error")
   @Operation(summary = "Retorna o erro proveniente de métodos HTTP sem efeito colateral")
   public ApiError handleError(WebRequest webRequest) {
     return buildApiError(webRequest);
   }
 
+  /**
+   * Retorna um objeto de erro formatado para requisições HTTP com efeito colateral (como POST, PUT ou DELETE).
+   *
+   * @param webRequest a requisição web atual
+   * @return um objeto {@link ApiError} contendo detalhes do erro ocorrido
+   */
   @PostMapping("/error")
   @Operation(summary = "Retorna o erro proveniente de métodos HTTP com efeito colateral")
   public ApiError handleUnsafeError(WebRequest webRequest) {
