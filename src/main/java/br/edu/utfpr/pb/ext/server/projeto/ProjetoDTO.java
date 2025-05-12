@@ -1,3 +1,4 @@
+
 package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
@@ -10,7 +11,12 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-@Schema(name = "ProjetoDTO", description = "DTO para detalhamento de projeto")
+@Schema(
+  name = "ProjetoDTO",
+  description = "Detalhes completos de um projeto incluindo informações básicas, datas e participantes",
+  title = "Detalhes do Projeto",
+  example = "{\"titulo\":\"Projeto de Extensão Exemplo\",\"descricao\":\"Descrição detalhada do projeto\",\"dataInicio\":\"2023-01-01\",\"dataFim\":\"2023-12-31\",\"status\":\"ATIVO\"}"
+)
 public class ProjetoDTO {
 
   private Long id;
