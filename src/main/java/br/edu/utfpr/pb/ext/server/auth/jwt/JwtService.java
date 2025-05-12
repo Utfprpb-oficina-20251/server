@@ -32,7 +32,7 @@ public class JwtService {
   /**
    * Valida se a chave secreta decodificada possui pelo menos 64 bytes.
    *
-   * Lança uma exceção {@link IllegalStateException} se a chave for inválida para uso com HS512.
+   * <p>Lança uma exceção {@link IllegalStateException} se a chave for inválida para uso com HS512.
    */
   @PostConstruct
   private void validateSecretKey() {
@@ -47,7 +47,8 @@ public class JwtService {
    * Extrai o nome de usuário (subject) de um token JWT.
    *
    * @param token o token JWT do qual o nome de usuário será extraído
-   * @return o nome de usuário contido no subject do token, ou {@code null} se não for possível extrair
+   * @return o nome de usuário contido no subject do token, ou {@code null} se não for possível
+   *     extrair
    */
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -63,6 +64,9 @@ public class JwtService {
    */
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
+    if (claims == null) {
+      return null;
+    }
     return claimsResolver.apply(claims);
   }
 
@@ -88,7 +92,8 @@ public class JwtService {
   }
 
   /**
-   * Constrói um token JWT assinado com as claims fornecidas, usuário e tempo de expiração especificados.
+   * Constrói um token JWT assinado com as claims fornecidas, usuário e tempo de expiração
+   * especificados.
    *
    * @param extraClaims mapa de claims adicionais a serem incluídas no token
    * @param userDetails detalhes do usuário para definir o subject do token
@@ -112,15 +117,19 @@ public class JwtService {
   /**
    * Verifica se um token JWT é válido para o usuário fornecido.
    *
-   * O token é considerado válido se o nome de usuário extraído do token corresponder ao do usuário informado e se o token não estiver expirado.
+   * <p>O token é considerado válido se o nome de usuário extraído do token corresponder ao do
+   * usuário informado e se o token não estiver expirado.
    *
    * @param token o token JWT a ser validado
    * @param userDetails os detalhes do usuário para validação
-   * @return {@code true} se o token for válido para o usuário e não estiver expirado; caso contrário, {@code false}
+   * @return {@code true} se o token for válido para o usuário e não estiver expirado; caso
+   *     contrário, {@code false}
    */
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    return username != null
+        && (username.equals(userDetails.getUsername()))
+        && !isTokenExpired(token);
   }
 
   /**
@@ -130,7 +139,8 @@ public class JwtService {
    * @return {@code true} se o token estiver expirado, caso contrário {@code false}
    */
   public boolean isTokenExpired(String token) {
-    return extractExpiration(token).before(new Date());
+    Date expiration = extractExpiration(token);
+    return expiration == null || extractExpiration(token).before(new Date());
   }
 
   /**
@@ -147,7 +157,8 @@ public class JwtService {
    * Extrai todos os claims de um token JWT após verificar sua assinatura.
    *
    * @param token o token JWT a ser analisado
-   * @return os claims extraídos do token, ou {@code null} se o token for inválido ou ocorrer erro na extração
+   * @return os claims extraídos do token, ou {@code null} se o token for inválido ou ocorrer erro
+   *     na extração
    */
   private Claims extractAllClaims(String token) {
     try {
@@ -157,11 +168,12 @@ public class JwtService {
     } catch (IllegalArgumentException e) {
       logger.error("Formato de claims inválido: {}", e.getMessage(), e);
     }
-    return null;
+    return Jwts.claims().build();
   }
 
   /**
-   * Decodifica a chave secreta em base64 e retorna uma instância de {@link SecretKey} para assinatura HMAC SHA.
+   * Decodifica a chave secreta em base64 e retorna uma instância de {@link SecretKey} para
+   * assinatura HMAC SHA.
    *
    * @return chave secreta para assinatura de tokens JWT
    */
