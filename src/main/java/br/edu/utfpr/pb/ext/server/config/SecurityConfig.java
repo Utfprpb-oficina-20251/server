@@ -14,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -73,7 +72,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-    http.cors(Customizer.withDefaults())
+    http.cors(c -> c.configurationSource(corsConfigurationSource()))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/h2-console/**"))
         .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
         .authorizeHttpRequests(
@@ -97,7 +96,7 @@ public class SecurityConfig {
                     .access(isTestProfile())
                     .requestMatchers(HttpMethod.POST, "/api/usuarios/**")
                     .permitAll()
-                    .requestMatchers(HttpMethod.OPTIONS, "/**")
+                    .requestMatchers(HttpMethod.OPTIONS, "/**")//CORS preflight
                     .permitAll()
                     .anyRequest()
                     .authenticated())
@@ -144,7 +143,7 @@ public class SecurityConfig {
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(allowedOrigins);
+    configuration.setAllowedOriginPatterns(allowedOrigins);
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(
         Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
