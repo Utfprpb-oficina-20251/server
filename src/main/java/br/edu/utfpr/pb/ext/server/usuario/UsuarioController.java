@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController extends CrudController<Usuario, UsuarioServidorResponseDTO, Long> {
@@ -43,8 +45,11 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   public ResponseEntity<RespostaLoginDTO> createServidor(
       @Valid @RequestBody UsuarioServidorRequestDTO usuarioServidorRequestDTO) {
     Usuario usuario = modelMapper.map(usuarioServidorRequestDTO, Usuario.class);
+    usuario.getRoles().add("SERVIDOR");
+    usuario.getAuthorities();
     Usuario salvo = usuarioService.save(usuario);
-    String token = jwtService.generateToken(salvo);
+    Map<String, Object> authorities = Map.of("authority", salvo.getAuthorities());
+    String token = jwtService.generateToken(authorities,salvo);
     long expiration = jwtService.getExpirationTime();
     return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
   }

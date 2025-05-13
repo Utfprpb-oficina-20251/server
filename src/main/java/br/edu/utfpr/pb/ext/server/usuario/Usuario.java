@@ -7,14 +7,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+
+import java.util.*;
+
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -56,6 +57,11 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Column(name = "data_atualizacao")
   private Date dataAtualizacao;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "usuario_roles", joinColumns = @JoinColumn(name = "usuario_id"))
+  @Column(name = "role")
+  private Set<String> roles = new HashSet<>();
+
   /**
    * Retorna uma coleção vazia de autoridades concedidas ao usuário.
    *
@@ -65,7 +71,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Transient
   @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of();
+    List<GrantedAuthority> authorities = new ArrayList<>();
+      authorities.add(new SimpleGrantedAuthority("ROLE_SERVIDOR"));
+    return authorities;
   }
 
   /**

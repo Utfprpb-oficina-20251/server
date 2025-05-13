@@ -94,6 +94,8 @@ public class SecurityConfig {
                     .access(isTestProfile())
                     .requestMatchers(HttpMethod.POST, "/api/usuarios/**")
                     .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/projeto/**")
+                    .hasRole("SERVIDOR")
                     .requestMatchers(HttpMethod.OPTIONS, "/**")//CORS preflight
                     .permitAll()
                     .anyRequest()
