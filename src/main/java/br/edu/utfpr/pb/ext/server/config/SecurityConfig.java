@@ -14,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -58,22 +57,20 @@ public class SecurityConfig {
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP, definindo autenticação, autorização, CORS,
-   * CSRF e política de sessão para a aplicação.
+   * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação, autorização, CORS, CSRF e política de sessão.
    *
-   * <p>Permite acesso público a requisições GET em `/api/projeto/**` e a todas as rotas em
-   * `/api/auth/**`. Restringe o acesso a rotas específicas conforme o papel do usuário, exige
-   * autenticação para demais endpoints e permite acesso ao console H2 apenas em perfil de teste.
-   * Define sessões como stateless, habilita CORS e adiciona filtro de autenticação JWT.
+   * Permite acesso público a requisições GET em `/api/projeto/**`, a todas as rotas em `/api/auth/**` e a POST em `/api/usuarios/**`. Restringe o acesso a rotas administrativas e de usuários conforme o papel do usuário autenticado. O acesso ao console H2 e à documentação Swagger é permitido apenas quando o perfil ativo é "test". Todas as demais rotas exigem autenticação.
+   *
+   * As sessões são configuradas como stateless, o CORS é habilitado e um filtro de autenticação JWT é adicionado à cadeia de filtros.
    *
    * @param http configuração de segurança HTTP do Spring
-   * @return cadeia de filtros de segurança configurada
-   * @throws Exception se ocorrer erro na configuração de segurança
+   * @return a cadeia de filtros de segurança configurada
+   * @throws Exception se ocorrer erro na configuração da segurança
    */
   @Bean
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-    http.cors(Customizer.withDefaults())
+    http.cors(c -> c.configurationSource(corsConfigurationSource()))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/h2-console/**"))
         .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
         .authorizeHttpRequests(
@@ -93,10 +90,14 @@ public class SecurityConfig {
                     .hasRole("ESTUDANTE")
                     .requestMatchers("/h2-console/**")
                     .access(isTestProfile())
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**")
+                    .access(isTestProfile())
                     .requestMatchers(HttpMethod.POST, "/api/usuarios/**")
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/projeto/**")
                     .hasRole("SERVIDOR")
+                    .requestMatchers(HttpMethod.OPTIONS, "/**")//CORS preflight
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .sessionManagement(
@@ -142,7 +143,7 @@ public class SecurityConfig {
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(allowedOrigins);
+    configuration.setAllowedOriginPatterns(allowedOrigins);
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(
         Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));

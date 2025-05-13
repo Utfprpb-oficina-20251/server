@@ -7,6 +7,7 @@ import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("projeto")
+@Tag(name = "Projeto", description = "Endpoints responsáveis por manipulação de projeto")
 public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long> {
 
   private final IProjetoService projetoService;
