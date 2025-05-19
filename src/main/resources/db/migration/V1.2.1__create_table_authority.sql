@@ -13,9 +13,13 @@ DROP TABLE usuario_roles CASCADE;
 CREATE TABLE usuario_roles (
                                usuario_id BIGINT NOT NULL,
                                authority_id BIGINT NOT NULL,
-                               PRIMARY KEY (usuario_id),
+                               PRIMARY KEY (usuario_id, authority_id),
                                CONSTRAINT fk_usuario_roles_usuario
                                    FOREIGN KEY (usuario_id)
                                        REFERENCES tb_usuario (id)
+                                       ON DELETE CASCADE,
+                               CONSTRAINT fk_usuario_roles_authority
+                                   FOREIGN KEY (authority_id)
+                                       REFERENCES tb_authority (id)
                                        ON DELETE CASCADE
 );

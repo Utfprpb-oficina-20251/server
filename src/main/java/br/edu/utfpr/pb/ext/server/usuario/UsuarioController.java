@@ -10,16 +10,14 @@ import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorResponseDTO;
 import jakarta.validation.Valid;
+import java.util.HashSet;
+import java.util.Set;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -30,8 +28,10 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   private final AuthorityRepository authorityRepository;
 
   public UsuarioController(
-      IUsuarioService usuarioService, ModelMapper modelMapper,
-      JwtService jwtService, AuthorityRepository authorityRepository) {
+      IUsuarioService usuarioService,
+      ModelMapper modelMapper,
+      JwtService jwtService,
+      AuthorityRepository authorityRepository) {
     super(Usuario.class, UsuarioServidorResponseDTO.class);
     this.usuarioService = usuarioService;
     this.modelMapper = modelMapper;
@@ -54,7 +54,11 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
       @Valid @RequestBody UsuarioServidorRequestDTO usuarioServidorRequestDTO) {
     Usuario usuario = modelMapper.map(usuarioServidorRequestDTO, Usuario.class);
     Set<Authority> authorities = new HashSet<>();
-    authorities.add(authorityRepository.findByAuthority("ROLE_SERVIDOR"));
+    Authority servidorAuthority = authorityRepository.findByAuthority("ROLE_SERVIDOR").orElse(null);
+    if (servidorAuthority == null) {
+      return ResponseEntity.badRequest().body(null);
+    }
+    authorities.add(servidorAuthority);
     usuario.setAuthorities(authorities);
     Usuario salvo = usuarioService.save(usuario);
     String token = jwtService.generateToken(salvo);
@@ -63,15 +67,19 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   @PostMapping("/aluno")
-    public ResponseEntity<RespostaLoginDTO> createAluno(
-        @Valid @RequestBody UsuarioAlunoRequestDTO usuarioAlunoRequestDTO) {
-        Usuario usuario = modelMapper.map(usuarioAlunoRequestDTO, Usuario.class);
-        Set<Authority> authorities = new HashSet<>();
-        authorities.add(authorityRepository.findByAuthority("ROLE_ALUNO"));
-        usuario.setAuthorities(authorities);
-        Usuario salvo = usuarioService.save(usuario);
-        String token = jwtService.generateToken(salvo);
-        long expiration = jwtService.getExpirationTime();
-        return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
+  public ResponseEntity<RespostaLoginDTO> createAluno(
+      @Valid @RequestBody UsuarioAlunoRequestDTO usuarioAlunoRequestDTO) {
+    Usuario usuario = modelMapper.map(usuarioAlunoRequestDTO, Usuario.class);
+    Set<Authority> authorities = new HashSet<>();
+    Authority alunoAuthority = authorityRepository.findByAuthority("ROLE_ALUNO").orElse(null);
+    if (alunoAuthority == null) {
+      return ResponseEntity.badRequest().body(null);
     }
+    authorities.add(alunoAuthority);
+    usuario.setAuthorities(authorities);
+    Usuario salvo = usuarioService.save(usuario);
+    String token = jwtService.generateToken(salvo);
+    long expiration = jwtService.getExpirationTime();
+    return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
+  }
 }
