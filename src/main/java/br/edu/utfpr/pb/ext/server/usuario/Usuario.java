@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
+import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
 import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -15,7 +16,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -57,10 +57,13 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Column(name = "data_atualizacao")
   private Date dataAtualizacao;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "usuario_roles", joinColumns = @JoinColumn(name = "usuario_id"))
-  @Column(name = "role")
-  private Set<String> roles = new HashSet<>();
+  @ManyToMany(fetch = FetchType.EAGER, cascade = {
+          CascadeType.DETACH, CascadeType.MERGE,
+          CascadeType.PERSIST, CascadeType.REFRESH})
+  @JoinTable(name = "usuario_roles",
+          joinColumns = @JoinColumn(name = "usuario_id"),
+          inverseJoinColumns = @JoinColumn(name = "authority_id"))
+  private Set<Authority> authorities;
 
   /**
    * Retorna uma coleção vazia de autoridades concedidas ao usuário.
@@ -71,9 +74,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Transient
   @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    List<GrantedAuthority> authorities = new ArrayList<>();
-      authorities.add(new SimpleGrantedAuthority("ROLE_SERVIDOR"));
-    return authorities;
+    return new HashSet<>(authorities);
   }
 
   /**
