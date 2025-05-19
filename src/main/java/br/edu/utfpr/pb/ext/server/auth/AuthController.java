@@ -49,10 +49,12 @@ public class AuthController {
   /**
    * Realiza a autenticação do usuário e retorna um token JWT com o tempo de expiração.
    *
-   * Recebe as credenciais de login, autentica o usuário e, em caso de sucesso, gera um token JWT para acesso autenticado, incluindo o tempo de expiração do token na resposta.
+   * <p>Recebe as credenciais de login, autentica o usuário e, em caso de sucesso, gera um token JWT
+   * para acesso autenticado, incluindo o tempo de expiração do token na resposta.
    *
    * @param loginUsuarioDTO objeto contendo as credenciais do usuário para autenticação
-   * @return ResponseEntity com o token JWT e o tempo de expiração em caso de autenticação bem-sucedida
+   * @return ResponseEntity com o token JWT e o tempo de expiração em caso de autenticação
+   *     bem-sucedida
    */
   @Operation(summary = "Autentica um usuário")
   @ApiResponse(

@@ -4,6 +4,10 @@ import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.LoginUsuarioDTO;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
+import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
+import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthService {
   private final UsuarioRepository usuarioRepository;
   private final AuthenticationManager authenticationManager;
+  private final AuthorityRepository authorityRepository;
 
   /**
    * Realiza o cadastro de um novo usuário com base nos dados fornecidos.
@@ -28,6 +33,28 @@ public class AuthService {
   public Usuario cadastro(CadastroUsuarioDTO dto) {
     Usuario usuario =
         Usuario.builder().nome(dto.getNome()).email(dto.getEmail()).cpf(dto.getRegistro()).build();
+    Set<Authority> authorities = new HashSet<>();
+
+    // verifica dominio do email para definir nivel de permissão
+    if (dto.getEmail().endsWith("@alunos.utfpr.edu.br")) {
+      Authority alunoAuthority = authorityRepository.findByAuthority("ROLE_ALUNO").orElse(null);
+      if (alunoAuthority == null) {
+        throw new ResponseStatusException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar autoridade");
+      }
+      authorities.add(alunoAuthority);
+    } else if (dto.getEmail().endsWith("@utfpr.edu.br")) {
+      Authority servidorAuthority =
+          authorityRepository.findByAuthority("ROLE_SERVIDOR").orElse(null);
+      if (servidorAuthority == null) {
+        throw new ResponseStatusException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar autoridade");
+      }
+      authorities.add(servidorAuthority);
+    } else {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "E-mail inválido");
+    }
+    usuario.setAuthorities(authorities);
     return usuarioRepository.save(usuario);
   }
 
