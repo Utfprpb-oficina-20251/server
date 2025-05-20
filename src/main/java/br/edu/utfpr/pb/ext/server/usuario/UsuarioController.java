@@ -9,6 +9,12 @@ import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/usuarios")
+@Tag(name = "UsuarioController", description = "Endpoints for managing users")
 public class UsuarioController extends CrudController<Usuario, UsuarioServidorResponseDTO, Long> {
   private final IUsuarioService usuarioService;
   private final ModelMapper modelMapper;
@@ -49,6 +56,13 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return modelMapper;
   }
 
+  @Operation(summary = "Create a new servidor user", description = "Creates a new servidor user and returns a login response with a token.")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "User created successfully",
+                  content = @Content(mediaType = "application/json", schema = @Schema(implementation = RespostaLoginDTO.class))),
+          @ApiResponse(responseCode = "400", description = "Invalid request or missing authority",
+                  content = @Content(mediaType = "application/json"))
+  })
   @PostMapping("/servidor")
   public ResponseEntity<RespostaLoginDTO> createServidor(
       @Valid @RequestBody UsuarioServidorRequestDTO usuarioServidorRequestDTO) {
@@ -66,6 +80,13 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
   }
 
+  @Operation(summary = "Create a new aluno user", description = "Creates a new aluno user and returns a login response with a token.")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "User created successfully",
+                  content = @Content(mediaType = "application/json", schema = @Schema(implementation = RespostaLoginDTO.class))),
+          @ApiResponse(responseCode = "400", description = "Invalid request or missing authority",
+                  content = @Content(mediaType = "application/json"))
+  })
   @PostMapping("/aluno")
   public ResponseEntity<RespostaLoginDTO> createAluno(
       @Valid @RequestBody UsuarioAlunoRequestDTO usuarioAlunoRequestDTO) {
