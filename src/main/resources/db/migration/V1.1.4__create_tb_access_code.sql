@@ -1,5 +1,5 @@
 -- =============================================================
--- Script: V1__create_tb_access_code.sql
+-- Script: V1.1.4__create_tb_access_code.sql
 -- Descrição: Criação da tabela de códigos temporários enviados por e-mail
 -- Autor: Luiz Alberto dos Passos
 -- Data: 2025-05-19
