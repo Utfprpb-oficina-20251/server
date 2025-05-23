@@ -61,20 +61,25 @@ class ErrorHandlerTest {
 
   @Test
   @Description("Erro deve retornar o status 500 quando não houver status no atributo")
-  void handleError_WhenStatusDoesNotExistOnAttributes_ShouldReturnApiErrorWithDefaultStatusCode(){
+  void handleError_WhenStatusDoesNotExistOnAttributes_ShouldReturnApiErrorWithDefaultStatusCode() {
     attributes.remove("status");
     ApiError result = errorHandler.handleError(webRequest);
     assertThat(result.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
   }
 
   @Test
+  @Description("Erro deve ser retornado no caso do campo path estar nulo")
+  void handleError_whenPathDoesNotExist_ShouldReturnApiErrorWithAttributes() {
+    attributes.remove("path");
+    ApiError result = errorHandler.handleError(webRequest);
+    assertThat(result.getUrl()).isNull();
+  }
+
+  @Test
   @Description("Erro deve ser retornado no caso do campo mensagem estar nulo")
   void handleError_WhenMessageNotExist_ShouldReturnApiErrorWithAttributes() {
-
     attributes.remove("message");
-
     ApiError result = errorHandler.handleError(webRequest);
-
     assertThat(result.getMessage()).isNull();
   }
 }
