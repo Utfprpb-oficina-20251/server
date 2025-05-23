@@ -86,7 +86,10 @@ class EmailServiceImplTest {
   }
 
   @Test
-  void testEnviarEmailDeNotificacao_TipoNulo_DeveLancarExcecao() {email = "teste@utfpr.edu.br";projeto = "Projeto Qualquer";link = "https://utfpr.edu.br/link";
+  void testEnviarEmailDeNotificacao_TipoNulo_DeveLancarExcecao() {
+    email = "teste@utfpr.edu.br";
+    projeto = "Projeto Qualquer";
+    link = "https://utfpr.edu.br/link";
 
     var ex =
         assertThrows(

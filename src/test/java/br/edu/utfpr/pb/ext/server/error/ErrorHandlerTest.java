@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.WebRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +57,14 @@ class ErrorHandlerTest {
     assertThat(result.getMessage()).isEqualTo("error message");
     assertThat(result.getStatus()).isEqualTo(400);
     assertThat(result.getUrl()).isEqualTo("/url");
+  }
+
+  @Test
+  @Description("Erro deve retornar o status 500 quando não houver status no atributo")
+  void handleError_WhenStatusDoesNotExistOnAttributes_ShouldReturnApiErrorWithDefaultStatusCode(){
+    attributes.remove("status");
+    ApiError result = errorHandler.handleError(webRequest);
+    assertThat(result.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
   }
 
   @Test
