@@ -85,7 +85,8 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna uma página de entidades convertidas para DTOs, com suporte a paginação e ordenação opcionais.
+   * Retorna uma página de entidades convertidas para DTOs, com suporte a paginação e ordenação
+   * opcionais.
    *
    * @param page número da página a ser retornada (começando em 0)
    * @param size quantidade de itens por página
@@ -144,11 +145,12 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   /**
    * Atualiza uma entidade existente com base no identificador fornecido e nos dados do DTO.
    *
-   * Retorna HTTP 400 se o ID do caminho não corresponder ao ID do DTO.
+   * <p>Retorna HTTP 400 se o ID do caminho não corresponder ao ID do DTO.
    *
    * @param i identificador da entidade a ser atualizada
    * @param entity DTO com os dados atualizados
-   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou 400 em caso de inconsistência de IDs
+   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou 400 em
+   *     caso de inconsistência de IDs
    */
   @PutMapping("{i}")
   @Operation(summary = "Atualiza um registro de acordo com o identificador fornecido")
@@ -189,7 +191,8 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   /**
    * Remove a entidade correspondente ao identificador fornecido.
    *
-   * <p>Retorna HTTP 204 No Content após a tentativa de exclusão, independentemente da existência da entidade.
+   * <p>Retorna HTTP 204 No Content após a tentativa de exclusão, independentemente da existência da
+   * entidade.
    *
    * @param i identificador da entidade a ser removida
    * @return resposta HTTP 204 No Content

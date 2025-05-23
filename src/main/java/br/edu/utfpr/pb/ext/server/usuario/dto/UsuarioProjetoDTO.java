@@ -6,12 +6,10 @@ import lombok.Data;
 
 @Data
 public class UsuarioProjetoDTO {
-    private Long id;
+  private Long id;
 
-    @NotNull
-    private String nomeCompleto;
+  @NotNull private String nomeCompleto;
 
-    @NotNull
-    @Email(regexp = "^[a-zA-Z0-9._%+-]+@(utfpr\\.edu\\.br)$")
-    private String emailInstitucional;
+  @NotNull @Email(regexp = "^[a-zA-Z0-9._%+-]+@(utfpr\\.edu\\.br)$")
+  private String emailInstitucional;
 }
