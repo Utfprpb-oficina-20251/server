@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.email;
 
+import br.edu.utfpr.pb.ext.server.email.enums.TipoDeNotificacao;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 
 /** Controller responsável pelo envio e validação de códigos por e-mail. */
 @Tag(name = "Email", description = "API para envio e validação de códigos por e-mail")
@@ -65,6 +67,19 @@ public class EmailController {
     return ResponseEntity.ok(valido);
   }
 
+//EndPoint para teste de notificação
+
+@PostMapping("/teste/{email}")
+public ResponseEntity<String> sendEmail(@PathVariable("email") String email) {
+    try {
+        emailService.enviarEmailDeNotificacao(email,TipoDeNotificacao.ATUALIZACAO_STATUS,"PROJETO TESTE", "google.com");
+
+        return ResponseEntity.ok("E-mail enviado com sucesso!");
+    } catch (IOException e) {
+        return  ResponseEntity.internalServerError().body("Erro ao enviar e-mail: " + e.getMessage());
+    }
+}
+ //------------
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Map<String, String>> handleIllegalArgumentException(
       IllegalArgumentException e) {
