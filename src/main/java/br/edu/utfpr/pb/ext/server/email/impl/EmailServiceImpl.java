@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailServiceImpl {
 
-
   private static final int CODE_EXPIRATION_MINUTES = 10;
   private static final int MAX_CODES_PER_DAY = 3;
   private static final Pattern EMAIL_REGEX = Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
@@ -134,13 +133,15 @@ public class EmailServiceImpl {
     }
     return sendEmail(email, assunto, mensagemHtml, "text/html");
   }
+
   private String montarMensagem(String conteudo, String projeto, String link) {
     return String.format(
-            "<h1>Olá!</h1><p>%s: <strong>%s</strong></p><a href=\"%s\">Conferir</a>",
-            conteudo, projeto, link
-    );
+        "<h1>Olá!</h1><p>%s: <strong>%s</strong></p><a href=\"%s\">Conferir</a>",
+        conteudo, projeto, link);
   }
-  public Response sendEmail(String to, String subject, String contentText, String tipo) throws IOException {
+
+  public Response sendEmail(String to, String subject, String contentText, String tipo)
+      throws IOException {
     Email from = new Email("webprojeto2@gmail.com");
     Email toEmail = new Email(to);
     Content content = new Content(tipo, contentText);
@@ -152,10 +153,9 @@ public class EmailServiceImpl {
     request.setBody(mail.build());
 
     Response response = sendGrid.api(request);
-    if(response.getStatusCode() != 202){
-      throw new IOException("Erro ao enviar email, status code: "+ response.getStatusCode());
-    }
-    else {
+    if (response.getStatusCode() != 202) {
+      throw new IOException("Erro ao enviar e-mail, status code: " + response.getStatusCode());
+    } else {
       return response;
     }
   }
