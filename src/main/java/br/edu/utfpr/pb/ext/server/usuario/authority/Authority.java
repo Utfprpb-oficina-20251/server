@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
-
 @Entity
 @Table(name = "tb_authority")
 @Getter
@@ -14,9 +13,9 @@ import org.springframework.security.core.GrantedAuthority;
 @Builder
 public class Authority implements GrantedAuthority {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String authority;
+  private String authority;
 }

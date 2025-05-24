@@ -55,12 +55,16 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Column(name = "data_atualizacao")
   private Date dataAtualizacao;
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = {
-          CascadeType.DETACH, CascadeType.MERGE,
-          CascadeType.PERSIST, CascadeType.REFRESH})
-  @JoinTable(name = "usuario_roles",
-          joinColumns = @JoinColumn(name = "usuario_id"),
-          inverseJoinColumns = @JoinColumn(name = "authority_id"))
+  @ManyToMany(
+      fetch = FetchType.EAGER,
+      cascade = {
+        CascadeType.DETACH, CascadeType.MERGE,
+        CascadeType.PERSIST, CascadeType.REFRESH
+      })
+  @JoinTable(
+      name = "usuario_roles",
+      joinColumns = @JoinColumn(name = "usuario_id"),
+      inverseJoinColumns = @JoinColumn(name = "authority_id"))
   private Set<Authority> authorities;
 
   /**

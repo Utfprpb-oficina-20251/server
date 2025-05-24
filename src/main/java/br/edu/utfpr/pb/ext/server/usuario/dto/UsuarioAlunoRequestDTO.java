@@ -11,24 +11,19 @@ import org.hibernate.validator.constraints.br.CPF;
 @Data
 public class UsuarioAlunoRequestDTO {
 
-    private Long id;
+  private Long id;
 
-    @NotNull
-    private String nomeCompleto;
+  @NotNull private String nomeCompleto;
 
-    @NotNull @CPF
-    @UniqueCpf
-    private String cpf;
+  @NotNull @CPF @UniqueCpf private String cpf;
 
-    @NotNull
-    @UniqueRa
-    private String registroAcademico;
+  @NotNull @UniqueRa private String registroAcademico;
 
-    @NotNull @Email(
-            regexp = "^[a-zA-Z0-9._%+-]+@(alunos\\.utfpr\\.edu\\.br)$",
-            message =
-                    "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.emailInstitucional}")
-    private String emailInstitucional;
+  @NotNull @Email(
+      regexp = "^[a-zA-Z0-9._%+-]+@(alunos\\.utfpr\\.edu\\.br)$",
+      message =
+          "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.emailInstitucional}")
+  private String emailInstitucional;
 
-    private Curso curso;
+  private Curso curso;
 }

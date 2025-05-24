@@ -55,7 +55,8 @@ public class AuthService {
     Authority authority =
         authorityRepository
             .findByAuthority(authorityName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao cadastrar"));
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao cadastrar"));
     authorities.add(authority);
     usuario.setAuthorities(authorities);
     return usuarioRepository.save(usuario);

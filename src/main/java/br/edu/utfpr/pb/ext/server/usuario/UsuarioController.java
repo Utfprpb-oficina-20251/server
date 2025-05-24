@@ -56,13 +56,23 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return modelMapper;
   }
 
-  @Operation(summary = "Create a new servidor user", description = "Creates a new servidor user and returns a login response with a token.")
-  @ApiResponses(value = {
-          @ApiResponse(responseCode = "200", description = "User created successfully",
-                  content = @Content(mediaType = "application/json", schema = @Schema(implementation = RespostaLoginDTO.class))),
-          @ApiResponse(responseCode = "400", description = "Invalid request or missing authority",
-                  content = @Content(mediaType = "application/json"))
-  })
+  @Operation(
+      summary = "Create a new servidor user",
+      description = "Creates a new servidor user and returns a login response with a token.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User created successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = RespostaLoginDTO.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request or missing authority",
+            content = @Content(mediaType = "application/json"))
+      })
   @PostMapping("/servidor")
   public ResponseEntity<RespostaLoginDTO> createServidor(
       @Valid @RequestBody UsuarioServidorRequestDTO usuarioServidorRequestDTO) {
@@ -80,13 +90,23 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
   }
 
-  @Operation(summary = "Create a new aluno user", description = "Creates a new aluno user and returns a login response with a token.")
-  @ApiResponses(value = {
-          @ApiResponse(responseCode = "200", description = "User created successfully",
-                  content = @Content(mediaType = "application/json", schema = @Schema(implementation = RespostaLoginDTO.class))),
-          @ApiResponse(responseCode = "400", description = "Invalid request or missing authority",
-                  content = @Content(mediaType = "application/json"))
-  })
+  @Operation(
+      summary = "Create a new aluno user",
+      description = "Creates a new aluno user and returns a login response with a token.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User created successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = RespostaLoginDTO.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request or missing authority",
+            content = @Content(mediaType = "application/json"))
+      })
   @PostMapping("/aluno")
   public ResponseEntity<RespostaLoginDTO> createAluno(
       @Valid @RequestBody UsuarioAlunoRequestDTO usuarioAlunoRequestDTO) {
