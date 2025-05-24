@@ -65,6 +65,7 @@ public class EmailController {
     return ResponseEntity.ok(valido);
   }
 
+  // ------------
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Map<String, String>> handleIllegalArgumentException(
       IllegalArgumentException e) {
