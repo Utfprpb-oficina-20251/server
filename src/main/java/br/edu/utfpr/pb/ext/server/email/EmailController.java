@@ -68,9 +68,10 @@ public class EmailController {
   }
 
 //EndPoint para teste de notificação
-
+@Operation(summary = "Endpoint para teste de envio de email, retirar na versão final")
+@ApiResponse(responseCode = "200", description = "envio realizado com sucesso")
 @PostMapping("/teste/{email}")
-public ResponseEntity<String> sendEmail(@PathVariable("email") String email) {
+public ResponseEntity<String> teste(@PathVariable("email") String email) {
     try {
         emailService.enviarEmailDeNotificacao(email,TipoDeNotificacao.ATUALIZACAO_STATUS,"PROJETO TESTE", "google.com");
 
