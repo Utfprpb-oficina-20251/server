@@ -6,6 +6,11 @@ import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
@@ -49,6 +54,23 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   }
 
   @Override
+  @Operation(
+      summary = "Create a new project",
+      description = "Creates a new project and returns the created project details.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Project created successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ProjetoDTO.class))),
+        @ApiResponse(
+            responseCode = "406",
+            description = "Invalid request, such as empty or invalid emails",
+            content = @Content(mediaType = "application/json"))
+      })
   @PostMapping
   public ResponseEntity<ProjetoDTO> create(@Valid @RequestBody ProjetoDTO dto) {
     Projeto projeto = new Projeto();
