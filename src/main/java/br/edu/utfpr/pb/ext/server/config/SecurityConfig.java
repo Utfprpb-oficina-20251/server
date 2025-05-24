@@ -57,11 +57,17 @@ public class SecurityConfig {
   }
 
   /**
-   * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação, autorização, CORS, CSRF e política de sessão.
+   * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação,
+   * autorização, CORS, CSRF e política de sessão.
    *
-   * Permite acesso público a requisições GET em `/api/projeto/**`, a todas as rotas em `/api/auth/**` e a POST em `/api/usuarios/**`. Restringe o acesso a rotas administrativas e de usuários conforme o papel do usuário autenticado. O acesso ao console H2 e à documentação Swagger é permitido apenas quando o perfil ativo é "test". Todas as demais rotas exigem autenticação.
+   * <p>Permite acesso público a requisições GET em `/api/projeto/**`, a todas as rotas em
+   * `/api/auth/**` e a POST em `/api/usuarios/**`. Restringe o acesso a rotas administrativas e de
+   * usuários conforme o papel do usuário autenticado. O acesso ao console H2 e à documentação
+   * Swagger é permitido apenas quando o perfil ativo é "test". Todas as demais rotas exigem
+   * autenticação.
    *
-   * As sessões são configuradas como stateless, o CORS é habilitado e um filtro de autenticação JWT é adicionado à cadeia de filtros.
+   * <p>As sessões são configuradas como stateless, o CORS é habilitado e um filtro de autenticação
+   * JWT é adicionado à cadeia de filtros.
    *
    * @param http configuração de segurança HTTP do Spring
    * @return a cadeia de filtros de segurança configurada
@@ -96,7 +102,9 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/projeto/**")
                     .hasRole("SERVIDOR")
-                    .requestMatchers(HttpMethod.OPTIONS, "/**")//CORS preflight
+                    .requestMatchers(HttpMethod.OPTIONS, "/**") // CORS preflight
+                    .permitAll()
+                    .requestMatchers("/error")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
