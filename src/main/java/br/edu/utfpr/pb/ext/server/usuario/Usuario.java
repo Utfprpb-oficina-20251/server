@@ -7,9 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.*;
-
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -72,7 +70,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities() {
     List<GrantedAuthority> authorities = new ArrayList<>();
-      authorities.add(new SimpleGrantedAuthority("ROLE_SERVIDOR"));
+    authorities.add(new SimpleGrantedAuthority("ROLE_SERVIDOR"));
     return authorities;
   }
 

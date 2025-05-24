@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,7 +46,8 @@ public class ErrorHandler implements ErrorController {
   }
 
   /**
-   * Retorna um objeto de erro formatado para requisições HTTP com efeito colateral (como POST, PUT ou DELETE).
+   * Retorna um objeto de erro formatado para requisições HTTP com efeito colateral (como POST, PUT
+   * ou DELETE).
    *
    * @param webRequest a requisição web atual
    * @return um objeto {@link ApiError} contendo detalhes do erro ocorrido
@@ -59,11 +61,18 @@ public class ErrorHandler implements ErrorController {
   private ApiError buildApiError(WebRequest webRequest) {
     Map<String, Object> attributes =
         errorAttributes.getErrorAttributes(
-            webRequest, ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE));
+            webRequest,
+            ErrorAttributeOptions.of(
+                ErrorAttributeOptions.Include.MESSAGE,
+                ErrorAttributeOptions.Include.PATH,
+                ErrorAttributeOptions.Include.STATUS));
     return ApiError.builder()
         .message((String) attributes.get("message"))
         .url((String) attributes.get("path"))
-        .status((Integer) attributes.get("status"))
+        .status(
+            attributes.get("status") != null
+                ? (Integer) attributes.get("status")
+                : HttpStatus.INTERNAL_SERVER_ERROR.value())
         .build();
   }
 }

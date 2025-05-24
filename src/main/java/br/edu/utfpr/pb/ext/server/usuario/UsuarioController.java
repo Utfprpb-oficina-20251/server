@@ -7,14 +7,13 @@ import br.edu.utfpr.pb.ext.server.generics.ICrudService;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorResponseDTO;
 import jakarta.validation.Valid;
+import java.util.Map;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -49,7 +48,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     usuario.getAuthorities();
     Usuario salvo = usuarioService.save(usuario);
     Map<String, Object> authorities = Map.of("authority", salvo.getAuthorities());
-    String token = jwtService.generateToken(authorities,salvo);
+    String token = jwtService.generateToken(authorities, salvo);
     long expiration = jwtService.getExpirationTime();
     return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
   }

@@ -94,9 +94,11 @@ public class EmailServiceImpl {
     String assunto = "Código de Verificação - " + type;
     String mensagem =
         "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
-    return sendEmail(email, assunto, mensagem,"text/plain");
+    return sendEmail(email, assunto, mensagem, "text/plain");
   }
-  public Response enviarEmailDeNotificacao(String email, TipoDeNotificacao tipo, String projeto, String link  ) throws IOException {
+
+  public Response enviarEmailDeNotificacao(
+      String email, TipoDeNotificacao tipo, String projeto, String link) throws IOException {
 
     if (email == null || email.isBlank()) {
       throw new IllegalArgumentException("Email não pode ser nulo ou vazio.");
@@ -114,21 +116,23 @@ public class EmailServiceImpl {
     String assunto = "";
     String mensagemHtml = "";
 
-      switch (tipo) {
-          case INSCRICAO_ALUNO -> {
-              assunto = "Inscrição no projeto: " + projeto;
-              mensagemHtml = montarMensagem("Você se cadastrou com sucesso no projeto", projeto, link);
-          }
-          case INSCRICAO_ALUNO_PROFESSOR -> {
-              assunto = "Inscrição no projeto: " + projeto;
-              mensagemHtml = montarMensagem("Um aluno acabou de se cadastrar no projeto", projeto, link);
-          }
-          case ATUALIZACAO_STATUS -> {
-              assunto = "Atualização no status da sugestão de projeto: " + projeto;
-              mensagemHtml = montarMensagem("Houve uma atualização no status da sua sugestão de projeto", projeto, link);
-          }
+    switch (tipo) {
+      case INSCRICAO_ALUNO -> {
+        assunto = "Inscrição no projeto: " + projeto;
+        mensagemHtml = montarMensagem("Você se cadastrou com sucesso no projeto", projeto, link);
       }
-    return sendEmail(email, assunto, mensagemHtml,"text/html");
+      case INSCRICAO_ALUNO_PROFESSOR -> {
+        assunto = "Inscrição no projeto: " + projeto;
+        mensagemHtml = montarMensagem("Um aluno acabou de se cadastrar no projeto", projeto, link);
+      }
+      case ATUALIZACAO_STATUS -> {
+        assunto = "Atualização no status da sugestão de projeto: " + projeto;
+        mensagemHtml =
+            montarMensagem(
+                "Houve uma atualização no status da sua sugestão de projeto", projeto, link);
+      }
+    }
+    return sendEmail(email, assunto, mensagemHtml, "text/html");
   }
   private String montarMensagem(String conteudo, String projeto, String link) {
     return String.format(
