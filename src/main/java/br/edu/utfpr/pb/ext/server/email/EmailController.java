@@ -77,7 +77,8 @@ public ResponseEntity<String> teste(@PathVariable("email") String email) {
 
         return ResponseEntity.ok("E-mail enviado com sucesso!");
     } catch (IOException e) {
-        return  ResponseEntity.internalServerError().body("Erro ao enviar e-mail: " + e.getMessage());
+        System.err.println("Erro ao enviar e-mail: " + e.getMessage()); // Log the exception details
+        return ResponseEntity.internalServerError().body("Falha ao enviar e-mail.");
     }
 }
  //------------
