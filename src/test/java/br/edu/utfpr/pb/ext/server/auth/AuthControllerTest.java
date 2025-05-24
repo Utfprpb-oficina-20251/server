@@ -47,7 +47,7 @@ class AuthControllerTest {
     mockMvc
         .perform(
             post("/api/auth/login")
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginUsuarioDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.token").exists())

@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Unshallow Git history
+        run: git fetch --unshallow
       - name: Set JDK
         uses: actions/setup-java@v4
         with:
