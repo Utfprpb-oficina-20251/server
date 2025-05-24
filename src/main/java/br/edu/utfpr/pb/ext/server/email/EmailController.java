@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-
 /** Controller responsável pelo envio e validação de códigos por e-mail. */
 @Tag(name = "Email", description = "API para envio e validação de códigos por e-mail")
 @RestController
@@ -67,21 +66,7 @@ public class EmailController {
     return ResponseEntity.ok(valido);
   }
 
-//EndPoint para teste de notificação
-@Operation(summary = "Endpoint para teste de envio de email, retirar na versão final")
-@ApiResponse(responseCode = "200", description = "envio realizado com sucesso")
-@PostMapping("/teste/{email}")
-public ResponseEntity<String> teste(@PathVariable("email") String email) {
-    try {
-        emailService.enviarEmailDeNotificacao(email,TipoDeNotificacao.ATUALIZACAO_STATUS,"PROJETO TESTE", "google.com");
-
-        return ResponseEntity.ok("E-mail enviado com sucesso!");
-    } catch (IOException e) {
-        System.err.println("Erro ao enviar e-mail: " + e.getMessage()); // Log the exception details
-        return ResponseEntity.internalServerError().body("Falha ao enviar e-mail.");
-    }
-}
- //------------
+  // ------------
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Map<String, String>> handleIllegalArgumentException(
       IllegalArgumentException e) {
