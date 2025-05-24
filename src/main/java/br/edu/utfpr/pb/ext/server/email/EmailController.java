@@ -1,6 +1,5 @@
 package br.edu.utfpr.pb.ext.server.email;
 
-import br.edu.utfpr.pb.ext.server.email.enums.TipoDeNotificacao;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
