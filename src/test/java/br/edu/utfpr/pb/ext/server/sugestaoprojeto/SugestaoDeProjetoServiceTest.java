@@ -88,4 +88,102 @@ public class SugestaoDeProjetoServiceTest {
     // 2. Execução + Verificação
     assertThrows(EntityNotFoundException.class, () -> service.criar(request));
   }
+
+  @Test
+  void criarSugestao_ComProfessorInativo_DeveLancarExcecao() {
+    // 1. Configuração do request
+    SugestaoDeProjetoRequestDTO request =
+        SugestaoDeProjetoRequestDTO.builder()
+            .titulo("Título válido")
+            .descricao("Descrição com mais de 30 caracteres...")
+            .publicoAlvo("Alunos")
+            .professorId(1L)
+            .build();
+
+    // 2. Mock do professor INATIVO
+    Usuario professorInativo =
+        Usuario.builder()
+            .nome("Professor Teste")
+            .email("professor@utfpr.edu.br")
+            .cpf("12345678901")
+            .ativo(false)
+            .build();
+
+    professorInativo.setId(1L);
+
+    when(usuarioRepository.findById(1L)).thenReturn(Optional.of(professorInativo));
+
+    // 3. Execução + Verificação
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> service.criar(request),
+        "Deveria lançar exceção para professor inativo");
+  }
+
+  @Test
+  void criarSugestao_DeveTerStatusAguardandoPorPadrao() {
+    // 1. Configuração do request
+    SugestaoDeProjetoRequestDTO request =
+        SugestaoDeProjetoRequestDTO.builder()
+            .titulo("Título válido")
+            .descricao("Descrição com mais de 30 caracteres...")
+            .publicoAlvo("Alunos")
+            .build();
+
+    // 2. Mock do aluno autenticado (ADICIONE ESSA PARTE!)
+    Usuario aluno = new Usuario();
+    aluno.setId(1L);
+    Authentication auth = mock(Authentication.class);
+    SecurityContext securityContext = mock(SecurityContext.class);
+    when(securityContext.getAuthentication()).thenReturn(auth);
+    when(auth.getPrincipal()).thenReturn(aluno);
+    SecurityContextHolder.setContext(securityContext);
+
+    // 3. Mock do repositório para capturar o objeto salvo
+    SugestaoDeProjeto sugestaoSalva = new SugestaoDeProjeto();
+    when(repository.save(any()))
+        .thenAnswer(
+            invocation -> {
+              SugestaoDeProjeto s = invocation.getArgument(0);
+              sugestaoSalva.setStatus(s.getStatus()); // Captura o status
+              return s;
+            });
+
+    // 4. Execução
+    service.criar(request);
+
+    // 5. Verificação
+    assertEquals(
+        StatusSugestao.AGUARDANDO, sugestaoSalva.getStatus(), "Status inicial deve ser AGUARDANDO");
+  }
+
+  @Test
+  void criarSugestao_SemProfessor_DeveSalvarComProfessorNull() {
+    // 1. Configuração - Request SEM professorId
+    SugestaoDeProjetoRequestDTO request =
+        SugestaoDeProjetoRequestDTO.builder()
+            .titulo("Projeto sem professor")
+            .descricao("Descrição válida com mais de 30 caracteres...")
+            .publicoAlvo("Alunos")
+            .build(); // Sem .professorId()
+
+    // 2. Mock do repositório para capturar o objeto salvo
+    SugestaoDeProjeto sugestaoSalva = new SugestaoDeProjeto();
+    when(repository.save(any()))
+        .thenAnswer(
+            invocation -> {
+              SugestaoDeProjeto s = invocation.getArgument(0);
+              sugestaoSalva.setId(1L);
+              sugestaoSalva.setTitulo(s.getTitulo());
+              sugestaoSalva.setProfessor(s.getProfessor()); // Captura o professor (deve ser null)
+              return sugestaoSalva;
+            });
+
+    // 3. Execução
+    SugestaoDeProjetoResponseDTO response = service.criar(request);
+
+    // 4. Verificações
+    assertNull(sugestaoSalva.getProfessor(), "Professor deve ser null quando não informado");
+    assertEquals("Projeto sem professor", response.getTitulo());
+  }
 }
