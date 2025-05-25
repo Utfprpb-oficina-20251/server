@@ -93,9 +93,11 @@ public class EmailServiceImpl {
     String assunto = "Código de Verificação - " + type;
     String mensagem =
         "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
-    return enviarEmail(email, assunto, mensagem,"text/plain");
+    return sendEmail(email, assunto, mensagem, "text/plain");
   }
-  public Response enviarEmailDeNotificacao(String email, TipoDeNotificacao tipo, String projeto, String link  ) throws IOException {
+
+  public Response enviarEmailDeNotificacao(
+      String email, TipoDeNotificacao tipo, String projeto, String link) throws IOException {
 
     if (email == null || email.isBlank()) {
       throw new IllegalArgumentException("Email não pode ser nulo ou vazio.");
@@ -113,41 +115,48 @@ public class EmailServiceImpl {
     String assunto = "";
     String mensagemHtml = "";
 
-      switch (tipo) {
-          case INSCRICAO_ALUNO -> {
-              assunto = "Inscrição no projeto: " + projeto;
-              mensagemHtml = montarMensagem("Você se cadastrou com sucesso no projeto", projeto, link);
-          }
-          case INSCRICAO_ALUNO_PROFESSOR -> {
-              assunto = "Inscrição no projeto: " + projeto;
-              mensagemHtml = montarMensagem("Um aluno acabou de se cadastrar no projeto", projeto, link);
-          }
-          case ATUALIZACAO_STATUS -> {
-              assunto = "Atualização no status da sugestão de projeto: " + projeto;
-              mensagemHtml = montarMensagem("Houve uma atualização no status da sua sugestão de projeto", projeto, link);
-          }
+    switch (tipo) {
+      case INSCRICAO_ALUNO -> {
+        assunto = "Inscrição no projeto: " + projeto;
+        mensagemHtml = montarMensagem("Você se cadastrou com sucesso no projeto", projeto, link);
       }
-    return enviarEmail(email, assunto, mensagemHtml,"text/html");
+      case INSCRICAO_ALUNO_PROFESSOR -> {
+        assunto = "Inscrição no projeto: " + projeto;
+        mensagemHtml = montarMensagem("Um aluno acabou de se cadastrar no projeto", projeto, link);
+      }
+      case ATUALIZACAO_STATUS -> {
+        assunto = "Atualização no status da sugestão de projeto: " + projeto;
+        mensagemHtml =
+            montarMensagem(
+                "Houve uma atualização no status da sua sugestão de projeto", projeto, link);
+      }
+    }
+    return sendEmail(email, assunto, mensagemHtml, "text/html");
   }
 
-  private Response enviarEmail(String destinatario, String assunto, String corpo, String tipo)
+  private String montarMensagem(String conteudo, String projeto, String link) {
+    return String.format(
+        "<h1>Olá!</h1><p>%s: <strong>%s</strong></p><a href=\"%s\">Conferir</a>",
+        conteudo, projeto, link);
+  }
+
+  public Response sendEmail(String to, String subject, String contentText, String tipo)
       throws IOException {
     Email from = new Email("webprojeto2@gmail.com");
-    Email to = new Email(destinatario);
-    Content content = new Content(tipo, corpo);
-    Mail mail = new Mail(from, assunto, to, content);
+    Email toEmail = new Email(to);
+    Content content = new Content(tipo, contentText);
+    Mail mail = new Mail(from, subject, toEmail, content);
 
     Request request = new Request();
     request.setMethod(Method.POST);
     request.setEndpoint("mail/send");
     request.setBody(mail.build());
 
-    return sendGrid.api(request);
-  }
-  private String montarMensagem(String conteudo, String projeto, String link) {
-    return String.format(
-            "<h1>Olá!</h1><p>%s: <strong>%s</strong></p><a href=\"%s\">Conferir</a>",
-            conteudo, projeto, link
-    );
+    Response response = sendGrid.api(request);
+    if (response.getStatusCode() != 202) {
+      throw new IOException("Erro ao enviar e-mail, status code: " + response.getStatusCode());
+    } else {
+      return response;
+    }
   }
 }

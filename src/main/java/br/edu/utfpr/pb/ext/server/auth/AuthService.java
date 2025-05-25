@@ -4,6 +4,10 @@ import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.LoginUsuarioDTO;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
+import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
+import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,8 +20,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+  public static final String ALUNOS_UTFPR_EDU_BR = "@alunos.utfpr.edu.br";
+  public static final String UTFPR_EDU_BR = "@utfpr.edu.br";
   private final UsuarioRepository usuarioRepository;
   private final AuthenticationManager authenticationManager;
+  private final AuthorityRepository authorityRepository;
 
   /**
    * Realiza o cadastro de um novo usuário com base nos dados fornecidos.
@@ -28,6 +35,30 @@ public class AuthService {
   public Usuario cadastro(CadastroUsuarioDTO dto) {
     Usuario usuario =
         Usuario.builder().nome(dto.getNome()).email(dto.getEmail()).cpf(dto.getRegistro()).build();
+    Set<Authority> authorities = new HashSet<>();
+
+    final String ROLE_ALUNO = "ROLE_ALUNO";
+    final String ROLE_SERVIDOR = "ROLE_SERVIDOR";
+
+    String email = dto.getEmail();
+    String authorityName;
+
+    // verifica dominio do email para definir nivel de permissão
+    if (email.endsWith(UTFPR_EDU_BR)) {
+      authorityName = ROLE_SERVIDOR;
+    } else if (email.endsWith(ALUNOS_UTFPR_EDU_BR)) {
+      authorityName = ROLE_ALUNO;
+    } else {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "E-mail deve ser @utfpr.edu.br ou @alunos.utfpr.edu.br");
+    }
+    Authority authority =
+        authorityRepository
+            .findByAuthority(authorityName)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao cadastrar"));
+    authorities.add(authority);
+    usuario.setAuthorities(authorities);
     return usuarioRepository.save(usuario);
   }
 
