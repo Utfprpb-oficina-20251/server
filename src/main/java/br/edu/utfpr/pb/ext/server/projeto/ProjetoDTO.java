@@ -3,7 +3,6 @@ package br.edu.utfpr.pb.ext.server.projeto;
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,9 +22,11 @@ public class ProjetoDTO {
 
   @NotNull @Size(min = 20, max = 500) private String justificativa;
 
-  @NotNull @JsonFormat(pattern="yyyy-MM-dd") private Date dataInicio;
+  @NotNull @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date dataInicio;
 
-  @NotNull @JsonFormat(pattern="yyyy-MM-dd") private Date dataFim;
+  @NotNull @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date dataFim;
 
   @NotNull @Size(max = 500) private String publicoAlvo;
 

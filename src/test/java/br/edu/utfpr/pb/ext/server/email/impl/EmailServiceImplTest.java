@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,9 +28,6 @@ class EmailServiceImplTest {
   @Mock private EmailCodeRepository emailCodeRepository;
   @Mock private SendGrid sendGrid;
   @InjectMocks private EmailServiceImpl emailService;
-
-  @BeforeEach
-  void setUp() {}
 
   /** Teste para verificar envio com sucesso. */
   @Test
@@ -57,14 +53,14 @@ class EmailServiceImplTest {
     assertFalse(savedCode.isUsed());
     assertNotNull(savedCode.getGeneratedAt());
     assertNotNull(savedCode.getExpiration());
-    assertTrue(savedCode.getCode().length() > 0);
+    assertFalse(savedCode.getCode().isEmpty());
     assertTrue(savedCode.getExpiration().isAfter(savedCode.getGeneratedAt()));
     assertTrue(savedCode.getExpiration().isAfter(LocalDateTime.now()));
   }
 
   /** Teste para validar que o limite de envio diário é respeitado. */
   @Test
-  void testGenerateAndSendCode_MaxLimitReached() throws IOException {
+  void testGenerateAndSendCode_MaxLimitReached() {
     String email = "teste@utfpr.edu.br";
     String tipo = "cadastro";
 

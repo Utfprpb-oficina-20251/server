@@ -1,9 +1,7 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,6 +18,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
   Optional<Usuario> findBySiape(String siape);
 
-  @Query("SELECT u FROM Usuario u WHERE u.ativo = true AND 'ROLE_SERVIDOR' MEMBER OF u.roles")
-  List<Usuario> findServidoresAtivos();
+  Optional<Usuario> findByRegistroAcademico(String ra);
 }
