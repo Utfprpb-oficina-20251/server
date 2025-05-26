@@ -84,17 +84,17 @@ public class AuthService {
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public boolean solicitarCodigoOtp(String email) {
-    logger.info("Solicitando envio de código OTP para {}", email);
+    logger.info("Solicitação de código para validação de email");
     try {
       // Verificar se o usuário existe
       usuarioRepository
           .findByEmail(email)
           .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
       emailService.generateAndSendCode(email, "autenticacao");
-      logger.info("Código de verificação enviado para {}", email);
+      logger.info("Código de verificação enviado");
       return true;
     } catch (Exception e) {
-      logger.error("Erro ao enviar código de verificação para o email {}", email, e);
+      logger.error("Erro ao enviar código de verificação", e);
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao enviar código de verificação");
     }
