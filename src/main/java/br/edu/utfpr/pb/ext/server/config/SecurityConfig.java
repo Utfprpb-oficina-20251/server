@@ -45,6 +45,9 @@ public class SecurityConfig {
   @Value("#{'${app.client.origins}'.split(',')}")
   private List<String> allowedOrigins;
 
+  @Value("${app.swagger.enabled}")
+  private boolean isSwaggerEnabled;
+
   /**
    * Cria uma instância de configuração de segurança com as dependências necessárias.
    *
@@ -86,18 +89,10 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/auth/**")
                     .permitAll()
-                    .requestMatchers("/api/users/**")
-                    .hasRole("ADMINISTRADOR")
-                    .requestMatchers("/api/administrador/**")
-                    .hasRole("ADMINISTRADOR")
-                    .requestMatchers("/api/servidor/**")
-                    .hasRole("SERVIDOR")
-                    .requestMatchers("/api/estudante/**")
-                    .hasRole("ESTUDANTE")
                     .requestMatchers("/h2-console/**")
                     .access(isTestProfile())
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**")
-                    .access(isTestProfile())
+                    .access(isSwaggerEnabled())
                     .requestMatchers(HttpMethod.POST, "/api/usuarios/**")
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/projeto/**")
@@ -125,6 +120,11 @@ public class SecurityConfig {
         Arrays.stream(environment.getActiveProfiles()).toList().contains("test")
             ? new AuthorizationDecision(true)
             : new AuthorizationDecision(false);
+  }
+
+  private AuthorizationManager<RequestAuthorizationContext> isSwaggerEnabled() {
+    return (authentication, context) ->
+        isSwaggerEnabled ? new AuthorizationDecision(true) : new AuthorizationDecision(false);
   }
 
   /**

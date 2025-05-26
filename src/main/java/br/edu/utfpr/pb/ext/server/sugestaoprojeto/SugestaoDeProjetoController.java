@@ -4,6 +4,7 @@ import br.edu.utfpr.pb.ext.server.generics.CrudController;
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.SugestaoDeProjetoDTO;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.modelmapper.ModelMapper;
@@ -59,6 +60,7 @@ public class SugestaoDeProjetoController
    *
    * @return uma resposta HTTP 200 contendo a lista de sugestões de projeto do usuário logado, no formato DTO
    */
+  @Operation(summary = "Listar sugestões de projeto do usuário logado")
   @GetMapping("/minhas-sugestoes")
   public ResponseEntity<List<SugestaoDeProjetoDTO>> listarSugestoesDoUsuarioLogado() {
     List<SugestaoDeProjeto> sugestoes = service.listarSugestoesDoUsuarioLogado();

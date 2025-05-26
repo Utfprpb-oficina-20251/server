@@ -5,6 +5,8 @@ app:
     jwt:
       secret-key: ${JWT_SECRET_KEY}
       expiration-time: ${JWT_EXPIRATION_TIME:7200000}
+  swagger:
+    enabled: ${SWAGGER_ENABLED:false}
 spring:
   jpa:
     hibernate:
@@ -50,3 +52,6 @@ logging:
     org:
       springframework:
         security: DEBUG
+app:
+  swagger:
+    enabled: true
