@@ -1,9 +1,6 @@
 package br.edu.utfpr.pb.ext.server.auth;
 
-import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
-import br.edu.utfpr.pb.ext.server.auth.dto.LoginUsuarioDTO;
-import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
-import br.edu.utfpr.pb.ext.server.auth.dto.UsuarioCadastradoDTO;
+import br.edu.utfpr.pb.ext.server.auth.dto.*;
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtService;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +27,10 @@ public class AuthController {
   private final ModelMapper modelMapper;
 
   /**
-   * Realiza o cadastro de um novo usuário e retorna os dados do usuário cadastrado.
+   * Registra um novo usuário e retorna os dados do usuário cadastrado.
    *
-   * @param cadastroUsuarioDTO informações necessárias para registrar o novo usuário
-   * @return resposta HTTP com o DTO do usuário cadastrado
+   * @param cadastroUsuarioDTO dados para cadastro do novo usuário
+   * @return resposta HTTP contendo o DTO do usuário cadastrado
    */
   @Operation(summary = "Cadastra um novo usuário")
   @ApiResponse(
@@ -47,24 +45,38 @@ public class AuthController {
   }
 
   /**
-   * Realiza a autenticação do usuário e retorna um token JWT com o tempo de expiração.
+   * Envia um código OTP para o email informado para fins de autenticação.
    *
-   * <p>Recebe as credenciais de login, autentica o usuário e, em caso de sucesso, gera um token JWT
-   * para acesso autenticado, incluindo o tempo de expiração do token na resposta.
-   *
-   * @param loginUsuarioDTO objeto contendo as credenciais do usuário para autenticação
-   * @return ResponseEntity com o token JWT e o tempo de expiração em caso de autenticação
-   *     bem-sucedida
+   * @param email Endereço de email do usuário que receberá o código OTP.
+   * @return Resposta contendo uma mensagem de confirmação do envio do código.
    */
-  @Operation(summary = "Autentica um usuário")
+  @Operation(summary = "Solicita um código OTP para autenticação")
+  @ApiResponse(responseCode = "200", description = "Código enviado com sucesso")
+  @PostMapping("/solicitar-codigo")
+  public ResponseEntity<SolicitacaoCodigoDTO> solicitarCodigoOtp(
+      @RequestParam @Email String email) {
+    authService.solicitarCodigoOtp(email);
+    return ResponseEntity.ok(
+        SolicitacaoCodigoDTO.builder()
+            .mensagem("Código de verificação enviado para " + email)
+            .build());
+  }
+
+  /**
+   * Realiza a autenticação de um usuário utilizando email e código OTP, retornando um token JWT e o tempo de expiração.
+   *
+   * @param requestDTO objeto contendo o email do usuário e o código OTP recebido
+   * @return resposta com o token JWT gerado e o tempo de expiração em segundos
+   */
+  @Operation(summary = "Autentica um usuário usando OTP")
   @ApiResponse(
       responseCode = "200",
       description = "Usuário autenticado com sucesso",
       content = @Content(schema = @Schema(implementation = RespostaLoginDTO.class)))
-  @PostMapping("/login")
-  public ResponseEntity<RespostaLoginDTO> autenticacao(
-      @RequestBody @Valid LoginUsuarioDTO loginUsuarioDTO) {
-    Usuario usuarioAutenticado = authService.autenticacao(loginUsuarioDTO);
+  @PostMapping("/login-otp")
+  public ResponseEntity<RespostaLoginDTO> autenticacaoOtp(
+      @RequestBody @Valid EmailOtpAuthRequestDTO requestDTO) {
+    Usuario usuarioAutenticado = authService.autenticacaoOtp(requestDTO);
     String tokenJwt = jwtService.generateToken(usuarioAutenticado);
     RespostaLoginDTO respostaLoginDTO =
         RespostaLoginDTO.builder()

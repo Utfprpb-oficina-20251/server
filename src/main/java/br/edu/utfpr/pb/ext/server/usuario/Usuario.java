@@ -68,9 +68,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   private Set<Authority> authorities;
 
   /**
-   * Retorna uma coleção vazia de autoridades concedidas ao usuário.
+   * Retorna as autoridades associadas ao usuário.
    *
-   * @return coleção vazia de autoridades
+   * @return conjunto de autoridades concedidas ao usuário
    */
   @Override
   @Transient
@@ -80,16 +80,14 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna uma senha hash fixa como valor temporário para autenticação.
+   * Retorna sempre null, pois a autenticação do usuário é realizada exclusivamente por OTP ou JWT, sem uso de senha.
    *
-   * @return hash bcrypt temporário utilizado como senha do usuário
+   * @return sempre null, indicando que não há senha armazenada ou utilizada para autenticação.
    */
   @Override
   public String getPassword() {
-    // Retornando null intencionalmente pois autenticação será via OTP/JWT
-    // e será implementada em tarefa futura
-    // senha temporária até a implementação do OTP, significa password
-    return "$2a$12$a8kcoUlLHvBlhrEebCYe0uZ2Ofvzijj14HkAfKJmdUGzUCWcUOd7m";
+    // Retornando null intencionalmente pois autenticação é via OTP/JWT
+    return null;
   }
 
   /**

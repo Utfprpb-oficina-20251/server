@@ -23,7 +23,8 @@ public class SugestaoDeProjetoController
   private final ModelMapper modelMapper;
 
   /**
-   * Cria uma instância do controlador de sugestões de projeto, inicializando o serviço e o model mapper necessários.
+   * Cria uma instância do controlador de sugestões de projeto, inicializando o serviço e o model
+   * mapper necessários.
    *
    * @param service implementação do serviço de sugestões de projeto
    * @param modelMapper instância para conversão entre entidades e DTOs
@@ -56,7 +57,7 @@ public class SugestaoDeProjetoController
   }
 
   /**
-   * Lista as sugestões de projeto do usuário atualmente autenticado.
+   * Recupera as sugestões de projeto associadas ao usuário autenticado.
    *
    * @return resposta HTTP 200 com a lista de sugestões de projeto do usuário logado em formato DTO
    */

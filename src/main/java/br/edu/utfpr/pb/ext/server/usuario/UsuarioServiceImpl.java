@@ -29,7 +29,7 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
   private static final String ROLE_SERVIDOR = "ROLE_SERVIDOR";
 
   /**
-   * Recupera o usuário atualmente autenticado no contexto de segurança.
+   * Retorna o usuário atualmente autenticado no contexto de segurança.
    *
    * @return o usuário autenticado
    * @throws IllegalStateException se não houver usuário autenticado ou se o principal não for uma instância de Usuario
@@ -47,10 +47,10 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
   }
 
   /**
-   * Valida se o professor informado está ativo e possui o perfil de servidor.
+   * Verifica se o usuário informado está ativo e possui o perfil de servidor.
    *
    * @param professor usuário a ser validado como professor
-   * @throws IllegalArgumentException se o professor não estiver ativo ou não possuir o perfil de servidor
+   * @throws IllegalArgumentException se o usuário não estiver ativo ou não possuir o perfil de servidor
    */
   public void validarProfessor(Usuario professor) {
     if (!professor.isAtivo()) {

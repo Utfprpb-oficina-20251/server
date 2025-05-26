@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.config;
 
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtAuthenticationFilter;
+import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import java.util.Arrays;
 import java.util.List;
@@ -10,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -21,8 +20,6 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -38,6 +35,8 @@ public class SecurityConfig {
 
   private final UsuarioRepository usuarioRepository;
 
+  private final EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
+
   /**
    * Injeta a chave app.client.origins e os valores existentes separados por vírgula configurado no
    * yml
@@ -49,24 +48,30 @@ public class SecurityConfig {
   private boolean isSwaggerEnabled;
 
   /**
-   * Cria uma instância de configuração de segurança com as dependências necessárias.
+   * Inicializa a configuração de segurança com as dependências de ambiente, repositório de usuários e provedor de autenticação OTP por e-mail.
    *
-   * @param environment ambiente Spring utilizado para acessar propriedades e perfis ativos
-   * @param usuarioRepository repositório para acesso aos dados de usuários
+   * @param environment ambiente Spring para acesso a propriedades e perfis ativos
+   * @param usuarioRepository repositório para operações com dados de usuários
+   * @param emailOtpAuthenticationProvider provedor de autenticação OTP por e-mail
    */
-  public SecurityConfig(Environment environment, UsuarioRepository usuarioRepository) {
+  public SecurityConfig(
+      Environment environment,
+      UsuarioRepository usuarioRepository,
+      EmailOtpAuthenticationProvider emailOtpAuthenticationProvider) {
     this.environment = environment;
     this.usuarioRepository = usuarioRepository;
+    this.emailOtpAuthenticationProvider = emailOtpAuthenticationProvider;
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação, autorização, CORS, CSRF e política de sessão.
+   * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação, autorização, CORS, CSRF e gerenciamento de sessão.
    *
-   * Permite acesso público a endpoints específicos, como GET em `/api/projeto/**`, todas as rotas em `/api/auth/**`, POST em `/api/usuarios/**`, e requisições OPTIONS e `/error`. O acesso ao console H2 é permitido apenas quando o perfil "test" está ativo, e o acesso à documentação Swagger depende da configuração `isSwaggerEnabled`. POST em `/api/projeto/**` é restrito a usuários com papel "SERVIDOR". Todas as demais rotas exigem autenticação.
+   * Permite acesso público a endpoints específicos, como GET em `/api/projeto/**`, todas as rotas em `/api/auth/**`, POST em `/api/usuarios/**`, requisições OPTIONS e `/error`. O acesso ao console H2 é liberado apenas quando o perfil "test" está ativo, e o acesso à documentação Swagger depende da configuração de habilitação. POST em `/api/projeto/**` é restrito a usuários com papel "SERVIDOR". Todas as demais rotas exigem autenticação.
    *
    * As sessões são configuradas como stateless, o CORS é habilitado com configuração personalizada, e um filtro de autenticação JWT é adicionado antes do filtro padrão de autenticação.
    *
    * @param http configuração de segurança HTTP do Spring
+   * @param jwtAuthenticationFilter filtro de autenticação JWT a ser adicionado à cadeia
    * @return a cadeia de filtros de segurança configurada
    * @throws Exception se ocorrer erro na configuração da segurança
    */
@@ -99,15 +104,15 @@ public class SecurityConfig {
                     .authenticated())
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider())
+        .authenticationProvider(emailOtpAuthenticationProvider)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 
   /**
-   * Cria um AuthorizationManager que concede acesso somente quando o perfil ativo inclui "test".
+   * Retorna um AuthorizationManager que autoriza requisições apenas quando o perfil ativo do Spring inclui "test".
    *
-   * @return AuthorizationManager que autoriza requisições apenas se o perfil "test" estiver ativo.
+   * @return AuthorizationManager que concede acesso somente se o perfil "test" estiver ativo.
    */
   private AuthorizationManager<RequestAuthorizationContext> isTestProfile() {
     return (authentication, context) ->
@@ -117,24 +122,13 @@ public class SecurityConfig {
   }
 
   /**
-   * Retorna um AuthorizationManager que concede acesso se a propriedade de habilitação do Swagger estiver ativada.
+   * Retorna um AuthorizationManager que permite acesso apenas se o Swagger estiver habilitado.
    *
-   * @return AuthorizationManager que permite ou nega acesso com base no valor de isSwaggerEnabled.
+   * @return AuthorizationManager que concede autorização quando a flag de habilitação do Swagger está ativada.
    */
   private AuthorizationManager<RequestAuthorizationContext> isSwaggerEnabled() {
     return (authentication, context) ->
         isSwaggerEnabled ? new AuthorizationDecision(true) : new AuthorizationDecision(false);
-  }
-
-  /**
-   * Retorna um codificador de senhas que utiliza o algoritmo BCrypt para garantir o armazenamento
-   * seguro das senhas dos usuários.
-   *
-   * @return instância de PasswordEncoder baseada em BCrypt
-   */
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
   }
 
   /**
@@ -176,8 +170,7 @@ public class SecurityConfig {
   }
 
   /**
-   * Fornece o bean {@link AuthenticationManager} a partir da configuração de autenticação do
-   * Spring.
+   * Expõe o bean {@link AuthenticationManager} configurado pelo Spring Security.
    *
    * @param config configuração de autenticação do Spring Security
    * @return instância do {@link AuthenticationManager} configurada
@@ -187,19 +180,5 @@ public class SecurityConfig {
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
       throws Exception {
     return config.getAuthenticationManager();
-  }
-
-  /**
-   * Cria e configura um AuthenticationProvider baseado em DAO com UserDetailsService e
-   * PasswordEncoder personalizados.
-   *
-   * @return o AuthenticationProvider configurado para autenticação de usuários.
-   */
-  @Bean
-  AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService());
-    authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
   }
 }
