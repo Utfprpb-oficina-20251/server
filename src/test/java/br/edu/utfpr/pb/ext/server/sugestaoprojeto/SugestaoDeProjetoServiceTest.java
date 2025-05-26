@@ -8,7 +8,7 @@ import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.*;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoService;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
-import br.edu.utfpr.pb.ext.server.usuario.UsuarioService;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ public class SugestaoDeProjetoServiceTest {
 
   @Mock private UsuarioRepository usuarioRepository;
 
-  @Mock private UsuarioService usuarioService;
+  @Mock private UsuarioServiceImpl usuarioService;
 
   @InjectMocks private SugestaoDeProjetoService service;
 

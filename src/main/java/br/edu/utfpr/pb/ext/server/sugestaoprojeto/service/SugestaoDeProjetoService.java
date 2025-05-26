@@ -3,7 +3,7 @@ package br.edu.utfpr.pb.ext.server.sugestaoprojeto.service;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.*;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.*;
 import br.edu.utfpr.pb.ext.server.usuario.*;
-import br.edu.utfpr.pb.ext.server.usuario.UsuarioService;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +18,7 @@ public class SugestaoDeProjetoService {
 
   private final SugestaoDeProjetoRepository repository;
   private final UsuarioRepository usuarioRepository;
-  private final UsuarioService usuarioService;
+  private final UsuarioServiceImpl usuarioService;
 
   public SugestaoDeProjetoResponseDTO criar(SugestaoDeProjetoRequestDTO requestDTO) {
 
