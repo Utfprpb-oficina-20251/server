@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.HashSet;
 import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,15 +80,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     Usuario usuario = modelMapper.map(usuarioServidorRequestDTO, Usuario.class);
     Set<Authority> authorities = new HashSet<>();
     Authority servidorAuthority = authorityRepository.findByAuthority("ROLE_SERVIDOR").orElse(null);
-    if (servidorAuthority == null) {
-      return ResponseEntity.badRequest().body(null);
-    }
-    authorities.add(servidorAuthority);
-    usuario.setAuthorities(authorities);
-    Usuario salvo = usuarioService.save(usuario);
-    String token = jwtService.generateToken(salvo);
-    long expiration = jwtService.getExpirationTime();
-    return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
+    return getRespostaLoginDTOResponseEntity(usuario, authorities, servidorAuthority);
   }
 
   @Operation(
@@ -113,10 +106,15 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     Usuario usuario = modelMapper.map(usuarioAlunoRequestDTO, Usuario.class);
     Set<Authority> authorities = new HashSet<>();
     Authority alunoAuthority = authorityRepository.findByAuthority("ROLE_ALUNO").orElse(null);
-    if (alunoAuthority == null) {
+    return getRespostaLoginDTOResponseEntity(usuario, authorities, alunoAuthority);
+  }
+
+  @NotNull
+  private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(Usuario usuario, Set<Authority> authorities, Authority authority) {
+    if (authority == null) {
       return ResponseEntity.badRequest().body(null);
     }
-    authorities.add(alunoAuthority);
+    authorities.add(authority);
     usuario.setAuthorities(authorities);
     Usuario salvo = usuarioService.save(usuario);
     String token = jwtService.generateToken(salvo);

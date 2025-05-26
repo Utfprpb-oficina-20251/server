@@ -1,5 +1,9 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,16 +12,9 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.util.Collection;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceImplTest {
@@ -114,7 +111,7 @@ class UsuarioServiceImplTest {
     @Test
     void validarProfessor_QuandoProfessorSemRoleServidor_DeveLancarIllegalArgumentException() {
         when(usuario.isAtivo()).thenReturn(true);
-        Collection<GrantedAuthority> auths = List.of(
+        Set auths = Set.of(
             new SimpleGrantedAuthority("ROLE_ALUNO"),
             new SimpleGrantedAuthority("ROLE_OTHER")
         );
@@ -130,7 +127,7 @@ class UsuarioServiceImplTest {
     @Test
     void validarProfessor_QuandoProfessorValido_NaoDeveLancarExcecao() {
         when(usuario.isAtivo()).thenReturn(true);
-        Collection<GrantedAuthority> auths = List.of(
+        Set auths = Set.of(
             new SimpleGrantedAuthority("ROLE_SERVIDOR"),
             new SimpleGrantedAuthority("ROLE_OTHER")
         );
@@ -142,7 +139,7 @@ class UsuarioServiceImplTest {
     @Test
     void validarProfessor_QuandoProfessorComApenasRoleServidor_NaoDeveLancarExcecao() {
         when(usuario.isAtivo()).thenReturn(true);
-        Collection<GrantedAuthority> auths = List.of(
+        Set auths = Set.of(
             new SimpleGrantedAuthority("ROLE_SERVIDOR")
         );
         when(usuario.getAuthorities()).thenReturn(auths);
