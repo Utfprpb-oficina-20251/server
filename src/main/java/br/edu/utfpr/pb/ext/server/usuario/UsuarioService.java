@@ -14,7 +14,11 @@ public class UsuarioService {
     if (auth == null || !auth.isAuthenticated()) {
       throw new IllegalStateException("Nenhum usuário autenticado!");
     }
-    return (Usuario) auth.getPrincipal();
+    Object principal = auth.getPrincipal();
+    if (!(principal instanceof Usuario)) {
+      throw new IllegalStateException("Principal não é uma instância de Usuario!");
+    }
+    return (Usuario) principal;
   }
 
   public void validarProfessor(Usuario professor) {
