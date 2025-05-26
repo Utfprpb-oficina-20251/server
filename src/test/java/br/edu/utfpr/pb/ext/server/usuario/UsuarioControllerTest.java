@@ -172,7 +172,7 @@ class UsuarioControllerTest {
 
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {
     UsuarioServidorRequestDTO request = new UsuarioServidorRequestDTO();
-    request.setNomeCompleto("teste");
+    request.setNome("teste");
     request.setCpf("29212492002");
     request.setSiape("1234567");
     request.setEmailInstitucional("batata@utfpr.edu.br");
@@ -182,7 +182,7 @@ class UsuarioControllerTest {
 
   private UsuarioAlunoRequestDTO createUsuarioAlunoRequestDTO() {
     UsuarioAlunoRequestDTO request = new UsuarioAlunoRequestDTO();
-    request.setNomeCompleto("teste");
+    request.setNome("teste");
     request.setCpf("29212492002");
     request.setRegistroAcademico("1234567");
     request.setEmailInstitucional("batata@alunos.utfpr.edu.br");

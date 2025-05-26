@@ -12,7 +12,7 @@ public class UsuarioServidorRequestDTO {
 
   private Long id;
 
-  @NotNull private String nomeCompleto;
+  @NotNull private String nome;
 
   @NotNull @CPF @UniqueCpf private String cpf;
 
