@@ -35,6 +35,10 @@ Url do banco de dados qual a aplicação vai se conectar, opcional para teste
 
 `POSTGRES_DB` Nome do banco de dados utilizado ao criar o banco pelo docker-compose.yml
 
+`SWAGGER_ENABLED` Define se o Swagger deve exibir a documentação da API, opcional
+
+`SENDGRID_API_KEY` Chave de API do SendGrid para envio de e-mails, opcional para desenvolvimento
+
 
 
 ### Exemplo de envfile
@@ -47,4 +51,6 @@ DATABASE_URL=
 DATABASE_USERNAME=
 DATABASE_PASSWORD=
 POSTGRES_DB=
+SWAGGER_ENABLED=
+SENDGRID_API_KEY=
 ```
