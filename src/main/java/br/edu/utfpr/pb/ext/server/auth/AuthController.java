@@ -50,14 +50,12 @@ public class AuthController {
 
   /**
    * Solicita o envio de um código OTP para o email do usuário.
-   * 
+   *
    * @param email Email do usuário
    * @return Resposta HTTP indicando sucesso ou falha
    */
   @Operation(summary = "Solicita um código OTP para autenticação")
-  @ApiResponse(
-      responseCode = "200",
-      description = "Código enviado com sucesso")
+  @ApiResponse(responseCode = "200", description = "Código enviado com sucesso")
   @PostMapping("/solicitar-codigo")
   public ResponseEntity<Map<String, String>> solicitarCodigoOtp(@RequestParam String email) {
     authService.solicitarCodigoOtp(email);
@@ -68,7 +66,7 @@ public class AuthController {
 
   /**
    * Autentica um usuário usando o código OTP e retorna um token JWT.
-   * 
+   *
    * @param requestDTO DTO contendo email e código OTP
    * @return ResponseEntity com o token JWT e tempo de expiração
    */
@@ -79,10 +77,11 @@ public class AuthController {
       content = @Content(schema = @Schema(implementation = RespostaLoginDTO.class)))
   @PostMapping("/login-otp")
   public ResponseEntity<RespostaLoginDTO> autenticacaoOtp(
-          @RequestBody @Valid EmailOtpAuthRequestDTO requestDTO) {
+      @RequestBody @Valid EmailOtpAuthRequestDTO requestDTO) {
     Usuario usuarioAutenticado = authService.autenticacaoOtp(requestDTO);
     String tokenJwt = jwtService.generateToken(usuarioAutenticado);
-    RespostaLoginDTO respostaLoginDTO = RespostaLoginDTO.builder()
+    RespostaLoginDTO respostaLoginDTO =
+        RespostaLoginDTO.builder()
             .token(tokenJwt)
             .expiresIn(jwtService.getExpirationTime())
             .build();

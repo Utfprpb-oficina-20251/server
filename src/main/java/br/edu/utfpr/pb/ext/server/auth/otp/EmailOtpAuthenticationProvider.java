@@ -14,40 +14,40 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
 
-    private final EmailCodeValidationService emailCodeValidationService;
-    private final UsuarioRepository usuarioRepository;
+  private final EmailCodeValidationService emailCodeValidationService;
+  private final UsuarioRepository usuarioRepository;
 
-    public EmailOtpAuthenticationProvider(
-            EmailCodeValidationService emailCodeValidationService,
-            UsuarioRepository usuarioRepository) {
-        this.emailCodeValidationService = emailCodeValidationService;
-        this.usuarioRepository = usuarioRepository;
+  public EmailOtpAuthenticationProvider(
+      EmailCodeValidationService emailCodeValidationService, UsuarioRepository usuarioRepository) {
+    this.emailCodeValidationService = emailCodeValidationService;
+    this.usuarioRepository = usuarioRepository;
+  }
+
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    EmailOtpAuthenticationToken authToken = (EmailOtpAuthenticationToken) authentication;
+    String email = authToken.getPrincipal().toString();
+    String code = authToken.getCredentials().toString();
+
+    // Validate the OTP code for the "autenticacao" type
+    boolean isValid = emailCodeValidationService.validateCode(email, "autenticacao", code);
+
+    if (!isValid) {
+      throw new BadCredentialsException("Código de verificação inválido ou expirado");
     }
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        EmailOtpAuthenticationToken authToken = (EmailOtpAuthenticationToken) authentication;
-        String email = authToken.getPrincipal().toString();
-        String code = authToken.getCredentials().toString();
-        
-        // Validate the OTP code for the "autenticacao" type
-        boolean isValid = emailCodeValidationService.validateCode(email, "autenticacao", code);
-        
-        if (!isValid) {
-            throw new BadCredentialsException("Código de verificação inválido ou expirado");
-        }
-        
-        // Find the user by email
-        UserDetails userDetails = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
-        
-        // Create an authentication token with the user's authorities
-        return new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-    }
+    // Find the user by email
+    UserDetails userDetails =
+        usuarioRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return EmailOtpAuthenticationToken.class.isAssignableFrom(authentication);
-    }
+    // Create an authentication token with the user's authorities
+    return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+  }
+
+  @Override
+  public boolean supports(Class<?> authentication) {
+    return EmailOtpAuthenticationToken.class.isAssignableFrom(authentication);
+  }
 }

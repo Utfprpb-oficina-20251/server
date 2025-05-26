@@ -55,7 +55,7 @@ public class SecurityConfig {
    * @param emailOtpAuthenticationProvider provedor de autenticação OTP
    */
   public SecurityConfig(
-      Environment environment, 
+      Environment environment,
       UsuarioRepository usuarioRepository,
       EmailOtpAuthenticationProvider emailOtpAuthenticationProvider) {
     this.environment = environment;

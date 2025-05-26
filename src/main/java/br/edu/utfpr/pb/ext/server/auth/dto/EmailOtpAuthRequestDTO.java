@@ -8,9 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class EmailOtpAuthRequestDTO {
-    @NotBlank @Email
-    private String email;
-    
-    @NotBlank
-    private String code;
+  @NotBlank @Email private String email;
+
+  @NotBlank private String code;
 }

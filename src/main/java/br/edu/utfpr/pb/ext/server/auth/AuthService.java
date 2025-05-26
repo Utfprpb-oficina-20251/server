@@ -69,14 +69,15 @@ public class AuthService {
 
   /**
    * Solicita o envio de um código OTP para o email do usuário.
-   * 
+   *
    * @param email Email do usuário
    * @return true se o código foi enviado com sucesso
    */
   public boolean solicitarCodigoOtp(String email) {
     try {
       // Verificar se o usuário existe
-      usuarioRepository.findByEmail(email)
+      usuarioRepository
+          .findByEmail(email)
           .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
 
       emailService.generateAndSendCode(email, "autenticacao");
@@ -89,7 +90,7 @@ public class AuthService {
 
   /**
    * Autentica um usuário usando o código OTP.
-   * 
+   *
    * @param dto DTO contendo email e código OTP
    * @return O usuário autenticado
    */
@@ -97,10 +98,10 @@ public class AuthService {
     try {
       EmailOtpAuthenticationToken authToken =
           new EmailOtpAuthenticationToken(dto.getEmail(), dto.getCode());
-      Authentication authentication = 
-          emailOtpAuthenticationProvider.authenticate(authToken);
+      Authentication authentication = emailOtpAuthenticationProvider.authenticate(authToken);
       SecurityContextHolder.getContext().setAuthentication(authentication);
-      return usuarioRepository.findByEmail(dto.getEmail())
+      return usuarioRepository
+          .findByEmail(dto.getEmail())
           .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
     } catch (BadCredentialsException ex) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Código inválido ou expirado");

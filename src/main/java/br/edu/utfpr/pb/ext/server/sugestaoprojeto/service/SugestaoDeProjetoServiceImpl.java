@@ -32,7 +32,9 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   /**
    * Prepara uma entidade SugestaoDeProjeto antes de ser salva.
    *
-   * Define o usuário logado como aluno, inicializa o status como AGUARDANDO e, se informado, associa e valida o professor responsável. Lança EntityNotFoundException caso o professor especificado não seja encontrado.
+   * <p>Define o usuário logado como aluno, inicializa o status como AGUARDANDO e, se informado,
+   * associa e valida o professor responsável. Lança EntityNotFoundException caso o professor
+   * especificado não seja encontrado.
    *
    * @param entity sugestão de projeto a ser preparada para persistência
    * @return a entidade SugestaoDeProjeto pronta para ser salva
@@ -60,7 +62,8 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   /**
    * Retorna uma lista de sugestões de projeto associadas ao aluno especificado.
    *
-   * O acesso é permitido apenas para usuários com o papel "ROLE_SERVIDOR" ou para o próprio aluno.
+   * <p>O acesso é permitido apenas para usuários com o papel "ROLE_SERVIDOR" ou para o próprio
+   * aluno.
    *
    * @param alunoId ID do aluno cujas sugestões de projeto serão listadas
    * @return lista de sugestões de projeto do aluno informado
