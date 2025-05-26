@@ -34,8 +34,7 @@ public class SugestaoDeProjeto extends BaseEntity {
   private Usuario professor;
 
   @Enumerated(EnumType.STRING)
-  @Builder.Default
-  private StatusSugestao status = StatusSugestao.AGUARDANDO;
+  private StatusSugestao status;
 
   @CreationTimestamp
   @Column(updatable = false)

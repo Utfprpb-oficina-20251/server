@@ -171,6 +171,9 @@ public class SugestaoDeProjetoServiceTest {
             });
 
     // 3. Execução
+    Usuario aluno = new Usuario();
+    aluno.setId(1L);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
     SugestaoDeProjetoResponseDTO response = service.criar(request);
 
     // 4. Verificações

@@ -53,6 +53,7 @@ public class SugestaoDeProjetoService {
     return repository.findAll().stream().map(this::toResponseDTO).toList();
   }
 
+  @PreAuthorize("hasRole('ROLE_SERVIDOR') or #alunoId == authentication.principal.id")
   public List<SugestaoDeProjetoResponseDTO> listarPorAluno(Long alunoId) {
     return repository.findByAlunoId(alunoId).stream()
         .map(this::toResponseDTO)
