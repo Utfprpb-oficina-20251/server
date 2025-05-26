@@ -36,10 +36,13 @@ public class AuthService {
   private final EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
 
   /**
-   * Realiza o cadastro de um novo usuário com base nos dados fornecidos.
+   * Cadastra um novo usuário atribuindo a autoridade conforme o domínio do e-mail informado.
    *
-   * @param dto objeto contendo nome, e-mail e registro do usuário a ser cadastrado
-   * @return o usuário salvo após o cadastro
+   * O papel do usuário é determinado automaticamente com base no domínio do e-mail, podendo ser aluno ou servidor.
+   * Lança uma exceção com status 400 caso a autoridade correspondente não seja encontrada.
+   *
+   * @param dto dados para cadastro do usuário, incluindo nome, e-mail e registro
+   * @return o usuário cadastrado e persistido no banco de dados
    */
   @Operation(summary = "Cadastra um novo usuário")
   public Usuario cadastro(CadastroUsuarioDTO dto) {
@@ -58,6 +61,16 @@ public class AuthService {
     return usuarioRepository.save(usuario);
   }
 
+  /**
+   * Determina o papel do usuário com base no domínio do e-mail informado.
+   *
+   * Retorna "ROLE_SERVIDOR" se o e-mail termina com "@utfpr.edu.br" ou "ROLE_ALUNO" se termina com "@alunos.utfpr.edu.br".
+   * Lança uma exceção se o domínio do e-mail for inválido.
+   *
+   * @param dto DTO contendo o e-mail do usuário.
+   * @return o nome da role correspondente ao domínio do e-mail.
+   * @throws ResponseStatusException se o e-mail não pertencer a um domínio permitido.
+   */
   @NotNull private static String obtemRoleDeUsuario(CadastroUsuarioDTO dto) {
     final String ROLE_ALUNO = "ROLE_ALUNO";
     final String ROLE_SERVIDOR = "ROLE_SERVIDOR";
@@ -77,10 +90,12 @@ public class AuthService {
   }
 
   /**
-   * Solicita o envio de um código OTP para o email do usuário.
+   * Envia um código OTP para o email informado, caso o usuário exista.
    *
-   * @param email Email do usuário
+   * @param email endereço de email do usuário que receberá o código OTP
    * @return true se o código foi enviado com sucesso
+   *
+   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public boolean solicitarCodigoOtp(String email) {
@@ -101,10 +116,13 @@ public class AuthService {
   }
 
   /**
-   * Autentica um usuário usando o código OTP.
+   * Realiza a autenticação de um usuário utilizando um código OTP enviado por email.
    *
-   * @param dto DTO contendo email e código OTP
-   * @return O usuário autenticado
+   * @param dto Objeto contendo o email do usuário e o código OTP recebido.
+   * @return O usuário autenticado correspondente ao email informado.
+   *
+   * @throws ResponseStatusException Se o código OTP for inválido ou expirado, retorna erro 401.
+   * @throws UsernameNotFoundException Se o email informado não estiver cadastrado.
    */
   @Operation(summary = "Autentica um usuário usando o código OTP")
   public Usuario autenticacaoOtp(EmailOtpAuthRequestDTO dto) {

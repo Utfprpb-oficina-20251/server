@@ -18,12 +18,29 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   private final EmailCodeValidationService emailCodeValidationService;
   private final UsuarioRepository usuarioRepository;
 
+  /**
+   * Cria uma instância do provedor de autenticação OTP por e-mail.
+   *
+   * @param emailCodeValidationService serviço responsável por validar códigos OTP enviados por e-mail
+   * @param usuarioRepository repositório para busca de usuários pelo e-mail
+   */
   public EmailOtpAuthenticationProvider(
       EmailCodeValidationService emailCodeValidationService, UsuarioRepository usuarioRepository) {
     this.emailCodeValidationService = emailCodeValidationService;
     this.usuarioRepository = usuarioRepository;
   }
 
+  /**
+   * Realiza a autenticação de um usuário utilizando um código OTP enviado por e-mail.
+   *
+   * Valida o código OTP fornecido para o e-mail informado e, se válido, recupera os detalhes do usuário.
+   * Em caso de sucesso, retorna um token de autenticação com as autoridades do usuário.
+   *
+   * @param authentication objeto contendo o e-mail e o código OTP.
+   * @return um token de autenticação autenticado com os detalhes do usuário.
+   * @throws BadCredentialsException se o código OTP for inválido ou expirado.
+   * @throws UsernameNotFoundException se o usuário não for encontrado pelo e-mail informado.
+   */
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     EmailOtpAuthenticationToken authToken = (EmailOtpAuthenticationToken) authentication;
@@ -47,6 +64,12 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
     return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
   }
 
+  /**
+   * Verifica se este provedor de autenticação suporta o tipo de autenticação fornecido.
+   *
+   * @param authentication classe do token de autenticação a ser verificado
+   * @return {@code true} se o tipo de autenticação for compatível com {@code EmailOtpAuthenticationToken}
+   */
   @Override
   public boolean supports(Class<?> authentication) {
     return EmailOtpAuthenticationToken.class.isAssignableFrom(authentication);

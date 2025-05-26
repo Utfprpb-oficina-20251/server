@@ -27,10 +27,10 @@ public class AuthController {
   private final ModelMapper modelMapper;
 
   /**
-   * Realiza o cadastro de um novo usuário e retorna os dados do usuário cadastrado.
+   * Registra um novo usuário e retorna os dados do usuário cadastrado.
    *
-   * @param cadastroUsuarioDTO informações necessárias para registrar o novo usuário
-   * @return resposta HTTP com o DTO do usuário cadastrado
+   * @param cadastroUsuarioDTO dados para cadastro do novo usuário
+   * @return resposta HTTP contendo o DTO do usuário cadastrado
    */
   @Operation(summary = "Cadastra um novo usuário")
   @ApiResponse(
@@ -45,10 +45,10 @@ public class AuthController {
   }
 
   /**
-   * Solicita o envio de um código OTP para o email do usuário.
+   * Envia um código OTP para o email informado para fins de autenticação.
    *
-   * @param email Email do usuário
-   * @return Resposta HTTP indicando sucesso ou falha
+   * @param email Endereço de email do usuário que receberá o código OTP.
+   * @return Resposta contendo uma mensagem de confirmação do envio do código.
    */
   @Operation(summary = "Solicita um código OTP para autenticação")
   @ApiResponse(responseCode = "200", description = "Código enviado com sucesso")
@@ -63,10 +63,10 @@ public class AuthController {
   }
 
   /**
-   * Autentica um usuário usando o código OTP e retorna um token JWT.
+   * Realiza a autenticação de um usuário utilizando email e código OTP, retornando um token JWT e o tempo de expiração.
    *
-   * @param requestDTO DTO contendo email e código OTP
-   * @return ResponseEntity com o token JWT e tempo de expiração
+   * @param requestDTO objeto contendo o email do usuário e o código OTP recebido
+   * @return resposta com o token JWT gerado e o tempo de expiração em segundos
    */
   @Operation(summary = "Autentica um usuário usando OTP")
   @ApiResponse(
