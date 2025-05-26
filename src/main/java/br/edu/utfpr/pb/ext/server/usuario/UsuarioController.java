@@ -57,6 +57,12 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return modelMapper;
   }
 
+  /**
+   * Cria um novo usuário com perfil de servidor e retorna uma resposta de login com token JWT.
+   *
+   * @param usuarioServidorRequestDTO dados do usuário servidor a ser criado
+   * @return resposta HTTP contendo o token JWT e a data de expiração em caso de sucesso, ou HTTP 400 se a autoridade não for encontrada
+   */
   @Operation(
       summary = "Create a new servidor user",
       description = "Creates a new servidor user and returns a login response with a token.")
@@ -83,6 +89,12 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return getRespostaLoginDTOResponseEntity(usuario, authorities, servidorAuthority);
   }
 
+  /**
+   * Cria um novo usuário com perfil de aluno e retorna uma resposta de login contendo o token JWT e o tempo de expiração.
+   *
+   * @param usuarioAlunoRequestDTO dados do usuário aluno a ser criado
+   * @return resposta HTTP com o token de autenticação e tempo de expiração, ou erro 400 se a autoridade não for encontrada
+   */
   @Operation(
       summary = "Create a new aluno user",
       description = "Creates a new aluno user and returns a login response with a token.")
@@ -109,6 +121,16 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return getRespostaLoginDTOResponseEntity(usuario, authorities, alunoAuthority);
   }
 
+  /**
+   * Cria uma resposta HTTP contendo um token JWT e tempo de expiração após salvar o usuário com a autoridade fornecida.
+   *
+   * Retorna HTTP 400 se a autoridade informada for nula.
+   *
+   * @param usuario entidade do usuário a ser salva
+   * @param authorities conjunto de autoridades do usuário
+   * @param authority autoridade a ser adicionada ao usuário
+   * @return resposta HTTP com o DTO de login contendo o token e a expiração, ou HTTP 400 se a autoridade for nula
+   */
   @NotNull private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(
       Usuario usuario, Set<Authority> authorities, Authority authority) {
     if (authority == null) {

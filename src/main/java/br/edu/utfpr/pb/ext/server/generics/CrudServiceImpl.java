@@ -51,10 +51,14 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Salva a entidade fornecida no repositório.
+   * Salva a entidade fornecida após aplicar os ganchos de pré e pós-processamento.
+   *
+   * Aplica o método `preSave` antes de persistir a entidade e `postsave` após a persistência.
+   * Lança uma exceção se a entidade for nula.
    *
    * @param entity entidade a ser salva
-   * @return a entidade salva, possivelmente atualizada pelo repositório
+   * @return a entidade salva, possivelmente modificada pelos ganchos de pré ou pós-processamento
+   * @throws IllegalArgumentException se a entidade fornecida for nula
    */
   @Override
   public T save(T entity) {
@@ -67,10 +71,26 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
     return entity;
   }
 
+  /**
+   * Ponto de extensão chamado antes de salvar a entidade.
+   *
+   * Pode ser sobrescrito para realizar validações ou modificações na entidade antes da persistência.
+   *
+   * @param entity entidade a ser salva
+   * @return a entidade possivelmente modificada antes do salvamento
+   */
   public T preSave(T entity) {
     return entity;
   }
 
+  /**
+   * Ponto de extensão chamado após a persistência de uma entidade.
+   *
+   * Pode ser sobrescrito para executar lógica adicional após o salvamento. Por padrão, retorna a entidade sem modificações.
+   *
+   * @param entity entidade recém-persistida
+   * @return a entidade, possivelmente modificada após o salvamento
+   */
   public T postsave(T entity) {
     return entity;
   }
