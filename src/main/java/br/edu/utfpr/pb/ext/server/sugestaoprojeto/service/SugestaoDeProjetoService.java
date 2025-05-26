@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SugestaoDeProjetoService{
+public class SugestaoDeProjetoService {
 
   private final SugestaoDeProjetoRepository repository;
   private final UsuarioRepository usuarioRepository;
@@ -39,11 +39,7 @@ public class SugestaoDeProjetoService{
               .findById(requestDTO.getProfessorId())
               .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
 
-      if (!professor.isAtivo()
-          || professor.getAuthorities().stream()
-              .noneMatch(a -> a.getAuthority().equals("ROLE_SERVIDOR"))) {
-        throw new IllegalArgumentException("Professor não é servidor ativo");
-      }
+      usuarioService.validarProfessor(professor);
       sugestao.setProfessor(professor);
     }
 
@@ -54,10 +50,7 @@ public class SugestaoDeProjetoService{
 
   @PreAuthorize("hasAnyRole('ROLE_SERVIDOR')")
   public List<SugestaoDeProjetoResponseDTO> listarTodos() {
-    return repository.findAll()
-            .stream()
-            .map(this::toResponseDTO)
-            .toList();
+    return repository.findAll().stream().map(this::toResponseDTO).toList();
   }
 
   public List<SugestaoDeProjetoResponseDTO> listarPorAluno(Long alunoId) {

@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.sugestaoprojeto;
 
+import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import jakarta.persistence.*;
@@ -39,4 +40,8 @@ public class SugestaoDeProjeto extends BaseEntity {
   @CreationTimestamp
   @Column(updatable = false)
   private LocalDateTime dataCriacao;
+
+  @ManyToOne
+  @JoinColumn(name = "curso_id")
+  @NotNull private Curso curso;
 }

@@ -8,6 +8,7 @@ import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.*;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoService;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioService;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @ExtendWith(MockitoExtension.class)
 public class SugestaoDeProjetoServiceTest {
@@ -25,6 +23,8 @@ public class SugestaoDeProjetoServiceTest {
   @Mock private SugestaoDeProjetoRepository repository;
 
   @Mock private UsuarioRepository usuarioRepository;
+
+  @Mock private UsuarioService usuarioService;
 
   @InjectMocks private SugestaoDeProjetoService service;
 
@@ -49,12 +49,7 @@ public class SugestaoDeProjetoServiceTest {
 
     aluno.setId(1L);
 
-    // Mock do usuário autenticado
-    Authentication auth = mock(Authentication.class);
-    SecurityContext securityContext = mock(SecurityContext.class);
-    when(securityContext.getAuthentication()).thenReturn(auth);
-    when(auth.getPrincipal()).thenReturn(aluno);
-    SecurityContextHolder.setContext(securityContext);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
 
     // Mock da entidade salva (USANDO BUILDER)
     SugestaoDeProjeto sugestaoSalva =
@@ -133,11 +128,7 @@ public class SugestaoDeProjetoServiceTest {
     // 2. Mock do aluno autenticado (ADICIONE ESSA PARTE!)
     Usuario aluno = new Usuario();
     aluno.setId(1L);
-    Authentication auth = mock(Authentication.class);
-    SecurityContext securityContext = mock(SecurityContext.class);
-    when(securityContext.getAuthentication()).thenReturn(auth);
-    when(auth.getPrincipal()).thenReturn(aluno);
-    SecurityContextHolder.setContext(securityContext);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
 
     // 3. Mock do repositório para capturar o objeto salvo
     SugestaoDeProjeto sugestaoSalva = new SugestaoDeProjeto();
