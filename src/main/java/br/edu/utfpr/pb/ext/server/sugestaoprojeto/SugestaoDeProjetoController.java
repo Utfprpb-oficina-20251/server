@@ -21,6 +21,12 @@ public class SugestaoDeProjetoController
   private final SugestaoDeProjetoServiceImpl service;
   private final ModelMapper modelMapper;
 
+  /**
+   * Cria uma instância do controlador de sugestões de projeto, inicializando o serviço e o model mapper necessários.
+   *
+   * @param service implementação do serviço de sugestões de projeto
+   * @param modelMapper instância para conversão entre entidades e DTOs
+   */
   public SugestaoDeProjetoController(
       SugestaoDeProjetoServiceImpl service, ModelMapper modelMapper) {
     super(SugestaoDeProjeto.class, SugestaoDeProjetoDTO.class);
@@ -28,22 +34,43 @@ public class SugestaoDeProjetoController
     this.modelMapper = modelMapper;
   }
 
+  /**
+   * Retorna a instância do serviço responsável pelas operações de CRUD para SugestaoDeProjeto.
+   *
+   * @return o serviço de SugestaoDeProjeto utilizado pelo controlador
+   */
   @Override
   protected ICrudService<SugestaoDeProjeto, Long> getService() {
     return this.service;
   }
 
+  /**
+   * Retorna a instância de ModelMapper utilizada para conversão entre entidades e DTOs.
+   *
+   * @return o ModelMapper configurado para este controlador
+   */
   @Override
   protected ModelMapper getModelMapper() {
     return this.modelMapper;
   }
 
+  /**
+   * Retorna as sugestões de projeto associadas ao usuário atualmente autenticado.
+   *
+   * @return uma resposta HTTP 200 contendo a lista de sugestões de projeto do usuário logado, no formato DTO
+   */
   @GetMapping("/minhas-sugestoes")
   public ResponseEntity<List<SugestaoDeProjetoDTO>> listarSugestoesDoUsuarioLogado() {
     List<SugestaoDeProjeto> sugestoes = service.listarSugestoesDoUsuarioLogado();
     return ResponseEntity.ok(sugestoes.stream().map(this::convertToResponseDTO).toList());
   }
 
+  /**
+   * Converte uma entidade SugestaoDeProjeto em seu DTO correspondente.
+   *
+   * @param sugestaoDeProjeto entidade de sugestão de projeto a ser convertida
+   * @return DTO representando a sugestão de projeto fornecida
+   */
   private SugestaoDeProjetoDTO convertToResponseDTO(SugestaoDeProjeto sugestaoDeProjeto) {
     return getModelMapper().map(sugestaoDeProjeto, SugestaoDeProjetoDTO.class);
   }

@@ -64,10 +64,10 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Converte um DTO em uma instância da entidade correspondente usando o ModelMapper.
+   * Converte um DTO em uma entidade do tipo gerenciado pelo controlador.
    *
-   * @param entityDto DTO a ser convertido.
-   * @return Instância da entidade resultante da conversão.
+   * @param entityDto objeto DTO a ser convertido
+   * @return entidade correspondente ao DTO fornecido
    */
   protected T convertToEntity(D entityDto) {
     return getModelMapper().map(entityDto, this.typeClass);

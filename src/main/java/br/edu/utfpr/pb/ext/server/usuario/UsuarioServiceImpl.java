@@ -16,6 +16,11 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
     this.usuarioRepository = usuarioRepository;
   }
 
+  /**
+   * Retorna o repositório JPA utilizado para operações CRUD da entidade Usuario.
+   *
+   * @return o repositório JpaRepository para Usuario
+   */
   @Override
   protected JpaRepository<Usuario, Long> getRepository() {
     return usuarioRepository;
@@ -23,6 +28,12 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
 
   private static final String ROLE_SERVIDOR = "ROLE_SERVIDOR";
 
+  /**
+   * Recupera o usuário atualmente autenticado no contexto de segurança.
+   *
+   * @return o usuário autenticado
+   * @throws IllegalStateException se não houver usuário autenticado ou se o principal não for uma instância de Usuario
+   */
   public Usuario obterUsuarioLogado() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || !auth.isAuthenticated()) {
@@ -35,6 +46,12 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
     return (Usuario) principal;
   }
 
+  /**
+   * Valida se o professor informado está ativo e possui o perfil de servidor.
+   *
+   * @param professor usuário a ser validado como professor
+   * @throws IllegalArgumentException se o professor não estiver ativo ou não possuir o perfil de servidor
+   */
   public void validarProfessor(Usuario professor) {
     if (!professor.isAtivo()) {
       throw new IllegalArgumentException("Professor deve estar ativo");
