@@ -4,8 +4,11 @@ import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "tb_sugestao_de_projeto")
@@ -13,8 +16,14 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class SugestaoDeProjeto extends BaseEntity {
+
+  @NotBlank @Size(min = 5, max = 100) private String titulo;
+
+  @NotBlank @Size(min = 30) private String descricao;
+
+  @NotBlank @Size(max = 500) private String publicoAlvo;
 
   @ManyToOne
   @JoinColumn(name = "aluno_id")
@@ -22,11 +31,16 @@ public class SugestaoDeProjeto extends BaseEntity {
 
   @ManyToOne
   @JoinColumn(name = "professor_id")
-  @NotNull private Usuario professor;
+  private Usuario professor;
+
+  @Enumerated(EnumType.STRING)
+  private StatusSugestao status;
+
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime dataCriacao;
 
   @ManyToOne
   @JoinColumn(name = "curso_id")
   @NotNull private Curso curso;
-
-  @NotNull private String descricao;
 }
