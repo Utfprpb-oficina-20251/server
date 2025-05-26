@@ -69,7 +69,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
    * @param entityDto DTO a ser convertido.
    * @return Instância da entidade resultante da conversão.
    */
-  private T convertToEntity(D entityDto) {
+  protected T convertToEntity(D entityDto) {
     return getModelMapper().map(entityDto, this.typeClass);
   }
 

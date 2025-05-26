@@ -58,7 +58,18 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    */
   @Override
   public T save(T entity) {
-    return getRepository().save(entity);
+    entity = preSave(entity);
+    entity = getRepository().save(entity);
+    entity = postsave(entity);
+    return entity;
+  }
+
+  public T preSave(T entity) {
+    return entity;
+  }
+
+  public T postsave(T entity) {
+    return entity;
   }
 
   /**
