@@ -19,11 +19,24 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   private final UsuarioRepository usuarioRepository;
   private final IUsuarioService usuarioService;
 
+  /**
+   * Retorna o repositório utilizado para operações CRUD de SugestaoDeProjeto.
+   *
+   * @return o repositório de SugestaoDeProjeto
+   */
   @Override
   protected JpaRepository<SugestaoDeProjeto, Long> getRepository() {
     return repository;
   }
 
+  /**
+   * Prepara uma entidade SugestaoDeProjeto antes de ser salva.
+   *
+   * Define o usuário logado como aluno, inicializa o status como AGUARDANDO e, se informado, associa e valida o professor responsável. Lança EntityNotFoundException caso o professor especificado não seja encontrado.
+   *
+   * @param entity sugestão de projeto a ser preparada para persistência
+   * @return a entidade SugestaoDeProjeto pronta para ser salva
+   */
   @Override
   public SugestaoDeProjeto preSave(SugestaoDeProjeto entity) {
 
@@ -44,11 +57,24 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
     return super.preSave(entity);
   }
 
+  /**
+   * Retorna uma lista de sugestões de projeto associadas ao aluno especificado.
+   *
+   * O acesso é permitido apenas para usuários com o papel "ROLE_SERVIDOR" ou para o próprio aluno.
+   *
+   * @param alunoId ID do aluno cujas sugestões de projeto serão listadas
+   * @return lista de sugestões de projeto do aluno informado
+   */
   @PreAuthorize("hasRole('ROLE_SERVIDOR') or #alunoId == authentication.principal.id")
   public List<SugestaoDeProjeto> listarPorAluno(Long alunoId) {
     return repository.findByAlunoId(alunoId);
   }
 
+  /**
+   * Retorna a lista de sugestões de projeto associadas ao usuário atualmente logado.
+   *
+   * @return lista de sugestões de projeto do usuário logado
+   */
   public List<SugestaoDeProjeto> listarSugestoesDoUsuarioLogado() {
     Usuario usuario = usuarioService.obterUsuarioLogado();
     return repository.findByAlunoId(usuario.getId());
