@@ -1,7 +1,7 @@
 package br.edu.utfpr.pb.ext.server.auth;
 
 import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
-import br.edu.utfpr.pb.ext.server.auth.dto.LoginUsuarioDTO;
+import br.edu.utfpr.pb.ext.server.auth.dto.EmailOtpAuthRequestDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.UsuarioCadastradoDTO;
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtService;
@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -47,27 +49,40 @@ public class AuthController {
   }
 
   /**
-   * Realiza a autenticação do usuário e retorna um token JWT com o tempo de expiração.
-   *
-   * <p>Recebe as credenciais de login, autentica o usuário e, em caso de sucesso, gera um token JWT
-   * para acesso autenticado, incluindo o tempo de expiração do token na resposta.
-   *
-   * @param loginUsuarioDTO objeto contendo as credenciais do usuário para autenticação
-   * @return ResponseEntity com o token JWT e o tempo de expiração em caso de autenticação
-   *     bem-sucedida
+   * Solicita o envio de um código OTP para o email do usuário.
+   * 
+   * @param email Email do usuário
+   * @return Resposta HTTP indicando sucesso ou falha
    */
-  @Operation(summary = "Autentica um usuário")
+  @Operation(summary = "Solicita um código OTP para autenticação")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Código enviado com sucesso")
+  @PostMapping("/solicitar-codigo")
+  public ResponseEntity<Map<String, String>> solicitarCodigoOtp(@RequestParam String email) {
+    authService.solicitarCodigoOtp(email);
+    Map<String, String> response = new HashMap<>();
+    response.put("mensagem", "Código de verificação enviado para " + email);
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Autentica um usuário usando o código OTP e retorna um token JWT.
+   * 
+   * @param requestDTO DTO contendo email e código OTP
+   * @return ResponseEntity com o token JWT e tempo de expiração
+   */
+  @Operation(summary = "Autentica um usuário usando OTP")
   @ApiResponse(
       responseCode = "200",
       description = "Usuário autenticado com sucesso",
       content = @Content(schema = @Schema(implementation = RespostaLoginDTO.class)))
-  @PostMapping("/login")
-  public ResponseEntity<RespostaLoginDTO> autenticacao(
-      @RequestBody @Valid LoginUsuarioDTO loginUsuarioDTO) {
-    Usuario usuarioAutenticado = authService.autenticacao(loginUsuarioDTO);
+  @PostMapping("/login-otp")
+  public ResponseEntity<RespostaLoginDTO> autenticacaoOtp(
+          @RequestBody @Valid EmailOtpAuthRequestDTO requestDTO) {
+    Usuario usuarioAutenticado = authService.autenticacaoOtp(requestDTO);
     String tokenJwt = jwtService.generateToken(usuarioAutenticado);
-    RespostaLoginDTO respostaLoginDTO =
-        RespostaLoginDTO.builder()
+    RespostaLoginDTO respostaLoginDTO = RespostaLoginDTO.builder()
             .token(tokenJwt)
             .expiresIn(jwtService.getExpirationTime())
             .build();

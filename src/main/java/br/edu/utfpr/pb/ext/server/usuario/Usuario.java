@@ -80,16 +80,14 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna uma senha hash fixa como valor temporário para autenticação.
+   * Retorna null pois a autenticação é feita via OTP/JWT.
    *
-   * @return hash bcrypt temporário utilizado como senha do usuário
+   * @return null, pois não utilizamos senha para autenticação
    */
   @Override
   public String getPassword() {
-    // Retornando null intencionalmente pois autenticação será via OTP/JWT
-    // e será implementada em tarefa futura
-    // senha temporária até a implementação do OTP, significa password
-    return "$2a$12$a8kcoUlLHvBlhrEebCYe0uZ2Ofvzijj14HkAfKJmdUGzUCWcUOd7m";
+    // Retornando null intencionalmente pois autenticação é via OTP/JWT
+    return null;
   }
 
   /**

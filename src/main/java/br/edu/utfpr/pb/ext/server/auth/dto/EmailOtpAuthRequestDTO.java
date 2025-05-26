@@ -7,7 +7,10 @@ import lombok.Data;
 
 @Data
 @Builder
-public class LoginUsuarioDTO {
-  private @NotBlank @Email String email;
-  // Senha removida pois autenticação agora é via OTP
+public class EmailOtpAuthRequestDTO {
+    @NotBlank @Email
+    private String email;
+    
+    @NotBlank
+    private String code;
 }

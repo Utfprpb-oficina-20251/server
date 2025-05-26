@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.config;
 
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtAuthenticationFilter;
+import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import java.util.Arrays;
 import java.util.List;
@@ -10,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -21,8 +20,6 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -37,6 +34,8 @@ public class SecurityConfig {
   private final Environment environment;
 
   private final UsuarioRepository usuarioRepository;
+
+  private final EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
 
   /**
    * Injeta a chave app.client.origins e os valores existentes separados por vírgula configurado no
@@ -53,10 +52,15 @@ public class SecurityConfig {
    *
    * @param environment ambiente Spring utilizado para acessar propriedades e perfis ativos
    * @param usuarioRepository repositório para acesso aos dados de usuários
+   * @param emailOtpAuthenticationProvider provedor de autenticação OTP
    */
-  public SecurityConfig(Environment environment, UsuarioRepository usuarioRepository) {
+  public SecurityConfig(
+      Environment environment, 
+      UsuarioRepository usuarioRepository,
+      EmailOtpAuthenticationProvider emailOtpAuthenticationProvider) {
     this.environment = environment;
     this.usuarioRepository = usuarioRepository;
+    this.emailOtpAuthenticationProvider = emailOtpAuthenticationProvider;
   }
 
   /**
@@ -105,7 +109,7 @@ public class SecurityConfig {
                     .authenticated())
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider())
+        .authenticationProvider(emailOtpAuthenticationProvider)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
@@ -125,17 +129,6 @@ public class SecurityConfig {
   private AuthorizationManager<RequestAuthorizationContext> isSwaggerEnabled() {
     return (authentication, context) ->
         isSwaggerEnabled ? new AuthorizationDecision(true) : new AuthorizationDecision(false);
-  }
-
-  /**
-   * Retorna um codificador de senhas que utiliza o algoritmo BCrypt para garantir o armazenamento
-   * seguro das senhas dos usuários.
-   *
-   * @return instância de PasswordEncoder baseada em BCrypt
-   */
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
   }
 
   /**
@@ -188,19 +181,5 @@ public class SecurityConfig {
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
       throws Exception {
     return config.getAuthenticationManager();
-  }
-
-  /**
-   * Cria e configura um AuthenticationProvider baseado em DAO com UserDetailsService e
-   * PasswordEncoder personalizados.
-   *
-   * @return o AuthenticationProvider configurado para autenticação de usuários.
-   */
-  @Bean
-  AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService());
-    authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
   }
 }
