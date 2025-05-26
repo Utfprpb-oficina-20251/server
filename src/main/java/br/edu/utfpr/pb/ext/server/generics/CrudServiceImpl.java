@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.generics;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -53,7 +54,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Salva a entidade fornecida após aplicar os ganchos de pré e pós-processamento.
    *
-   * Aplica o método `preSave` antes de persistir a entidade e `postsave` após a persistência.
+   * <p>Aplica o método `preSave` antes de persistir a entidade e `postsave` após a persistência.
    * Lança uma exceção se a entidade for nula.
    *
    * @param entity entidade a ser salva
@@ -62,7 +63,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    */
   @Override
   public T save(T entity) {
-    if (entity == null){
+    if (entity == null) {
       throw new IllegalArgumentException("O conteúdo a ser salvo não pode ser vazio.");
     }
     entity = preSave(entity);
@@ -74,7 +75,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Ponto de extensão chamado antes de salvar a entidade.
    *
-   * Pode ser sobrescrito para realizar validações ou modificações na entidade antes da persistência.
+   * <p>Pode ser sobrescrito para realizar validações ou modificações na entidade antes da
+   * persistência.
    *
    * @param entity entidade a ser salva
    * @return a entidade possivelmente modificada antes do salvamento
@@ -86,7 +88,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Ponto de extensão chamado após a persistência de uma entidade.
    *
-   * Pode ser sobrescrito para executar lógica adicional após o salvamento. Por padrão, retorna a entidade sem modificações.
+   * <p>Pode ser sobrescrito para executar lógica adicional após o salvamento. Por padrão, retorna a
+   * entidade sem modificações.
    *
    * @param entity entidade recém-persistida
    * @return a entidade, possivelmente modificada após o salvamento
@@ -183,5 +186,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   @Override
   public void deleteAll() {
     getRepository().deleteAll();
+  }
+
+  @Override
+  public Optional<T> findById(I id) {
+    return getRepository().findById(id);
   }
 }
