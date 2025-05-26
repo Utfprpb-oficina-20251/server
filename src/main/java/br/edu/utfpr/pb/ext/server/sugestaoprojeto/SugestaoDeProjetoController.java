@@ -56,9 +56,9 @@ public class SugestaoDeProjetoController
   }
 
   /**
-   * Retorna as sugestões de projeto associadas ao usuário atualmente autenticado.
+   * Lista as sugestões de projeto do usuário atualmente autenticado.
    *
-   * @return uma resposta HTTP 200 contendo a lista de sugestões de projeto do usuário logado, no formato DTO
+   * @return resposta HTTP 200 com a lista de sugestões de projeto do usuário logado em formato DTO
    */
   @Operation(summary = "Listar sugestões de projeto do usuário logado")
   @GetMapping("/minhas-sugestoes")
