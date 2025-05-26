@@ -64,11 +64,18 @@ public class SecurityConfig {
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação, autorização, CORS, CSRF e política de sessão.
+   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação,
+   * autorização, CORS, CSRF e política de sessão.
    *
-   * Permite acesso público a endpoints específicos, como GET em `/api/projeto/**`, todas as rotas em `/api/auth/**`, POST em `/api/usuarios/**`, e requisições OPTIONS e `/error`. O acesso ao console H2 é permitido apenas quando o perfil "test" está ativo, e o acesso à documentação Swagger depende da configuração `isSwaggerEnabled`. POST em `/api/projeto/**` é restrito a usuários com papel "SERVIDOR". Todas as demais rotas exigem autenticação.
+   * <p>Permite acesso público a endpoints específicos, como GET em `/api/projeto/**`, todas as
+   * rotas em `/api/auth/**`, POST em `/api/usuarios/**`, e requisições OPTIONS e `/error`. O acesso
+   * ao console H2 é permitido apenas quando o perfil "test" está ativo, e o acesso à documentação
+   * Swagger depende da configuração `isSwaggerEnabled`. POST em `/api/projeto/**` é restrito a
+   * usuários com papel "SERVIDOR". Todas as demais rotas exigem autenticação.
    *
-   * As sessões são configuradas como stateless, o CORS é habilitado com configuração personalizada, e um filtro de autenticação JWT é adicionado antes do filtro padrão de autenticação.
+   * <p>As sessões são configuradas como stateless, o CORS é habilitado com configuração
+   * personalizada, e um filtro de autenticação JWT é adicionado antes do filtro padrão de
+   * autenticação.
    *
    * @param http configuração de segurança HTTP do Spring
    * @return a cadeia de filtros de segurança configurada
@@ -121,7 +128,8 @@ public class SecurityConfig {
   }
 
   /**
-   * Retorna um AuthorizationManager que concede acesso se a propriedade de habilitação do Swagger estiver ativada.
+   * Retorna um AuthorizationManager que concede acesso se a propriedade de habilitação do Swagger
+   * estiver ativada.
    *
    * @return AuthorizationManager que permite ou nega acesso com base no valor de isSwaggerEnabled.
    */

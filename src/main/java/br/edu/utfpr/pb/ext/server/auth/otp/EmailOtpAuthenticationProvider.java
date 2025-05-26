@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
 
+  public static final String AUTENTICACAO = "autenticacao";
   private final EmailCodeValidationService emailCodeValidationService;
   private final UsuarioRepository usuarioRepository;
 
@@ -30,7 +31,7 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
     String code = authToken.getCredentials().toString();
 
     // Validate the OTP code for the "autenticacao" type
-    boolean isValid = emailCodeValidationService.validateCode(email, "autenticacao", code);
+    boolean isValid = emailCodeValidationService.validateCode(email, AUTENTICACAO, code);
 
     if (!isValid) {
       throw new BadCredentialsException("Código de verificação inválido ou expirado");

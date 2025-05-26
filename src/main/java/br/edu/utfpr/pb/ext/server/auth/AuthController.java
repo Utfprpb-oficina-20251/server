@@ -1,9 +1,6 @@
 package br.edu.utfpr.pb.ext.server.auth;
 
-import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
-import br.edu.utfpr.pb.ext.server.auth.dto.EmailOtpAuthRequestDTO;
-import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
-import br.edu.utfpr.pb.ext.server.auth.dto.UsuarioCadastradoDTO;
+import br.edu.utfpr.pb.ext.server.auth.dto.*;
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtService;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,8 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -57,11 +53,13 @@ public class AuthController {
   @Operation(summary = "Solicita um código OTP para autenticação")
   @ApiResponse(responseCode = "200", description = "Código enviado com sucesso")
   @PostMapping("/solicitar-codigo")
-  public ResponseEntity<Map<String, String>> solicitarCodigoOtp(@RequestParam String email) {
+  public ResponseEntity<SolicitacaoCodigoDTO> solicitarCodigoOtp(
+      @RequestParam @Email String email) {
     authService.solicitarCodigoOtp(email);
-    Map<String, String> response = new HashMap<>();
-    response.put("mensagem", "Código de verificação enviado para " + email);
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(
+        SolicitacaoCodigoDTO.builder()
+            .mensagem("Código de verificação enviado para " + email)
+            .build());
   }
 
   /**

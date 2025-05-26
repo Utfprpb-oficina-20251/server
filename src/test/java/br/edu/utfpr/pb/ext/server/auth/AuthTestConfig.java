@@ -24,6 +24,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 @TestConfiguration
 public class AuthTestConfig {
 
+  public static final String TEST_EMAIL = "testuser@alunos.utfpr.edu.br";
+  public static final String CODIGO_VALIDO = "123456";
+
   @Bean
   @Primary
   public EmailServiceImpl emailServiceMock() throws IOException {
@@ -40,14 +43,14 @@ public class AuthTestConfig {
   @Bean
   @Primary
   public EmailCodeValidationService emailCodeValidationServiceMock() {
+    String autenticacao = "autenticacao";
+    String codigoInvalido = "codigo-invalido";
+
     EmailCodeValidationService mockValidationService =
         Mockito.mock(EmailCodeValidationService.class);
 
-    // Mock validateCode to return true for specific test cases and false otherwise
-    when(mockValidationService.validateCode(
-            "testuser@alunos.utfpr.edu.br", "autenticacao", "123456"))
-        .thenReturn(true);
-    when(mockValidationService.validateCode(anyString(), anyString(), eq("codigo-invalido")))
+    when(mockValidationService.validateCode(TEST_EMAIL, autenticacao, CODIGO_VALIDO)).thenReturn(true);
+    when(mockValidationService.validateCode(anyString(), anyString(), eq(codigoInvalido)))
         .thenReturn(false);
 
     return mockValidationService;
@@ -68,12 +71,15 @@ public class AuthTestConfig {
               String email = token.getPrincipal().toString();
               String code = token.getCredentials().toString();
 
-              if ("testuser@alunos.utfpr.edu.br".equals(email) && "123456".equals(code)) {
+              if (TEST_EMAIL.equals(email) && CODIGO_VALIDO.equals(code)) {
                 Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
                 if (userOpt.isPresent()) {
                   UserDetails userDetails = userOpt.get();
                   return new UsernamePasswordAuthenticationToken(
                       userDetails, null, userDetails.getAuthorities());
+                } else {
+                  throw new org.springframework.security.core.userdetails.UsernameNotFoundException(
+                      "Usuário nao encontrado");
                 }
               }
 
