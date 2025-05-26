@@ -109,8 +109,8 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return getRespostaLoginDTOResponseEntity(usuario, authorities, alunoAuthority);
   }
 
-  @NotNull
-  private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(Usuario usuario, Set<Authority> authorities, Authority authority) {
+  @NotNull private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(
+      Usuario usuario, Set<Authority> authorities, Authority authority) {
     if (authority == null) {
       return ResponseEntity.badRequest().body(null);
     }

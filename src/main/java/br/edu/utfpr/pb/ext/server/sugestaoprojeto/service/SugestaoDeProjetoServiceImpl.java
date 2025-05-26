@@ -29,23 +29,17 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
 
     Usuario aluno = usuarioService.obterUsuarioLogado();
 
-    SugestaoDeProjeto sugestao =
-        SugestaoDeProjeto.builder()
-            .titulo(entity.getTitulo())
-            .descricao(entity.getDescricao())
-            .publicoAlvo(entity.getPublicoAlvo())
-            .aluno(aluno)
-            .status(StatusSugestao.AGUARDANDO)
-            .build();
+    entity.setStatus(StatusSugestao.AGUARDANDO);
+    entity.setAluno(aluno);
 
-    if (entity.getProfessor().getId() != null) {
+    if (entity.getProfessor() != null && entity.getProfessor().getId() != null) {
       Usuario professor =
           usuarioRepository
               .findById(entity.getProfessor().getId())
               .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
 
       usuarioService.validarProfessor(professor);
-      sugestao.setProfessor(professor);
+      entity.setProfessor(professor);
     }
     return super.preSave(entity);
   }

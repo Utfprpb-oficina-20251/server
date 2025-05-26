@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class UsuarioNomeIdDTO {
   private Long id;
-  private String nomeCompleto;
+  private String nome;
 }

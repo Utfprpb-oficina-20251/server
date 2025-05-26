@@ -263,7 +263,7 @@ class SugestaoDeProjetoControllerTest {
 
     UsuarioNomeIdDTO aluno = new UsuarioNomeIdDTO();
     aluno.setId(1L);
-    aluno.setNomeCompleto("Aluno Teste");
+    aluno.setNome("Aluno Teste");
     dto.setAluno(aluno);
 
     return dto;
