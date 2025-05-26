@@ -3,24 +3,27 @@ package br.edu.utfpr.pb.ext.server.sugestaoprojeto.service;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.*;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.*;
 import br.edu.utfpr.pb.ext.server.usuario.*;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioService;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SugestaoDeProjetoService {
+public class SugestaoDeProjetoService{
 
   private final SugestaoDeProjetoRepository repository;
   private final UsuarioRepository usuarioRepository;
+  private final UsuarioService usuarioService;
 
   public SugestaoDeProjetoResponseDTO criar(SugestaoDeProjetoRequestDTO requestDTO) {
 
-    Usuario aluno = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Usuario aluno = usuarioService.obterUsuarioLogado();
 
     SugestaoDeProjeto sugestao =
         SugestaoDeProjeto.builder()
@@ -50,8 +53,12 @@ public class SugestaoDeProjetoService {
     return toResponseDTO(sugestaoSalva);
   }
 
+  @PreAuthorize("hasAnyRole('ROLE_SERVIDOR')")
   public List<SugestaoDeProjetoResponseDTO> listarTodos() {
-    return repository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
+    return repository.findAll()
+            .stream()
+            .map(this::toResponseDTO)
+            .toList();
   }
 
   public List<SugestaoDeProjetoResponseDTO> listarPorAluno(Long alunoId) {
@@ -61,8 +68,7 @@ public class SugestaoDeProjetoService {
   }
 
   public List<SugestaoDeProjetoResponseDTO> listarSugestoesDoUsuarioLogado() {
-    Usuario usuario =
-        (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Usuario usuario = usuarioService.obterUsuarioLogado();
     return repository.findByAlunoId(usuario.getId()).stream()
         .map(this::toResponseDTO)
         .collect(Collectors.toList());

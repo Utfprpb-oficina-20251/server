@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class SugestaoDeProjetoRequestDTO {
   @NotBlank @Size(min = 5, max = 100) private String titulo;
 
-  @NotBlank @Size(min = 30) private String descricao;
+  @NotBlank @Size(min = 30, max = 10000) private String descricao;
 
   @NotBlank @Size(max = 500) private String publicoAlvo;
 

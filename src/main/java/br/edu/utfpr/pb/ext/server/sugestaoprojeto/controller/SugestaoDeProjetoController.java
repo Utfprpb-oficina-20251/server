@@ -3,7 +3,6 @@ package br.edu.utfpr.pb.ext.server.sugestaoprojeto.controller;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.SugestaoDeProjetoRequestDTO;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.SugestaoDeProjetoResponseDTO;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoService;
-import br.edu.utfpr.pb.ext.server.usuario.*;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class SugestaoDeProjetoController {
 
   private final SugestaoDeProjetoService service;
-  private final UsuarioRepository usuarioRepository;
 
   @PostMapping
   public ResponseEntity<SugestaoDeProjetoResponseDTO> criar(
