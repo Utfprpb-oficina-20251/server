@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.generics;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -100,4 +101,6 @@ public interface ICrudService<T, I extends Serializable> {
 
   /** Remove todas as entidades do repositório. */
   void deleteAll();
+
+  Optional<T> findById(I id);
 }

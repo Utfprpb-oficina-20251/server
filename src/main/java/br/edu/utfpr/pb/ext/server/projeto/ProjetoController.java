@@ -19,7 +19,10 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -100,5 +103,89 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     Projeto projetoResponse = projetoService.save(projeto);
     ProjetoDTO projetoDTO = modelMapper.map(projetoResponse, ProjetoDTO.class);
     return ResponseEntity.status(HttpStatus.CREATED).body(projetoDTO);
+  }
+
+  @Operation(
+      summary = "Update an existing project",
+      description = "Updates the details of an existing project by ID.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Project updated successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ProjetoDTO.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Project not found",
+            content = @Content(mediaType = "application/json")),
+        @ApiResponse(
+            responseCode = "406",
+            description = "Invalid request, such as empty or invalid emails",
+            content = @Content(mediaType = "application/json"))
+      })
+  @PutMapping("/{id}")
+  public ResponseEntity<ProjetoDTO> update(
+      @PathVariable Long id, @Valid @RequestBody ProjetoDTO dto) {
+
+    Optional<Projeto> projetoOptional = projetoService.findById(id);
+
+    if (projetoOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    Projeto projeto = projetoOptional.get();
+
+    List<String> emails =
+        dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmailInstitucional).toList();
+
+    if (emails.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+    }
+
+    ArrayList<Optional<Usuario>> usuarios = new ArrayList<>();
+    for (String email : emails) {
+      Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+      if (usuario.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+      }
+      usuarios.add(usuario);
+    }
+
+    projeto.setTitulo(dto.getTitulo());
+    projeto.setDescricao(dto.getDescricao());
+    projeto.setJustificativa(dto.getJustificativa());
+    projeto.setDataInicio(dto.getDataInicio());
+    projeto.setDataFim(dto.getDataFim());
+    projeto.setPublicoAlvo(dto.getPublicoAlvo());
+    projeto.setVinculadoDisciplina(dto.isVinculadoDisciplina());
+    projeto.setRestricaoPublico(dto.getRestricaoPublico());
+    projeto.setEquipeExecutora(usuarios.stream().flatMap(Optional::stream).toList());
+
+    Projeto projetoResponse = projetoService.save(projeto);
+    ProjetoDTO projetoDTO = modelMapper.map(projetoResponse, ProjetoDTO.class);
+
+    return ResponseEntity.ok(projetoDTO);
+  }
+
+  @Operation(summary = "Get all projects", description = "Returns all projects from the database.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of projects",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ProjetoDTO.class)))
+      })
+  @GetMapping
+  public ResponseEntity<List<ProjetoDTO>> findAll() {
+    List<Projeto> projetos = projetoService.findAll();
+    List<ProjetoDTO> projetoDTOs =
+        projetos.stream().map(projeto -> modelMapper.map(projeto, ProjetoDTO.class)).toList();
+    return ResponseEntity.ok(projetoDTOs);
   }
 }
