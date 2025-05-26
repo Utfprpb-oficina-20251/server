@@ -58,6 +58,9 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    */
   @Override
   public T save(T entity) {
+    if (entity == null){
+      throw new IllegalArgumentException("O conteúdo a ser salvo não pode ser vazio.");
+    }
     entity = preSave(entity);
     entity = getRepository().save(entity);
     entity = postsave(entity);

@@ -75,6 +75,10 @@ class SugestaoDeProjetoServiceImplTest {
     verify(usuarioService).obterUsuarioLogado();
     verify(usuarioRepository).findById(professor.getId());
     verify(usuarioService).validarProfessor(professor);
+
+    assertEquals(professor, sugestao.getProfessor());
+    assertEquals(StatusSugestao.AGUARDANDO, sugestao.getStatus());
+    assertEquals(aluno, sugestao.getAluno());
   }
 
   @Test
