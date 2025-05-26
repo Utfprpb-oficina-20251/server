@@ -198,6 +198,7 @@ class EmailServiceImplTest {
 
     assertTrue(ex.getMessage().toLowerCase().contains("link"));
   }
+
   @Test
   void testEnviarEmailDeNotificacao_LinkEmBranco_DeveLancarExcecao() {
     TipoDeNotificacao tipo = TipoDeNotificacao.INSCRICAO_ALUNO;
@@ -206,9 +207,9 @@ class EmailServiceImplTest {
     link = "    ";
 
     IllegalArgumentException ex =
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> emailService.enviarEmailDeNotificacao(email, tipo, projeto, link));
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> emailService.enviarEmailDeNotificacao(email, tipo, projeto, link));
 
     assertTrue(ex.getMessage().toLowerCase().contains("link"));
   }
