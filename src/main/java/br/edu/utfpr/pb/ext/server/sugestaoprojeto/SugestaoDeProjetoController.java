@@ -57,7 +57,7 @@ public class SugestaoDeProjetoController
   }
 
   /**
-   * Retorna as sugestões de projeto associadas ao usuário atualmente autenticado.
+   * Lista as sugestões de projeto do usuário atualmente autenticado.
    *
    * @return uma resposta HTTP 200 contendo a lista de sugestões de projeto do usuário logado, no
    *     formato DTO
