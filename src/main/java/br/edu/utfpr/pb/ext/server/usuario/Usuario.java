@@ -68,9 +68,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   private Set<Authority> authorities;
 
   /**
-   * Retorna uma coleção vazia de autoridades concedidas ao usuário.
+   * Retorna as autoridades associadas ao usuário.
    *
-   * @return coleção vazia de autoridades
+   * @return conjunto de autoridades concedidas ao usuário
    */
   @Override
   @Transient
@@ -80,9 +80,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna null pois a autenticação é feita via OTP/JWT.
+   * Retorna sempre null, pois a autenticação do usuário é realizada exclusivamente por OTP ou JWT, sem uso de senha.
    *
-   * @return null, pois não utilizamos senha para autenticação
+   * @return sempre null, indicando que não há senha armazenada ou utilizada para autenticação.
    */
   @Override
   public String getPassword() {

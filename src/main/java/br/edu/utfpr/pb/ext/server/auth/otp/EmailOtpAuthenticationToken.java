@@ -10,7 +10,12 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   private final transient Object principal;
   private transient Object credentials;
 
-  // Token for authentication request (not authenticated)
+  /**
+   * Cria um token de autenticação de OTP por e-mail não autenticado, contendo o principal e as credenciais fornecidas.
+   *
+   * @param principal identidade do usuário (por exemplo, e-mail)
+   * @param credentials código OTP ou senha temporária
+   */
   public EmailOtpAuthenticationToken(Object principal, Object credentials) {
     super(null);
     this.principal = principal;
@@ -18,7 +23,13 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
     setAuthenticated(false);
   }
 
-  // Token for an authenticated user
+  /**
+   * Cria um token de autenticação autenticado para autenticação via OTP por e-mail.
+   *
+   * @param principal identidade do usuário (por exemplo, e-mail ou nome de usuário)
+   * @param credentials código OTP ou credencial associada
+   * @param authorities permissões concedidas ao usuário autenticado
+   */
   public EmailOtpAuthenticationToken(
       Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
     super(authorities);
@@ -27,16 +38,31 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
     super.setAuthenticated(true);
   }
 
+  /**
+   * Retorna as credenciais associadas a este token de autenticação, geralmente o código OTP informado pelo usuário.
+   *
+   * @return as credenciais do token de autenticação
+   */
   @Override
   public Object getCredentials() {
     return this.credentials;
   }
 
+  /**
+   * Retorna o principal associado a este token de autenticação, geralmente representando a identidade do usuário (por exemplo, e-mail).
+   *
+   * @return o principal deste token de autenticação
+   */
   @Override
   public Object getPrincipal() {
     return this.principal;
   }
 
+  /**
+   * Remove as credenciais sensíveis deste token, definindo-as como nulas.
+   *
+   * Este método é utilizado para garantir que informações confidenciais, como senhas ou OTPs, não permaneçam em memória após o processo de autenticação.
+   */
   @Override
   public void eraseCredentials() {
     super.eraseCredentials();
