@@ -1,6 +1,6 @@
 package br.edu.utfpr.pb.ext.server.usuario.dto;
 
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
+import br.edu.utfpr.pb.ext.server.departamento.enums.Departamentos;
 import br.edu.utfpr.pb.ext.server.usuario.validation.annotation.UniqueCpf;
 import br.edu.utfpr.pb.ext.server.usuario.validation.annotation.UniqueSiape;
 import jakarta.validation.constraints.*;

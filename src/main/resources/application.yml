@@ -26,7 +26,7 @@ spring:
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:..env[.properties]
   # SendGrid API Key configuration. Em produção, defina SENDGRID_API_KEY como variável de ambiente ou utilize um gerenciador de segredos.
   sendgrid:
     api-key: ${SENDGRID_API_KEY:sendgridkey}

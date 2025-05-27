@@ -58,12 +58,14 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Cria um novo usuário com perfil de servidor e retorna uma resposta de login contendo um token JWT e a data de expiração.
+   * Cria um novo usuário com perfil de servidor e retorna uma resposta de login contendo um token
+   * JWT e a data de expiração.
    *
-   * Retorna HTTP 400 se a autoridade "ROLE_SERVIDOR" não for encontrada.
+   * <p>Retorna HTTP 400 se a autoridade "ROLE_SERVIDOR" não for encontrada.
    *
    * @param usuarioServidorRequestDTO dados para criação do usuário servidor
-   * @return resposta HTTP com o token JWT e data de expiração em caso de sucesso, ou HTTP 400 se a autoridade estiver ausente
+   * @return resposta HTTP com o token JWT e data de expiração em caso de sucesso, ou HTTP 400 se a
+   *     autoridade estiver ausente
    */
   @Operation(
       summary = "Create a new servidor user",
@@ -92,10 +94,12 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Cria um novo usuário com perfil de aluno e retorna uma resposta de login contendo o token JWT e o tempo de expiração.
+   * Cria um novo usuário com perfil de aluno e retorna uma resposta de login contendo o token JWT e
+   * o tempo de expiração.
    *
    * @param usuarioAlunoRequestDTO dados do usuário aluno a ser criado
-   * @return resposta HTTP 200 com o token de autenticação e tempo de expiração, ou HTTP 400 se a autoridade "ROLE_ALUNO" não for encontrada
+   * @return resposta HTTP 200 com o token de autenticação e tempo de expiração, ou HTTP 400 se a
+   *     autoridade "ROLE_ALUNO" não for encontrada
    */
   @Operation(
       summary = "Create a new aluno user",
@@ -124,14 +128,16 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Gera uma resposta HTTP com um token JWT e tempo de expiração após salvar o usuário com a autoridade especificada.
+   * Gera uma resposta HTTP com um token JWT e tempo de expiração após salvar o usuário com a
+   * autoridade especificada.
    *
-   * Retorna HTTP 400 se a autoridade fornecida for nula.
+   * <p>Retorna HTTP 400 se a autoridade fornecida for nula.
    *
    * @param usuario usuário a ser salvo
    * @param authorities conjunto de autoridades do usuário
    * @param authority autoridade a ser atribuída ao usuário
-   * @return resposta HTTP 200 com DTO de login contendo token e expiração, ou HTTP 400 se a autoridade for nula
+   * @return resposta HTTP 200 com DTO de login contendo token e expiração, ou HTTP 400 se a
+   *     autoridade for nula
    */
   @NotNull private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(
       Usuario usuario, Set<Authority> authorities, Authority authority) {

@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.usuario.enums;
+package br.edu.utfpr.pb.ext.server.departamento.enums;
 
 import lombok.Getter;
 

@@ -1,9 +1,9 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
+import br.edu.utfpr.pb.ext.server.departamento.enums.Departamentos;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -80,7 +80,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna sempre null, pois a autenticação do usuário é realizada exclusivamente por OTP ou JWT, sem uso de senha.
+   * Retorna sempre null, pois a autenticação do usuário é realizada exclusivamente por OTP ou JWT,
+   * sem uso de senha.
    *
    * @return sempre null, indicando que não há senha armazenada ou utilizada para autenticação.
    */

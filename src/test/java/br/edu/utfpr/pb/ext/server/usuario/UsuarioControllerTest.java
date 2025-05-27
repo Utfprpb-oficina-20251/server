@@ -3,9 +3,9 @@ package br.edu.utfpr.pb.ext.server.usuario;
 import static org.junit.jupiter.api.Assertions.*;
 
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
+import br.edu.utfpr.pb.ext.server.departamento.enums.Departamentos;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
