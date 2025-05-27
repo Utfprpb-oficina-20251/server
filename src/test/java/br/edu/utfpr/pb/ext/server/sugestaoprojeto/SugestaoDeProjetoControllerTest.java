@@ -103,7 +103,7 @@ class SugestaoDeProjetoControllerTest {
         .andExpect(jsonPath("$.publicoAlvo", is("Público Alvo 1")))
         .andExpect(jsonPath("$.curso.id", is(1)))
         .andExpect(jsonPath("$.curso.nome", is("Ciência da Computação")))
-        .andExpect(jsonPath("$.curso.codigo", is("SC26CP")));
+        .andExpect(jsonPath("$.curso.codigo", is("DAINF")));
 
     verify(service).findOne(id);
   }
@@ -156,7 +156,7 @@ class SugestaoDeProjetoControllerTest {
         .andExpect(jsonPath("$.publicoAlvo", is("Novo Público Alvo")))
         .andExpect(jsonPath("$.curso.id", is(1)))
         .andExpect(jsonPath("$.curso.nome", is("Ciência da Computação")))
-        .andExpect(jsonPath("$.curso.codigo", is("SC26CP")));
+        .andExpect(jsonPath("$.curso.codigo", is("DAINF")));
 
 
     verify(service).save(any(SugestaoDeProjeto.class));
@@ -199,7 +199,7 @@ class SugestaoDeProjetoControllerTest {
         .andExpect(jsonPath("$.publicoAlvo", is("Público Alvo Atualizado")))
         .andExpect(jsonPath("$.curso.id", is(1)))
         .andExpect(jsonPath("$.curso.nome", is("Ciência da Computação")))
-        .andExpect(jsonPath("$.curso.codigo", is("SC26CP")));
+        .andExpect(jsonPath("$.curso.codigo", is("DAINF")));
 
 
     verify(service).save(any(SugestaoDeProjeto.class));
