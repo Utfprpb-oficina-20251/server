@@ -1,8 +1,10 @@
 package br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto;
 
+import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.StatusSugestao;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioNomeIdDTO;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -27,5 +29,5 @@ public class SugestaoDeProjetoDTO {
   private UsuarioNomeIdDTO professor;
   private StatusSugestao status;
   private LocalDateTime dataCriacao;
-  @NotNull private Curso curso; 
+  @NotNull private Curso curso;
 }
