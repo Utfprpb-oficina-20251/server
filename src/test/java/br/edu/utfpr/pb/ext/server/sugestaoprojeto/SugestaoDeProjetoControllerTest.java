@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import br.edu.utfpr.pb.ext.server.curso.Curso;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.SugestaoDeProjetoDTO;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoServiceImpl;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
@@ -47,16 +48,24 @@ class SugestaoDeProjetoControllerTest {
   @Test
   void findAll_shouldReturnAllSugestoes() throws Exception {
     // Arrange
+    Curso curso1 = new Curso();
+    curso1.setId(1L);
+    curso1.setNome("Ciência da Computação");
+    curso1.setCodigo("DAINF");
+    Curso curso2 = new Curso();
+    curso2.setId(2L);
+    curso2.setNome("Engenharia da Computação");
+    curso2.setCodigo("DAEGC");
     SugestaoDeProjeto sugestao1 =
-        createSugestaoDeProjeto(1L, "Título 1", "Descrição 1", "Público Alvo 1");
+        createSugestaoDeProjeto(1L, "Título 1", "Descrição 1", "Público Alvo 1",curso1);
     SugestaoDeProjeto sugestao2 =
-        createSugestaoDeProjeto(2L, "Título 2", "Descrição 2", "Público Alvo 2");
+        createSugestaoDeProjeto(2L, "Título 2", "Descrição 2", "Público Alvo 2",curso2);
     List<SugestaoDeProjeto> sugestoes = Arrays.asList(sugestao1, sugestao2);
 
     SugestaoDeProjetoDTO dto1 =
-        createSugestaoDeProjetoDTO(1L, "Título 1", "Descrição 1", "Público Alvo 1");
+        createSugestaoDeProjetoDTO(1L, "Título 1", "Descrição 1", "Público Alvo 1",curso1);
     SugestaoDeProjetoDTO dto2 =
-        createSugestaoDeProjetoDTO(2L, "Título 2", "Descrição 2", "Público Alvo 2");
+        createSugestaoDeProjetoDTO(2L, "Título 2", "Descrição 2", "Público Alvo 2",curso2);
 
     when(service.findAll()).thenReturn(sugestoes);
     when(modelMapper.map(sugestao1, SugestaoDeProjetoDTO.class)).thenReturn(dto1);
@@ -80,10 +89,14 @@ class SugestaoDeProjetoControllerTest {
   void findOne_whenExists_shouldReturnSugestao() throws Exception {
     // Arrange
     Long id = 1L;
+    Curso curso = new Curso();
+    curso.setId(id);
+    curso.setNome("Ciência da Computação");
+    curso.setCodigo("SC26CP");
     SugestaoDeProjeto sugestao =
-        createSugestaoDeProjeto(id, "Título 1", "Descrição 1", "Público Alvo 1");
+        createSugestaoDeProjeto(id, "Título 1", "Descrição 1", "Público Alvo 1",curso);
     SugestaoDeProjetoDTO dto =
-        createSugestaoDeProjetoDTO(id, "Título 1", "Descrição 1", "Público Alvo 1");
+        createSugestaoDeProjetoDTO(id, "Título 1", "Descrição 1", "Público Alvo 1",curso);
 
     when(service.findOne(id)).thenReturn(sugestao);
     when(modelMapper.map(sugestao, SugestaoDeProjetoDTO.class)).thenReturn(dto);
@@ -96,7 +109,10 @@ class SugestaoDeProjetoControllerTest {
         .andExpect(jsonPath("$.id", is(1)))
         .andExpect(jsonPath("$.titulo", is("Título 1")))
         .andExpect(jsonPath("$.descricao", is("Descrição 1")))
-        .andExpect(jsonPath("$.publicoAlvo", is("Público Alvo 1")));
+        .andExpect(jsonPath("$.publicoAlvo", is("Público Alvo 1")))
+        .andExpect(jsonPath("$.curso.id", is(1)))
+        .andExpect(jsonPath("$.curso.nome", is("Ciência da Computação")))
+        .andExpect(jsonPath("$.curso.codigo", is("SC26CP")));
 
     verify(service).findOne(id);
   }
@@ -116,16 +132,20 @@ class SugestaoDeProjetoControllerTest {
   @Test
   void create_shouldCreateSugestao() throws Exception {
     // Arrange
+    Curso curso = new Curso();
+    curso.setId(1L);
+    curso.setNome("Ciência da Computação");
+    curso.setCodigo("SC26CP");
     String descricao =
         "Esta é uma descrição longa o suficiente para passar na validação de tamanho mínimo de 30 caracteres.";
     SugestaoDeProjetoDTO dto =
-        createSugestaoDeProjetoDTO(null, "Novo Título", descricao, "Novo Público Alvo");
+        createSugestaoDeProjetoDTO(null, "Novo Título", descricao, "Novo Público Alvo",curso);
     SugestaoDeProjeto sugestao =
-        createSugestaoDeProjeto(null, "Novo Título", descricao, "Novo Público Alvo");
+        createSugestaoDeProjeto(null, "Novo Título", descricao, "Novo Público Alvo",curso);
     SugestaoDeProjeto savedSugestao =
-        createSugestaoDeProjeto(1L, "Novo Título", descricao, "Novo Público Alvo");
+        createSugestaoDeProjeto(1L, "Novo Título", descricao, "Novo Público Alvo",curso);
     SugestaoDeProjetoDTO savedDto =
-        createSugestaoDeProjetoDTO(1L, "Novo Título", descricao, "Novo Público Alvo");
+        createSugestaoDeProjetoDTO(1L, "Novo Título", descricao, "Novo Público Alvo",curso);
 
     when(modelMapper.map(dto, SugestaoDeProjeto.class)).thenReturn(sugestao);
     when(service.save(sugestao)).thenReturn(savedSugestao);
@@ -145,7 +165,11 @@ class SugestaoDeProjetoControllerTest {
                 "$.descricao",
                 is(
                     "Esta é uma descrição longa o suficiente para passar na validação de tamanho mínimo de 30 caracteres.")))
-        .andExpect(jsonPath("$.publicoAlvo", is("Novo Público Alvo")));
+        .andExpect(jsonPath("$.publicoAlvo", is("Novo Público Alvo")))
+        .andExpect(jsonPath("$.curso.id", is(1)))
+        .andExpect(jsonPath("$.curso.nome", is("Ciência da Computação")))
+        .andExpect(jsonPath("$.curso.codigo", is("SC26CP")));
+
 
     verify(service).save(any(SugestaoDeProjeto.class));
   }
@@ -154,16 +178,20 @@ class SugestaoDeProjetoControllerTest {
   void update_shouldUpdateSugestao() throws Exception {
     // Arrange
     Long id = 1L;
+    Curso curso = new Curso();
+    curso.setId(id);
+    curso.setNome("Ciência da Computação");
+    curso.setCodigo("SC26CP");
     String descricao =
         "Esta é uma descrição atualizada longa o suficiente para passar na validação de tamanho mínimo de 30 caracteres.";
     SugestaoDeProjetoDTO dto =
-        createSugestaoDeProjetoDTO(id, "Título Atualizado", descricao, "Público Alvo Atualizado");
+        createSugestaoDeProjetoDTO(id, "Título Atualizado", descricao, "Público Alvo Atualizado", curso);
     SugestaoDeProjeto sugestao =
-        createSugestaoDeProjeto(id, "Título Atualizado", descricao, "Público Alvo Atualizado");
+        createSugestaoDeProjeto(id, "Título Atualizado", descricao, "Público Alvo Atualizado", curso);
     SugestaoDeProjeto updatedSugestao =
-        createSugestaoDeProjeto(id, "Título Atualizado", descricao, "Público Alvo Atualizado");
+        createSugestaoDeProjeto(id, "Título Atualizado", descricao, "Público Alvo Atualizado", curso);
     SugestaoDeProjetoDTO updatedDto =
-        createSugestaoDeProjetoDTO(id, "Título Atualizado", descricao, "Público Alvo Atualizado");
+        createSugestaoDeProjetoDTO(id, "Título Atualizado", descricao, "Público Alvo Atualizado", curso);
 
     when(modelMapper.map(dto, SugestaoDeProjeto.class)).thenReturn(sugestao);
     when(service.save(sugestao)).thenReturn(updatedSugestao);
@@ -183,7 +211,11 @@ class SugestaoDeProjetoControllerTest {
                 "$.descricao",
                 is(
                     "Esta é uma descrição atualizada longa o suficiente para passar na validação de tamanho mínimo de 30 caracteres.")))
-        .andExpect(jsonPath("$.publicoAlvo", is("Público Alvo Atualizado")));
+        .andExpect(jsonPath("$.publicoAlvo", is("Público Alvo Atualizado")))
+        .andExpect(jsonPath("$.curso.id", is(1)))
+        .andExpect(jsonPath("$.curso.nome", is("Ciência da Computação")))
+        .andExpect(jsonPath("$.curso.codigo", is("SC26CP")));
+
 
     verify(service).save(any(SugestaoDeProjeto.class));
   }
@@ -203,16 +235,24 @@ class SugestaoDeProjetoControllerTest {
   @Test
   void listarSugestoesDoUsuarioLogado_shouldReturnSugestoesDoUsuarioLogado() throws Exception {
     // Arrange
+    Curso curso1 = new Curso();
+    curso1.setId(1L);
+    curso1.setNome("Ciência da Computação");
+    curso1.setCodigo("DAINF");
+    Curso curso2 = new Curso();
+    curso2.setId(2L);
+    curso2.setNome("Engenharia da Computação");
+    curso2.setCodigo("DAEGC");
     SugestaoDeProjeto sugestao1 =
-        createSugestaoDeProjeto(1L, "Título 1", "Descrição 1", "Público Alvo 1");
+        createSugestaoDeProjeto(1L, "Título 1", "Descrição 1", "Público Alvo 1",curso1);
     SugestaoDeProjeto sugestao2 =
-        createSugestaoDeProjeto(2L, "Título 2", "Descrição 2", "Público Alvo 2");
+        createSugestaoDeProjeto(2L, "Título 2", "Descrição 2", "Público Alvo 2",curso2);
     List<SugestaoDeProjeto> sugestoes = Arrays.asList(sugestao1, sugestao2);
 
     SugestaoDeProjetoDTO dto1 =
-        createSugestaoDeProjetoDTO(1L, "Título 1", "Descrição 1", "Público Alvo 1");
+        createSugestaoDeProjetoDTO(1L, "Título 1", "Descrição 1", "Público Alvo 1",curso1);
     SugestaoDeProjetoDTO dto2 =
-        createSugestaoDeProjetoDTO(2L, "Título 2", "Descrição 2", "Público Alvo 2");
+        createSugestaoDeProjetoDTO(2L, "Título 2", "Descrição 2", "Público Alvo 2",curso2);
 
     when(service.listarSugestoesDoUsuarioLogado()).thenReturn(sugestoes);
     when(modelMapper.map(sugestao1, SugestaoDeProjetoDTO.class)).thenReturn(dto1);
@@ -234,7 +274,7 @@ class SugestaoDeProjetoControllerTest {
 
   // Helper methods to create test objects
   private SugestaoDeProjeto createSugestaoDeProjeto(
-      Long id, String titulo, String descricao, String publicoAlvo) {
+      Long id, String titulo, String descricao, String publicoAlvo, Curso curso) {
     SugestaoDeProjeto sugestao = new SugestaoDeProjeto();
     sugestao.setId(id);
     sugestao.setTitulo(titulo);
@@ -252,7 +292,8 @@ class SugestaoDeProjetoControllerTest {
   }
 
   private SugestaoDeProjetoDTO createSugestaoDeProjetoDTO(
-      Long id, String titulo, String descricao, String publicoAlvo) {
+      Long id, String titulo, String descricao, String publicoAlvo, Curso curso) {
+
     SugestaoDeProjetoDTO dto = new SugestaoDeProjetoDTO();
     dto.setId(id);
     dto.setTitulo(titulo);
@@ -260,6 +301,7 @@ class SugestaoDeProjetoControllerTest {
     dto.setPublicoAlvo(publicoAlvo);
     dto.setStatus(StatusSugestao.AGUARDANDO);
     dto.setDataCriacao(LocalDateTime.now());
+    dto.setCurso(curso);
 
     UsuarioNomeIdDTO aluno = new UsuarioNomeIdDTO();
     aluno.setId(1L);
