@@ -48,14 +48,8 @@ class SugestaoDeProjetoControllerTest {
   @Test
   void findAll_shouldReturnAllSugestoes() throws Exception {
     // Arrange
-    Curso curso1 = new Curso();
-    curso1.setId(1L);
-    curso1.setNome("Ciência da Computação");
-    curso1.setCodigo("DAINF");
-    Curso curso2 = new Curso();
-    curso2.setId(2L);
-    curso2.setNome("Engenharia da Computação");
-    curso2.setCodigo("DAEGC");
+    Curso curso1 = createCurso(1L,"Ciência da Computação","DAINF");
+    Curso curso2 = createCurso(2L, "Engenharia da Computação", "DAEGC");
     SugestaoDeProjeto sugestao1 =
         createSugestaoDeProjeto(1L, "Título 1", "Descrição 1", "Público Alvo 1",curso1);
     SugestaoDeProjeto sugestao2 =
@@ -89,10 +83,7 @@ class SugestaoDeProjetoControllerTest {
   void findOne_whenExists_shouldReturnSugestao() throws Exception {
     // Arrange
     Long id = 1L;
-    Curso curso = new Curso();
-    curso.setId(id);
-    curso.setNome("Ciência da Computação");
-    curso.setCodigo("SC26CP");
+    Curso curso = createCurso(id,"Ciência da Computação","DAINF");
     SugestaoDeProjeto sugestao =
         createSugestaoDeProjeto(id, "Título 1", "Descrição 1", "Público Alvo 1",curso);
     SugestaoDeProjetoDTO dto =
@@ -132,10 +123,7 @@ class SugestaoDeProjetoControllerTest {
   @Test
   void create_shouldCreateSugestao() throws Exception {
     // Arrange
-    Curso curso = new Curso();
-    curso.setId(1L);
-    curso.setNome("Ciência da Computação");
-    curso.setCodigo("SC26CP");
+    Curso curso = createCurso(1L,"Ciência da Computação","DAINF");
     String descricao =
         "Esta é uma descrição longa o suficiente para passar na validação de tamanho mínimo de 30 caracteres.";
     SugestaoDeProjetoDTO dto =
@@ -178,10 +166,7 @@ class SugestaoDeProjetoControllerTest {
   void update_shouldUpdateSugestao() throws Exception {
     // Arrange
     Long id = 1L;
-    Curso curso = new Curso();
-    curso.setId(id);
-    curso.setNome("Ciência da Computação");
-    curso.setCodigo("SC26CP");
+    Curso curso = createCurso(id,"Ciência da Computação","DAINF");
     String descricao =
         "Esta é uma descrição atualizada longa o suficiente para passar na validação de tamanho mínimo de 30 caracteres.";
     SugestaoDeProjetoDTO dto =
@@ -235,14 +220,8 @@ class SugestaoDeProjetoControllerTest {
   @Test
   void listarSugestoesDoUsuarioLogado_shouldReturnSugestoesDoUsuarioLogado() throws Exception {
     // Arrange
-    Curso curso1 = new Curso();
-    curso1.setId(1L);
-    curso1.setNome("Ciência da Computação");
-    curso1.setCodigo("DAINF");
-    Curso curso2 = new Curso();
-    curso2.setId(2L);
-    curso2.setNome("Engenharia da Computação");
-    curso2.setCodigo("DAEGC");
+    Curso curso1 = createCurso(1L,"Ciência da Computação","DAINF");
+    Curso curso2 = createCurso(2L, "Engenharia da Computação", "DAEGC");
     SugestaoDeProjeto sugestao1 =
         createSugestaoDeProjeto(1L, "Título 1", "Descrição 1", "Público Alvo 1",curso1);
     SugestaoDeProjeto sugestao2 =
@@ -309,5 +288,15 @@ class SugestaoDeProjetoControllerTest {
     dto.setAluno(aluno);
 
     return dto;
+  }
+
+  private Curso createCurso(Long id, String Nome, String Codigo) {
+
+    Curso curso = new Curso();
+    curso.setId(id);
+    curso.setNome(Nome);
+    curso.setCodigo(Codigo);
+
+    return curso;
   }
 }
