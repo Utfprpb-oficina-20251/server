@@ -80,7 +80,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna sempre null, pois a autenticação do usuário é realizada exclusivamente por OTP ou JWT, sem uso de senha.
+   * Retorna sempre null, pois a autenticação do usuário é realizada exclusivamente por OTP ou JWT,
+   * sem uso de senha.
    *
    * @return sempre null, indicando que não há senha armazenada ou utilizada para autenticação.
    */

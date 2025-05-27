@@ -63,7 +63,8 @@ public class AuthController {
   }
 
   /**
-   * Realiza a autenticação de um usuário utilizando email e código OTP, retornando um token JWT e o tempo de expiração.
+   * Realiza a autenticação de um usuário utilizando email e código OTP, retornando um token JWT e o
+   * tempo de expiração.
    *
    * @param requestDTO objeto contendo o email do usuário e o código OTP recebido
    * @return resposta com o token JWT gerado e o tempo de expiração em segundos

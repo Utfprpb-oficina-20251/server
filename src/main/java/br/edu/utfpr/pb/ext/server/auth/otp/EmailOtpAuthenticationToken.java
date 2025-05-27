@@ -11,7 +11,8 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   private transient Object credentials;
 
   /**
-   * Cria um token de autenticação de OTP por e-mail não autenticado, contendo o principal e as credenciais fornecidas.
+   * Cria um token de autenticação de OTP por e-mail não autenticado, contendo o principal e as
+   * credenciais fornecidas.
    *
    * @param principal identidade do usuário (por exemplo, e-mail)
    * @param credentials código OTP ou senha temporária
@@ -39,7 +40,8 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   }
 
   /**
-   * Retorna as credenciais associadas a este token de autenticação, geralmente o código OTP informado pelo usuário.
+   * Retorna as credenciais associadas a este token de autenticação, geralmente o código OTP
+   * informado pelo usuário.
    *
    * @return as credenciais do token de autenticação
    */
@@ -49,7 +51,8 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   }
 
   /**
-   * Retorna o principal associado a este token de autenticação, geralmente representando a identidade do usuário (por exemplo, e-mail).
+   * Retorna o principal associado a este token de autenticação, geralmente representando a
+   * identidade do usuário (por exemplo, e-mail).
    *
    * @return o principal deste token de autenticação
    */
@@ -61,7 +64,8 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   /**
    * Remove as credenciais sensíveis deste token, definindo-as como nulas.
    *
-   * Este método é utilizado para garantir que informações confidenciais, como senhas ou OTPs, não permaneçam em memória após o processo de autenticação.
+   * <p>Este método é utilizado para garantir que informações confidenciais, como senhas ou OTPs,
+   * não permaneçam em memória após o processo de autenticação.
    */
   @Override
   public void eraseCredentials() {

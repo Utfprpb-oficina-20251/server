@@ -38,8 +38,9 @@ public class AuthService {
   /**
    * Cadastra um novo usuário atribuindo a autoridade conforme o domínio do e-mail informado.
    *
-   * O papel do usuário é determinado automaticamente com base no domínio do e-mail, podendo ser aluno ou servidor.
-   * Lança uma exceção com status 400 caso a autoridade correspondente não seja encontrada.
+   * <p>O papel do usuário é determinado automaticamente com base no domínio do e-mail, podendo ser
+   * aluno ou servidor. Lança uma exceção com status 400 caso a autoridade correspondente não seja
+   * encontrada.
    *
    * @param dto dados para cadastro do usuário, incluindo nome, e-mail e registro
    * @return o usuário cadastrado e persistido no banco de dados
@@ -64,8 +65,8 @@ public class AuthService {
   /**
    * Determina o papel do usuário com base no domínio do e-mail informado.
    *
-   * Retorna "ROLE_SERVIDOR" se o e-mail termina com "@utfpr.edu.br" ou "ROLE_ALUNO" se termina com "@alunos.utfpr.edu.br".
-   * Lança uma exceção se o domínio do e-mail for inválido.
+   * <p>Retorna "ROLE_SERVIDOR" se o e-mail termina com "@utfpr.edu.br" ou "ROLE_ALUNO" se termina
+   * com "@alunos.utfpr.edu.br". Lança uma exceção se o domínio do e-mail for inválido.
    *
    * @param dto DTO contendo o e-mail do usuário.
    * @return o nome da role correspondente ao domínio do e-mail.
@@ -94,8 +95,8 @@ public class AuthService {
    *
    * @param email endereço de email do usuário que receberá o código OTP
    * @return true se o código foi enviado com sucesso
-   *
-   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do código
+   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do
+   *     código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public boolean solicitarCodigoOtp(String email) {
@@ -120,7 +121,6 @@ public class AuthService {
    *
    * @param dto Objeto contendo o email do usuário e o código OTP recebido.
    * @return O usuário autenticado correspondente ao email informado.
-   *
    * @throws ResponseStatusException Se o código OTP for inválido ou expirado, retorna erro 401.
    * @throws UsernameNotFoundException Se o email informado não estiver cadastrado.
    */

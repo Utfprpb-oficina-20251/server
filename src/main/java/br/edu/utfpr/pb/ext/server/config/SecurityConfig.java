@@ -48,7 +48,8 @@ public class SecurityConfig {
   private boolean isSwaggerEnabled;
 
   /**
-   * Inicializa a configuração de segurança com as dependências de ambiente, repositório de usuários e provedor de autenticação OTP por e-mail.
+   * Inicializa a configuração de segurança com as dependências de ambiente, repositório de usuários
+   * e provedor de autenticação OTP por e-mail.
    *
    * @param environment ambiente Spring para acesso a propriedades e perfis ativos
    * @param usuarioRepository repositório para operações com dados de usuários
@@ -64,11 +65,18 @@ public class SecurityConfig {
   }
 
   /**
-   * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação, autorização, CORS, CSRF e gerenciamento de sessão.
+   * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação,
+   * autorização, CORS, CSRF e gerenciamento de sessão.
    *
-   * Permite acesso público a endpoints específicos, como GET em `/api/projeto/**`, todas as rotas em `/api/auth/**`, POST em `/api/usuarios/**`, requisições OPTIONS e `/error`. O acesso ao console H2 é liberado apenas quando o perfil "test" está ativo, e o acesso à documentação Swagger depende da configuração de habilitação. POST em `/api/projeto/**` é restrito a usuários com papel "SERVIDOR". Todas as demais rotas exigem autenticação.
+   * <p>Permite acesso público a endpoints específicos, como GET em `/api/projeto/**`, todas as
+   * rotas em `/api/auth/**`, POST em `/api/usuarios/**`, requisições OPTIONS e `/error`. O acesso
+   * ao console H2 é liberado apenas quando o perfil "test" está ativo, e o acesso à documentação
+   * Swagger depende da configuração de habilitação. POST em `/api/projeto/**` é restrito a usuários
+   * com papel "SERVIDOR". Todas as demais rotas exigem autenticação.
    *
-   * As sessões são configuradas como stateless, o CORS é habilitado com configuração personalizada, e um filtro de autenticação JWT é adicionado antes do filtro padrão de autenticação.
+   * <p>As sessões são configuradas como stateless, o CORS é habilitado com configuração
+   * personalizada, e um filtro de autenticação JWT é adicionado antes do filtro padrão de
+   * autenticação.
    *
    * @param http configuração de segurança HTTP do Spring
    * @param jwtAuthenticationFilter filtro de autenticação JWT a ser adicionado à cadeia
@@ -110,7 +118,8 @@ public class SecurityConfig {
   }
 
   /**
-   * Retorna um AuthorizationManager que autoriza requisições apenas quando o perfil ativo do Spring inclui "test".
+   * Retorna um AuthorizationManager que autoriza requisições apenas quando o perfil ativo do Spring
+   * inclui "test".
    *
    * @return AuthorizationManager que concede acesso somente se o perfil "test" estiver ativo.
    */
@@ -124,7 +133,8 @@ public class SecurityConfig {
   /**
    * Retorna um AuthorizationManager que permite acesso apenas se o Swagger estiver habilitado.
    *
-   * @return AuthorizationManager que concede autorização quando a flag de habilitação do Swagger está ativada.
+   * @return AuthorizationManager que concede autorização quando a flag de habilitação do Swagger
+   *     está ativada.
    */
   private AuthorizationManager<RequestAuthorizationContext> isSwaggerEnabled() {
     return (authentication, context) ->
