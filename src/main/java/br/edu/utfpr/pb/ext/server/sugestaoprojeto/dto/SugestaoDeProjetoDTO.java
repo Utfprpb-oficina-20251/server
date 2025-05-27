@@ -27,4 +27,5 @@ public class SugestaoDeProjetoDTO {
   private UsuarioNomeIdDTO professor;
   private StatusSugestao status;
   private LocalDateTime dataCriacao;
+  @NotNull private Curso curso; 
 }
