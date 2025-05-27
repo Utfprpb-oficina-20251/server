@@ -261,6 +261,7 @@ class SugestaoDeProjetoControllerTest {
     sugestao.setPublicoAlvo(publicoAlvo);
     sugestao.setStatus(StatusSugestao.AGUARDANDO);
     sugestao.setDataCriacao(LocalDateTime.now());
+    sugestao.setCurso(curso);
 
     Usuario aluno = new Usuario();
     aluno.setId(1L);
