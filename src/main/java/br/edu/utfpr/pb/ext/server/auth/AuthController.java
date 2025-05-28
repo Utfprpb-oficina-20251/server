@@ -45,10 +45,10 @@ public class AuthController {
   }
 
   /**
-   * Envia um código OTP para o email informado para fins de autenticação.
+   * Solicita o envio de um código OTP para o email informado para autenticação do usuário.
    *
-   * @param email Endereço de email do usuário que receberá o código OTP.
-   * @return Resposta contendo uma mensagem de confirmação do envio do código.
+   * @param email Endereço de email para o qual o código OTP será enviado.
+   * @return Resposta com mensagem de confirmação do envio do código OTP.
    */
   @Operation(summary = "Solicita um código OTP para autenticação")
   @ApiResponse(responseCode = "200", description = "Código enviado com sucesso")

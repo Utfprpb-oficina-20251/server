@@ -91,12 +91,11 @@ public class AuthService {
   }
 
   /**
-   * Envia um código OTP para o email informado, caso o usuário exista.
+   * Envia um código OTP para o email do usuário, caso o email esteja cadastrado.
    *
-   * @param email endereço de email do usuário que receberá o código OTP
+   * @param email endereço de email do usuário destinatário do código OTP
    * @return true se o código foi enviado com sucesso
-   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do
-   *     código
+   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public boolean solicitarCodigoOtp(String email) {

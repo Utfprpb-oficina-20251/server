@@ -68,9 +68,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   private Set<Authority> authorities;
 
   /**
-   * Retorna as autoridades associadas ao usuário.
+   * Obtém o conjunto de autoridades (permissões) atribuídas ao usuário.
    *
-   * @return conjunto de autoridades concedidas ao usuário
+   * @return um novo conjunto contendo as autoridades do usuário
    */
   @Override
   @Transient
