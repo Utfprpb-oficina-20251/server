@@ -28,9 +28,9 @@ public class AuthTestConfig {
   public static final String CODIGO_VALIDO = "123456";
 
   /**
-   * Fornece um mock de EmailServiceImpl para testes, simulando o envio bem-sucedido de código de autenticação por e-mail.
+   * Cria um mock de EmailServiceImpl que simula o envio bem-sucedido de código de autenticação por e-mail no contexto "autenticacao".
    *
-   * @return uma instância mockada de EmailServiceImpl que retorna uma resposta de sucesso ao chamar generateAndSendCode com o contexto "autenticacao"
+   * @return instância mockada de EmailServiceImpl que retorna uma resposta de sucesso ao chamar generateAndSendCode com o contexto "autenticacao"
    * @throws IOException se ocorrer um erro de E/S durante a criação do mock
    */
   @Bean
@@ -47,11 +47,12 @@ public class AuthTestConfig {
   }
 
   /**
-   * Fornece um mock de EmailCodeValidationService para testes, simulando a validação de códigos de autenticação por e-mail.
+   * Retorna um mock de EmailCodeValidationService para testes de validação de código por e-mail.
    *
-   * Retorna verdadeiro ao validar o código correto para o e-mail e contexto de autenticação de teste, e falso para o código inválido em qualquer contexto.
-   * 
-   * @return instância mockada de EmailCodeValidationService com comportamento controlado para testes
+   * <p>O mock retorna {@code true} apenas quando o e-mail, contexto e código correspondem aos valores de teste válidos.
+   * Para qualquer código inválido, retorna {@code false}, independentemente do e-mail ou contexto.
+   *
+   * @return instância mockada de EmailCodeValidationService com respostas controladas para cenários de teste
    */
   @Bean
   @Primary
@@ -62,7 +63,8 @@ public class AuthTestConfig {
     EmailCodeValidationService mockValidationService =
         Mockito.mock(EmailCodeValidationService.class);
 
-    when(mockValidationService.validateCode(TEST_EMAIL, autenticacao, CODIGO_VALIDO)).thenReturn(true);
+    when(mockValidationService.validateCode(TEST_EMAIL, autenticacao, CODIGO_VALIDO))
+        .thenReturn(true);
     when(mockValidationService.validateCode(anyString(), anyString(), eq(codigoInvalido)))
         .thenReturn(false);
 
@@ -70,12 +72,14 @@ public class AuthTestConfig {
   }
 
   /**
-   * Fornece um mock de {@link EmailOtpAuthenticationProvider} para testes, simulando o fluxo de autenticação OTP por e-mail.
+   * Retorna um mock de {@link EmailOtpAuthenticationProvider} para testes de autenticação OTP por e-mail.
    *
-   * O mock autentica com sucesso apenas quando o e-mail e o código correspondem aos valores de teste definidos. Caso contrário, lança exceções apropriadas para simular falhas de autenticação.
+   * <p>O mock autentica com sucesso apenas quando o e-mail e o código correspondem aos valores de teste
+   * predefinidos. Caso contrário, lança exceções para simular falhas de autenticação, como código inválido
+   * ou usuário não encontrado.
    *
    * @param usuarioRepository repositório utilizado para buscar o usuário pelo e-mail durante a autenticação simulada
-   * @return um mock de {@code EmailOtpAuthenticationProvider} com comportamento controlado para cenários de teste
+   * @return mock de {@code EmailOtpAuthenticationProvider} com comportamento controlado para cenários de teste
    */
   @Bean
   @Primary
