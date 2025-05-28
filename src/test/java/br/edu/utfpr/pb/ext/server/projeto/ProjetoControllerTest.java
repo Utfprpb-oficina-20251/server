@@ -37,7 +37,7 @@ class ProjetoControllerTest {
     projetoDTO.setEquipeExecutora(
         List.of(
             UsuarioProjetoDTO.builder()
-                .nomeCompleto("batata")
+                .nome("batata")
                 .emailInstitucional("batata@utfpr.edu.br")
                 .build()));
 
