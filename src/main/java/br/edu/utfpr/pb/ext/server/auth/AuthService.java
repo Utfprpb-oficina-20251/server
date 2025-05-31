@@ -94,11 +94,11 @@ public class AuthService {
    * Envia um código OTP para o email do usuário, caso o email esteja cadastrado.
    *
    * @param email endereço de email do usuário destinatário do código OTP
-   * @return true se o código foi enviado com sucesso
-   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do código
+   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do
+   *                                 código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
-  public boolean solicitarCodigoOtp(String email) {
+  public void solicitarCodigoOtp(String email) {
     logger.info("Solicitação de código para validação de email");
     try {
       // Verificar se o usuário existe
@@ -107,7 +107,6 @@ public class AuthService {
           .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
       emailService.generateAndSendCode(email, "autenticacao");
       logger.info("Código de verificação enviado");
-      return true;
     } catch (Exception e) {
       logger.error("Erro ao enviar código de verificação", e);
       throw new ResponseStatusException(

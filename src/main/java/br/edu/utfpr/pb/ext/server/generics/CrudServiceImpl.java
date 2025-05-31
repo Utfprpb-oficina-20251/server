@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.generics;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.io.Serializable;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -53,8 +54,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Salva uma entidade, aplicando ganchos de pré e pós-processamento.
    *
-   * Executa {@code preSave} antes de persistir a entidade e {@code postsave} após a persistência.
-   * Lança {@code IllegalArgumentException} se a entidade fornecida for nula.
+   * <p>Executa {@code preSave} antes de persistir a entidade e {@code postsave} após a
+   * persistência. Lança {@code IllegalArgumentException} se a entidade fornecida for nula.
    *
    * @param entity entidade a ser salva
    * @return a entidade salva, possivelmente modificada pelos ganchos de pré ou pós-processamento
@@ -135,7 +136,9 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    */
   @Override
   public T findOne(I i) {
-    return getRepository().findById(i).orElse(null);
+    return getRepository()
+        .findById(i)
+        .orElseThrow(() -> new EntityNotFoundException("Não há entidade com o id " + i));
   }
 
   /**

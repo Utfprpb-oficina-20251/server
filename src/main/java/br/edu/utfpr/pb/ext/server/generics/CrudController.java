@@ -158,8 +158,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
     T entityToUpdate = convertToEntity(entity);
     I entityI = (I) entityToUpdate.getId();
     if (!i.equals(entityI)) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(null); // or provide an error message DTO if applicable
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
     return ResponseEntity.status(HttpStatus.OK)
         .body(convertToDto(getService().save(entityToUpdate)));

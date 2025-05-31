@@ -11,6 +11,10 @@ public class UniqueRaValidador implements ConstraintValidator<UniqueRa, String> 
 
   @Override
   public boolean isValid(String ra, jakarta.validation.ConstraintValidatorContext context) {
+    if (ra == null || ra.trim().isEmpty()) {
+      return true;
+    }
+
     return usuarioRepository.findByRegistroAcademico(ra).isEmpty();
   }
 }

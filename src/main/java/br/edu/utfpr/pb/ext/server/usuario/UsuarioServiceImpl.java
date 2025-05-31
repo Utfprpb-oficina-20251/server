@@ -32,7 +32,8 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
    * Obtém o usuário atualmente autenticado no contexto de segurança.
    *
    * @return o usuário autenticado
-   * @throws IllegalStateException se não houver usuário autenticado ou se o principal não for uma instância de Usuario
+   * @throws IllegalStateException se não houver usuário autenticado ou se o principal não for uma
+   *     instância de Usuario
    */
   public Usuario obterUsuarioLogado() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -50,7 +51,8 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
    * Valida se o usuário informado está ativo e possui o perfil de servidor.
    *
    * @param professor usuário a ser validado como professor
-   * @throws IllegalArgumentException se o usuário estiver inativo ou não possuir o perfil de servidor
+   * @throws IllegalArgumentException se o usuário estiver inativo ou não possuir o perfil de
+   *     servidor
    */
   public void validarProfessor(Usuario professor) {
     if (!professor.isAtivo()) {

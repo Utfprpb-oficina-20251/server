@@ -25,12 +25,12 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   }
 
   /**
-     * Instancia um token de autenticação já autenticado para autenticação via OTP por e-mail.
-     *
-     * @param principal identidade do usuário, como e-mail ou nome de usuário
-     * @param credentials código OTP ou credencial temporária associada ao usuário
-     * @param authorities coleção de permissões concedidas ao usuário autenticado
-     */
+   * Instancia um token de autenticação já autenticado para autenticação via OTP por e-mail.
+   *
+   * @param principal identidade do usuário, como e-mail ou nome de usuário
+   * @param credentials código OTP ou credencial temporária associada ao usuário
+   * @param authorities coleção de permissões concedidas ao usuário autenticado
+   */
   public EmailOtpAuthenticationToken(
       Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
     super(authorities);
@@ -63,7 +63,8 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   /**
    * Remove as credenciais sensíveis deste token, definindo-as como nulas.
    *
-   * <p>Garante que informações confidenciais, como senhas ou OTPs, sejam eliminadas da memória após a autenticação.
+   * <p>Garante que informações confidenciais, como senhas ou OTPs, sejam eliminadas da memória após
+   * a autenticação.
    */
   @Override
   public void eraseCredentials() {

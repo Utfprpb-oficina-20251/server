@@ -4,16 +4,16 @@ import br.edu.utfpr.pb.ext.server.generics.ICrudService;
 
 public interface IUsuarioService extends ICrudService<Usuario, Long> {
   /**
- * Retorna o usuário atualmente autenticado no sistema.
- *
- * @return o usuário autenticado
- */
+   * Retorna o usuário atualmente autenticado no sistema.
+   *
+   * @return o usuário autenticado
+   */
   Usuario obterUsuarioLogado();
 
   /**
- * Valida se o usuário atende aos critérios para ser considerado professor no sistema.
- *
- * @param professor usuário a ser validado como professor
- */
+   * Valida se o usuário atende aos critérios para ser considerado professor no sistema.
+   *
+   * @param professor usuário a ser validado como professor
+   */
   void validarProfessor(Usuario professor);
 }
