@@ -47,6 +47,10 @@ public class AuthService {
    */
   @Operation(summary = "Cadastra um novo usuário")
   public Usuario cadastro(CadastroUsuarioDTO dto) {
+    if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Usuário já cadastrado");
+    }
+
     Usuario usuario =
         Usuario.builder().nome(dto.getNome()).email(dto.getEmail()).cpf(dto.getRegistro()).build();
     Set<Authority> authorities = new HashSet<>();
@@ -95,7 +99,7 @@ public class AuthService {
    *
    * @param email endereço de email do usuário destinatário do código OTP
    * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do
-   *                                 código
+   *     código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public void solicitarCodigoOtp(String email) {
@@ -104,7 +108,8 @@ public class AuthService {
       // Verificar se o usuário existe
       usuarioRepository
           .findByEmail(email)
-          .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
+          .orElseThrow(
+              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email não cadastrado"));
       emailService.generateAndSendCode(email, "autenticacao");
       logger.info("Código de verificação enviado");
     } catch (Exception e) {

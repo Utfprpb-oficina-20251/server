@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.email;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Serviço responsável por validar códigos enviados por e-mail. */
 @Service
@@ -22,6 +23,7 @@ public class EmailCodeValidationService {
    * @param code código informado pelo usuário
    * @return true se válido, false se inválido ou expirado
    */
+  @Transactional
   public boolean validateCode(String email, String type, String code) {
     return repository
         .findTopByEmailAndTypeOrderByGeneratedAtDesc(email, type)

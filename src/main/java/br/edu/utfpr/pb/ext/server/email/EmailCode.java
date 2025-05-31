@@ -2,6 +2,9 @@ package br.edu.utfpr.pb.ext.server.email;
 
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,14 +23,14 @@ public class EmailCode extends BaseEntity {
 
   // E-mail destinatário do código
   @Column(nullable = false)
-  private String email;
+  @Email(message = "E-mail deve ter formato válido.") @NotBlank(message = "O e-mail é obrigatório.") private String email;
 
   // Código gerado
-  @Column(nullable = false, unique = true)
+  @NotBlank(message = "O código é obrigatório.") @Column(nullable = false, unique = true)
   private String code;
 
   // Data e hora em que o código foi gerado
-  @Column(name = "generated_at", nullable = false)
+  @NotNull(message = "A data de geração é obrigatória.") @Column(name = "generated_at", nullable = false)
   private LocalDateTime generatedAt;
 
   // Se já foi utilizado
@@ -35,11 +38,11 @@ public class EmailCode extends BaseEntity {
   private boolean used = false;
 
   // Data e hora de expiração
-  @Column(nullable = false)
+  @NotNull(message = "A data de expiração é obrigatória.") @Column(nullable = false)
   private LocalDateTime expiration;
 
   // Tipo do código: "cadastro", "recuperacao", etc.
-  @Column(nullable = false)
+  @NotBlank(message = "O tipo do código é obrigatório.") @Column(nullable = false)
   private String type;
 
   // Construtor auxiliar para testes ou uso direto

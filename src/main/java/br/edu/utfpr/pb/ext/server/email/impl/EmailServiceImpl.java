@@ -39,6 +39,9 @@ public class EmailServiceImpl {
    * @throws IOException falha no envio
    */
   public Response generateAndSendCode(String email, String type) throws IOException {
+    if (type == null || type.isBlank()) {
+      throw new IllegalArgumentException("O tipo do código é obrigatório.");
+    }
     validarEmail(email);
     verificarLimiteEnvio(email, type);
 

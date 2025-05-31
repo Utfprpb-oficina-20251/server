@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -111,16 +112,15 @@ class EmailServiceImplTest {
     assertEquals("Endereço de e-mail inválido.", ex.getMessage());
   }
 
-  /** Teste para tipo nulo (se a regra permitir). */
   @Test
-  void testGenerateAndSendCode_NullTypeButValidEmail() throws IOException {
+  @DisplayName("Garante que erro é retornado no caso de não haver o tipo do código na solicitação")
+  void testGenerateAndSendSendCode_whenTypeIsNull_ShouldReturnIllegalArgumentException() {
     String email = "teste@utfpr.edu.br";
-    String tipo = null;
+    String type = null;
 
-    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
-        .thenReturn(Collections.emptyList());
-    when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
-
-    assertDoesNotThrow(() -> emailService.generateAndSendCode(email, tipo));
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, type));
+    assertEquals("O tipo do código é obrigatório.", ex.getMessage());
   }
 }

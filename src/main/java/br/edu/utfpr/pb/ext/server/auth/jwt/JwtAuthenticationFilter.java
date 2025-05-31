@@ -1,5 +1,7 @@
 package br.edu.utfpr.pb.ext.server.auth.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,6 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +26,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String BEARER_TOKEN_PREFIX = "Bearer ";
+  private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
   private final HandlerExceptionResolver handlerExceptionResolver;
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
@@ -42,7 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    */
   @Override
   protected void doFilterInternal(
-          HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
+      HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull FilterChain filterChain)
       throws ServletException, IOException {
     final String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
@@ -74,6 +81,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
       }
       filterChain.doFilter(request, response);
+    } catch (ExpiredJwtException e) {
+      LOGGER.debug("Tentativa de login com token expirado");
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getWriter().write("Token expirado");
+    } catch (MalformedJwtException e) {
+      LOGGER.debug("Tentativa de login com token inválido");
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getWriter().write("Token inválido");
+
     } catch (Exception e) {
       handlerExceptionResolver.resolveException(request, response, null, e);
     }

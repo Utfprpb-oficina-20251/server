@@ -57,7 +57,7 @@ class ProjetoControllerTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("Projeto Teste", response.getBody().getTitulo());
-    verify(usuarioRepository).findByEmail("joao.silva@utfpr.edu.br");
+    verify(usuarioRepository).findByEmail("batata@utfpr.edu.br");
     verify(projetoService).save(any(Projeto.class));
     verify(modelMapper).map(any(Projeto.class), eq(ProjetoDTO.class));
   }
