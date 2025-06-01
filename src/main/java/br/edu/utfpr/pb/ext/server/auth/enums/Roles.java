@@ -12,9 +12,9 @@ public enum Roles {
   private final String authority;
 
   /**
-   * Constrói uma constante do enum Roles com o nome da autoridade especificada.
+   * Inicializa uma constante do enum Roles com o nome da autoridade fornecido.
    *
-   * @param role nome da autoridade associada ao papel
+   * @param role nome da autoridade associado ao papel
    */
   Roles(String role) {
     this.authority = role;

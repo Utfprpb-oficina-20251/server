@@ -10,18 +10,23 @@ public class EmailCodeValidationService {
 
   private final EmailCodeRepository repository;
 
+  /****
+   * Cria uma instância do serviço de validação de códigos de e-mail.
+   *
+   * @param repository repositório utilizado para acessar os códigos de e-mail
+   */
   public EmailCodeValidationService(EmailCodeRepository repository) {
     this.repository = repository;
   }
 
   /**
-   * Valida se o código informado para um e-mail e tipo é o mais recente, corresponde ao valor esperado, não foi utilizado e está dentro do prazo de validade.
-   * Caso todas as condições sejam atendidas, marca o código como utilizado e persiste a alteração.
+   * Valida se o código fornecido para um e-mail e tipo é o mais recente, corresponde ao valor esperado, não foi utilizado e está dentro do prazo de validade.
+   * Se todas as condições forem atendidas, marca o código como utilizado e salva a alteração.
    *
-   * @param email endereço de e-mail associado ao código
-   * @param type tipo do código (por exemplo: cadastro, recuperação)
-   * @param code código informado pelo usuário
-   * @return true se o código for válido e atualizado com sucesso; false caso contrário
+   * @param email endereço de e-mail ao qual o código está associado
+   * @param type tipo do código (exemplo: cadastro, recuperação)
+   * @param code código informado para validação
+   * @return true se o código for válido e marcado como utilizado; false caso contrário
    */
   @Transactional
   public boolean validateCode(String email, String type, String code) {

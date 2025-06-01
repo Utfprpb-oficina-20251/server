@@ -20,7 +20,7 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   private final IUsuarioService usuarioService;
 
   /**
-   * Retorna o repositório utilizado para operações CRUD de SugestaoDeProjeto.
+   * Fornece o repositório específico para operações CRUD da entidade SugestaoDeProjeto.
    *
    * @return o repositório de SugestaoDeProjeto
    */
@@ -30,14 +30,12 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   }
 
   /**
-   * Prepara uma entidade SugestaoDeProjeto antes de ser salva.
+   * Prepara a entidade SugestaoDeProjeto para persistência, definindo o usuário logado como aluno, status como AGUARDANDO e validando o professor, se informado.
    *
-   * <p>Define o usuário logado como aluno, inicializa o status como AGUARDANDO e, se informado,
-   * associa e valida o professor responsável. Lança EntityNotFoundException caso o professor
-   * especificado não seja encontrado.
+   * Caso um professor seja especificado, valida sua existência e papel; lança EntityNotFoundException se não encontrado.
    *
-   * @param entity sugestão de projeto a ser preparada para persistência
-   * @return a entidade SugestaoDeProjeto pronta para ser salva
+   * @param entity sugestão de projeto a ser preparada para salvamento
+   * @return a entidade SugestaoDeProjeto pronta para persistência
    */
   @Override
   public SugestaoDeProjeto preSave(SugestaoDeProjeto entity) {
@@ -60,13 +58,12 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   }
 
   /**
-   * Retorna uma lista de sugestões de projeto associadas ao aluno especificado.
+   * Lista as sugestões de projeto vinculadas ao aluno identificado pelo ID fornecido.
    *
-   * <p>O acesso é permitido apenas para usuários com o papel "ROLE_SERVIDOR" ou para o próprio
-   * aluno.
+   * <p>O acesso é restrito a usuários com o papel "ROLE_SERVIDOR" ou ao próprio aluno.
    *
-   * @param alunoId ID do aluno cujas sugestões de projeto serão listadas
-   * @return lista de sugestões de projeto do aluno informado
+   * @param alunoId identificador do aluno cujas sugestões de projeto serão retornadas
+   * @return lista de sugestões de projeto associadas ao aluno
    */
   @PreAuthorize("hasRole('ROLE_SERVIDOR') or #alunoId == authentication.principal.id")
   public List<SugestaoDeProjeto> listarPorAluno(Long alunoId) {
@@ -74,9 +71,9 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   }
 
   /**
-   * Retorna a lista de sugestões de projeto associadas ao usuário atualmente logado.
+   * Recupera todas as sugestões de projeto vinculadas ao usuário atualmente autenticado.
    *
-   * @return lista de sugestões de projeto do usuário logado
+   * @return lista de sugestões de projeto associadas ao usuário logado
    */
   public List<SugestaoDeProjeto> listarSugestoesDoUsuarioLogado() {
     Usuario usuario = usuarioService.obterUsuarioLogado();

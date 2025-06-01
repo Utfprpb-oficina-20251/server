@@ -11,12 +11,11 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
   /**
-   * Configura e retorna uma instância do OpenAPI com suporte à autenticação JWT via Bearer Token.
+   * Cria e configura uma instância do OpenAPI com suporte à autenticação JWT via Bearer Token.
    *
-   * <p>Adiciona um requisito de segurança chamado "bearerAuth" e define o esquema de segurança
-   * correspondente como HTTP Bearer com formato JWT na documentação OpenAPI da aplicação.
+   * Adiciona um requisito de segurança "bearerAuth" e define o esquema de segurança HTTP Bearer com formato JWT na documentação OpenAPI da aplicação.
    *
-   * @return instância configurada de OpenAPI com autenticação JWT Bearer.
+   * @return instância do OpenAPI configurada para autenticação JWT Bearer
    */
   @Bean
   public OpenAPI customOpenAPI() {

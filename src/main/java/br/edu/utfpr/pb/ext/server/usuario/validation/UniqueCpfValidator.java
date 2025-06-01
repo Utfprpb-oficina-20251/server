@@ -10,11 +10,11 @@ public class UniqueCpfValidator implements ConstraintValidator<UniqueCpf, String
   private final UsuarioRepository usuarioRepository;
 
   /**
-   * Verifica se o CPF fornecido é único no repositório de usuários.
+   * Valida se o CPF informado não está cadastrado em nenhum usuário.
    *
-   * @param cpf CPF a ser validado
+   * @param cpf CPF a ser verificado quanto à unicidade
    * @param context contexto de validação (não utilizado)
-   * @return {@code true} se o CPF não estiver cadastrado; {@code false} caso contrário
+   * @return {@code true} se o CPF for único; {@code false} se já existir no repositório
    */
   @Override
   public boolean isValid(String cpf, jakarta.validation.ConstraintValidatorContext context) {

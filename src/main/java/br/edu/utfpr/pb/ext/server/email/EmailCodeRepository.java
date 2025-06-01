@@ -9,34 +9,31 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
 
   /**
-   * Recupera o código de e-mail mais recente para um determinado e-mail e tipo.
-   *
-   * @param email endereço de e-mail a ser consultado
-   * @param type tipo do código de e-mail
-   * @return um {@link Optional} contendo o código mais recente, se existir
-   */
+ * Retorna o código de e-mail mais recente para o e-mail e tipo especificados, ordenado pela data de geração decrescente.
+ *
+ * @param email endereço de e-mail a ser pesquisado
+ * @param type tipo do código de e-mail
+ * @return um {@link Optional} com o código mais recente, se encontrado
+ */
   Optional<EmailCode> findTopByEmailAndTypeOrderByGeneratedAtDesc(String email, String type);
 
   /**
-   * Busca um código de e-mail que corresponda ao valor informado, que ainda não expirou e não foi
-   * utilizado.
-   *
-   * @param code o código de verificação a ser buscado
-   * @param now data e hora de referência para verificar a expiração
-   * @return um Optional contendo o EmailCode válido, caso exista
-   */
+ * Retorna um código de e-mail correspondente ao valor informado, que ainda não expirou e não foi utilizado.
+ *
+ * @param code valor do código de verificação a ser buscado
+ * @param now data e hora limite para considerar o código como não expirado
+ * @return um Optional contendo o EmailCode válido, se encontrado
+ */
   Optional<EmailCode> findByCodeAndExpirationAfterAndUsedFalse(String code, LocalDateTime now);
 
   /**
-   * Retorna uma lista de códigos de e-mail filtrados pelo e-mail, tipo e data de geração posterior
-   * à informada.
-   *
-   * @param email endereço de e-mail associado aos códigos
-   * @param type tipo do código de e-mail
-   * @param generatedAt data e hora limite; apenas códigos gerados após este momento serão
-   *     retornados
-   * @return lista de códigos de e-mail correspondentes aos critérios
-   */
+       * Busca todos os códigos de e-mail associados a um endereço e tipo específicos, gerados após a data e hora informadas.
+       *
+       * @param email endereço de e-mail para filtrar os códigos
+       * @param type tipo do código de e-mail
+       * @param generatedAt data e hora a partir da qual os códigos devem ter sido gerados (exclusivo)
+       * @return lista de códigos de e-mail que atendem aos critérios especificados
+       */
   List<EmailCode> findAllByEmailAndTypeAndGeneratedAtAfter(
       String email, String type, LocalDateTime generatedAt);
 }

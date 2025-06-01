@@ -12,17 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class CrudServiceImpl<T, I extends Serializable> implements ICrudService<T, I> {
 
   /**
-   * Retorna a instância de {@link JpaRepository} responsável pelas operações de persistência para a
-   * entidade.
-   *
-   * @return o repositório JPA associado à entidade
-   */
+ * Fornece o repositório JPA responsável pelas operações de persistência da entidade.
+ *
+ * @return o repositório JPA associado ao tipo de entidade gerenciado
+ */
   protected abstract JpaRepository<T, I> getRepository();
 
   /**
-   * Retorna uma lista com todas as entidades do tipo T.
+   * Recupera todas as entidades do tipo T do repositório.
    *
-   * @return lista de todas as entidades encontradas
+   * @return lista contendo todas as entidades persistidas
    */
   @Override
   public List<T> findAll() {
@@ -30,10 +29,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Retorna uma lista de todas as entidades ordenadas conforme o parâmetro especificado.
+   * Recupera todas as entidades do repositório aplicando o critério de ordenação especificado.
    *
-   * @param sort critério de ordenação a ser aplicado na consulta
-   * @return lista de entidades ordenadas
+   * @param sort critério de ordenação a ser utilizado na consulta
+   * @return lista de entidades ordenadas conforme o parâmetro fornecido
    */
   @Override
   public List<T> findAll(Sort sort) {
@@ -41,10 +40,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Retorna uma página de entidades com base nas informações de paginação fornecidas.
+   * Recupera uma página de entidades do repositório conforme os critérios de paginação e ordenação especificados.
    *
-   * @param pageable informações de paginação e ordenação
-   * @return uma página contendo as entidades encontradas
+   * @param pageable objeto que define as informações de página e ordenação
+   * @return página contendo as entidades correspondentes à consulta
    */
   @Override
   public Page<T> findAll(Pageable pageable) {
@@ -54,8 +53,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Salva uma entidade, aplicando ganchos de pré e pós-processamento.
    *
-   * <p>Executa {@code preSave} antes de persistir a entidade e {@code postsave} após a
-   * persistência. Lança {@code IllegalArgumentException} se a entidade fornecida for nula.
+   * Executa {@code preSave} antes de persistir a entidade e {@code postsave} após a persistência.
    *
    * @param entity entidade a ser salva
    * @return a entidade salva, possivelmente modificada pelos ganchos de pré ou pós-processamento
@@ -73,13 +71,12 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Ponto de extensão chamado antes de salvar a entidade.
+   * Permite customizar ou validar a entidade antes de sua persistência.
    *
-   * <p>Pode ser sobrescrito para realizar validações ou modificações na entidade antes da
-   * persistência.
+   * Pode ser sobrescrito para aplicar validações ou alterações na entidade antes de ser salva no repositório.
    *
-   * @param entity entidade a ser salva
-   * @return a entidade possivelmente modificada antes do salvamento
+   * @param entity entidade a ser processada antes do salvamento
+   * @return a entidade, possivelmente modificada, que será persistida
    */
   public T preSave(T entity) {
     return entity;
@@ -88,10 +85,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Ponto de extensão chamado após a persistência de uma entidade.
    *
-   * <p>Pode ser sobrescrito para executar lógica adicional após o salvamento. Por padrão, retorna a
-   * entidade sem modificações.
+   * <p>Pode ser sobrescrito para executar lógica adicional após o salvamento da entidade.
+   * Por padrão, retorna a entidade sem alterações.
    *
-   * @param entity entidade recém-persistida
+   * @param entity entidade recém-salva
    * @return a entidade, possivelmente modificada após o salvamento
    */
   public T postsave(T entity) {
@@ -99,10 +96,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Salva a entidade e força a sincronização imediata das alterações com o banco de dados.
+   * Persiste a entidade e garante que as alterações sejam imediatamente gravadas no banco de dados.
    *
-   * @param entity entidade a ser salva
-   * @return a entidade persistida após o flush
+   * @param entity entidade a ser salva e sincronizada
+   * @return a entidade após persistência e flush
    */
   @Override
   public T saveAndFlush(T entity) {
@@ -110,10 +107,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Salva múltiplas entidades fornecidas por um Iterable.
+   * Salva todas as entidades fornecidas por um Iterable em lote.
    *
-   * @param iterable coleção de entidades a serem salvas
-   * @return as entidades salvas
+   * @param iterable coleção de entidades a serem persistidas
+   * @return um Iterable contendo as entidades salvas
    */
   @Override
   public Iterable<T> save(Iterable<T> iterable) {
@@ -121,7 +118,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Força a sincronização imediata das alterações pendentes no repositório com o banco de dados.
+   * Sincroniza imediatamente todas as alterações pendentes do repositório com o banco de dados.
    */
   @Override
   public void flush() {
@@ -129,11 +126,11 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Recupera uma entidade pelo seu identificador.
+   * Busca uma entidade pelo identificador fornecido.
    *
-   * @param i identificador da entidade a ser buscada
-   * @return a entidade correspondente ao ID informado
-   * @throws EntityNotFoundException se nenhuma entidade for encontrada com o ID fornecido
+   * @param i identificador da entidade
+   * @return a entidade correspondente ao identificador
+   * @throws EntityNotFoundException se nenhuma entidade for encontrada com o identificador informado
    */
   @Override
   public T findOne(I i) {
@@ -143,11 +140,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Verifica se existe uma entidade com o identificador fornecido.
+   * Verifica se existe uma entidade com o identificador especificado.
    *
-   * @param i identificador da entidade a ser verificada
-   * @return {@code true} se uma entidade com o ID especificado existir, caso contrário {@code
-   *     false}
+   * @param i identificador da entidade
+   * @return {@code true} se a entidade existir, {@code false} caso contrário
    */
   @Override
   public boolean exists(I i) {
@@ -155,9 +151,9 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Retorna o número total de entidades persistidas.
+   * Retorna a quantidade total de entidades armazenadas no repositório.
    *
-   * @return a quantidade total de entidades no repositório
+   * @return o número total de entidades persistidas
    */
   @Override
   @Transactional(readOnly = true)
@@ -166,7 +162,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Remove a entidade correspondente ao identificador fornecido.
+   * Remove a entidade identificada pelo valor fornecido.
    *
    * @param i identificador da entidade a ser removida
    */
@@ -176,7 +172,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Remove todas as entidades fornecidas do repositório.
+   * Remove todas as entidades presentes na coleção fornecida do repositório.
    *
    * @param iterable coleção de entidades a serem removidas
    */
@@ -185,7 +181,9 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
     getRepository().deleteAll(iterable);
   }
 
-  /** Remove todas as entidades do repositório. */
+  /**
+   * Remove todas as entidades do repositório de forma permanente.
+   */
   @Override
   public void deleteAll() {
     getRepository().deleteAll();

@@ -11,15 +11,20 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
 
   private final UsuarioRepository usuarioRepository;
 
+  /**
+   * Cria uma instância do serviço de usuário utilizando o repositório fornecido.
+   *
+   * @param usuarioRepository repositório de usuários utilizado para operações de persistência
+   */
   public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
 
     this.usuarioRepository = usuarioRepository;
   }
 
   /**
-   * Retorna o repositório JPA utilizado para operações CRUD da entidade Usuario.
+   * Fornece o repositório JPA utilizado para operações CRUD da entidade Usuario.
    *
-   * @return o repositório JpaRepository para Usuario
+   * @return o JpaRepository específico para Usuario
    */
   @Override
   protected JpaRepository<Usuario, Long> getRepository() {
@@ -29,7 +34,7 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
   private static final String ROLE_SERVIDOR = "ROLE_SERVIDOR";
 
   /**
-   * Retorna o usuário atualmente autenticado no contexto de segurança.
+   * Obtém o usuário atualmente autenticado no contexto de segurança.
    *
    * @return o usuário autenticado
    * @throws IllegalStateException se não houver autenticação ativa ou se o principal não for uma instância de Usuario
@@ -47,7 +52,7 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long> implement
   }
 
   /**
-   * Verifica se o usuário está ativo e possui o perfil de servidor.
+   * Valida se o usuário informado está ativo e possui o perfil de servidor.
    *
    * @param professor usuário a ser validado como professor
    * @throws IllegalArgumentException se o usuário estiver inativo ou não possuir o perfil de servidor
