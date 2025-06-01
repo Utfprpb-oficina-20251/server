@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.generics;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.io.Serializable;
 import java.util.List;
@@ -111,21 +112,21 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Busca uma entidade pelo identificador e retorna seu DTO correspondente.
+   * Recupera uma entidade pelo identificador e retorna seu DTO correspondente.
    *
-   * <p>Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não existir.
+   * Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não existir.
    *
    * @param i identificador da entidade a ser buscada
-   * @return ResponseEntity contendo o DTO da entidade ou status 404 se não encontrada
+   * @return ResponseEntity com o DTO da entidade ou status 404 se não encontrada
    */
   @GetMapping("{i}")
   @Operation(summary = "Retorna um registro de acordo com o identificador fornecido")
   public ResponseEntity<D> findOne(@PathVariable I i) {
-    T entity = getService().findOne(i);
-    if (entity != null) {
+    try {
+      T entity = getService().findOne(i);
       return ResponseEntity.ok(convertToDto(entity));
-    } else {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    } catch (EntityNotFoundException e) {
+      return ResponseEntity.notFound().build();
     }
   }
 
@@ -143,14 +144,13 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Atualiza uma entidade existente com base no identificador fornecido e nos dados do DTO.
+   * Atualiza uma entidade existente com os dados fornecidos, garantindo que o identificador do caminho corresponda ao do DTO.
    *
-   * <p>Retorna HTTP 400 se o ID do caminho não corresponder ao ID do DTO.
+   * Retorna HTTP 400 se houver inconsistência entre o ID do caminho e o ID do DTO.
    *
    * @param i identificador da entidade a ser atualizada
-   * @param entity DTO com os dados atualizados
-   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou 400 em
-   *     caso de inconsistência de IDs
+   * @param entity DTO contendo os dados atualizados
+   * @return ResponseEntity com o DTO atualizado e status 200 em caso de sucesso, ou status 400 em caso de IDs divergentes
    */
   @PutMapping("{i}")
   @Operation(summary = "Atualiza um registro de acordo com o identificador fornecido")
@@ -158,8 +158,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
     T entityToUpdate = convertToEntity(entity);
     I entityI = (I) entityToUpdate.getId();
     if (!i.equals(entityI)) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(null); // or provide an error message DTO if applicable
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
     return ResponseEntity.status(HttpStatus.OK)
         .body(convertToDto(getService().save(entityToUpdate)));

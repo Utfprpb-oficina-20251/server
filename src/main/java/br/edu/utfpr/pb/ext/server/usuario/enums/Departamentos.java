@@ -6,12 +6,11 @@ import lombok.Getter;
 public enum Departamentos {
   CALEM("Centro Acadêmico Lingua Estrangeira Moderna"),
   DAADM("Departamento de Administração"),
-  DAAGR("Departamento de Agronomia"),
+  DAGRO("Departamento de Agronomia"),
   DACOC("Departamento Acadêmico de Construção Civil"),
   DACON("Departamento de Ciências Contábeis"),
   DAELE("Departamento de Engenharia Elétrica"),
   DAFIS("Departamento de Física"),
-  DAGRO("Departamento de Agronomia"),
   DAHUM("Departamento de Ciências Humanas"),
   DAINF("Departamento de Ciência da Computação"),
   DALET("Departamento de Letras"),

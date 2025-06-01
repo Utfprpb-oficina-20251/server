@@ -3,7 +3,7 @@ package br.edu.utfpr.pb.ext.server;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import jdk.jfr.Description;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,7 +24,7 @@ class ServerApplicationTests {
   }
 
   @Test
-  @Description("Consultar OPTIONS deve retornar cabeçalhos CORS")
+  @DisplayName("Consultar OPTIONS deve retornar cabeçalhos CORS")
   void options_whenCorsRequest_ShouldReturnCORSHeaders() throws Exception {
     mockMvc
         .perform(

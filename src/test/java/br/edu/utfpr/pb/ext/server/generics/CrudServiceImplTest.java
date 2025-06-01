@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.generics;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -138,14 +139,10 @@ class CrudServiceImplTest {
   }
 
   @Test
-  @DisplayName("findOne(ID) should return null if entity not found")
-  void testFindOneNotFound() {
+  @DisplayName("findOne(ID) deve retornar erro de entidade não encontrada caso não exista")
+  void testFindOne_NotFoundShouldReturnEntityNotFound() {
     when(repository.findById(3L)).thenReturn(Optional.empty());
-
-    TestEntity result = service.findOne(3L);
-
-    assertNull(result);
-    verify(repository).findById(3L);
+    assertThrows(EntityNotFoundException.class, () -> service.findOne(3L));
   }
 
   @Test

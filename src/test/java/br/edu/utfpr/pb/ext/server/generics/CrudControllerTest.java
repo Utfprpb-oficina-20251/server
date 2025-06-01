@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -166,7 +167,7 @@ class CrudControllerTest {
 
   @Test
   void testFindOne_NonExistingEntity_ReturnsNotFound() throws Exception {
-    when(mockService.findOne(anyLong())).thenReturn(null);
+    when(mockService.findOne(anyLong())).thenThrow(new EntityNotFoundException());
     mockMvc.perform(get("/api/test/999")).andExpect(status().isNotFound());
     verify(mockService).findOne(999L);
   }

@@ -48,11 +48,11 @@ public class SecurityConfig {
   private boolean isSwaggerEnabled;
 
   /**
-   * Constrói a configuração de segurança com as dependências necessárias para autenticação e acesso a propriedades do ambiente.
+   * Inicializa a configuração de segurança com as dependências para autenticação e acesso ao ambiente.
    *
-   * @param environment ambiente Spring utilizado para acessar propriedades e perfis ativos
-   * @param usuarioRepository repositório responsável pelo acesso aos dados dos usuários
-   * @param emailOtpAuthenticationProvider provedor de autenticação baseado em OTP enviado por e-mail
+   * @param environment ambiente Spring usado para acessar propriedades e perfis ativos
+   * @param usuarioRepository repositório para consulta de dados de usuários
+   * @param emailOtpAuthenticationProvider provedor de autenticação via OTP por e-mail
    */
   public SecurityConfig(
       Environment environment,
@@ -64,9 +64,13 @@ public class SecurityConfig {
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação, autorização, CORS, CSRF e gerenciamento de sessão.
+   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação,
+   * autorização, CORS, CSRF e gerenciamento de sessão.
    *
-   * <p>Define regras de acesso para diferentes endpoints, permitindo acesso público a rotas específicas, restringindo outras por perfil de usuário e ambiente, e exigindo autenticação para as demais. O gerenciamento de sessão é stateless e um filtro de autenticação JWT é adicionado à cadeia.
+   * <p>Define regras de acesso para diferentes endpoints, permitindo acesso público a rotas
+   * específicas, restringindo outras por perfil de usuário e ambiente, e exigindo autenticação para
+   * as demais. O gerenciamento de sessão é stateless e um filtro de autenticação JWT é adicionado à
+   * cadeia.
    *
    * @param http configuração de segurança HTTP do Spring
    * @param jwtAuthenticationFilter filtro de autenticação JWT a ser inserido na cadeia
@@ -108,10 +112,9 @@ public class SecurityConfig {
   }
 
   /**
-   * Retorna um AuthorizationManager que autoriza requisições apenas quando o perfil ativo do Spring
-   * inclui "test".
+   * Cria um AuthorizationManager que permite acesso apenas se o perfil ativo do Spring incluir "test".
    *
-   * @return AuthorizationManager que concede acesso somente se o perfil "test" estiver ativo.
+   * @return AuthorizationManager que concede autorização somente quando o perfil "test" está ativo.
    */
   private AuthorizationManager<RequestAuthorizationContext> isTestProfile() {
     return (authentication, context) ->
@@ -121,7 +124,8 @@ public class SecurityConfig {
   }
 
   /**
-   * Cria um AuthorizationManager que concede acesso somente quando o Swagger está habilitado na configuração da aplicação.
+   * Cria um AuthorizationManager que concede acesso somente quando o Swagger está habilitado na
+   * configuração da aplicação.
    *
    * @return AuthorizationManager que autoriza o acesso caso o Swagger esteja ativado.
    */

@@ -28,7 +28,7 @@ public class AuthTestConfig {
   public static final String CODIGO_VALIDO = "123456";
 
   /**
-   * Cria um mock de EmailServiceImpl que simula o envio bem-sucedido de código de autenticação por e-mail no contexto "autenticacao".
+   * Retorna um mock de EmailServiceImpl que simula o envio bem-sucedido de código de autenticação por e-mail no contexto "autenticacao".
    *
    * @return instância mockada de EmailServiceImpl que retorna uma resposta de sucesso ao chamar generateAndSendCode com o contexto "autenticacao"
    * @throws IOException se ocorrer um erro de E/S durante a criação do mock
@@ -47,12 +47,11 @@ public class AuthTestConfig {
   }
 
   /**
-   * Retorna um mock de EmailCodeValidationService para testes de validação de código por e-mail.
+   * Fornece um mock de EmailCodeValidationService para testes de validação de códigos OTP por e-mail.
    *
-   * <p>O mock retorna {@code true} apenas quando o e-mail, contexto e código correspondem aos valores de teste válidos.
-   * Para qualquer código inválido, retorna {@code false}, independentemente do e-mail ou contexto.
+   * O mock retorna {@code true} apenas quando o e-mail, o contexto e o código correspondem aos valores válidos de teste; para qualquer código inválido, retorna {@code false}, independentemente do e-mail ou contexto.
    *
-   * @return instância mockada de EmailCodeValidationService com respostas controladas para cenários de teste
+   * @return instância mockada de EmailCodeValidationService com respostas previsíveis para cenários de teste
    */
   @Bean
   @Primary
@@ -72,11 +71,10 @@ public class AuthTestConfig {
   }
 
   /**
-   * Retorna um mock de {@link EmailOtpAuthenticationProvider} para testes de autenticação OTP por e-mail.
+   * Fornece um mock de {@link EmailOtpAuthenticationProvider} para testes de autenticação OTP por e-mail.
    *
-   * <p>O mock autentica com sucesso apenas quando o e-mail e o código correspondem aos valores de teste
-   * predefinidos. Caso contrário, lança exceções para simular falhas de autenticação, como código inválido
-   * ou usuário não encontrado.
+   * O mock autentica com sucesso apenas quando o e-mail e o código correspondem aos valores de teste predefinidos.
+   * Caso contrário, lança exceções para simular falhas de autenticação, como código inválido ou usuário não encontrado.
    *
    * @param usuarioRepository repositório utilizado para buscar o usuário pelo e-mail durante a autenticação simulada
    * @return mock de {@code EmailOtpAuthenticationProvider} com comportamento controlado para cenários de teste

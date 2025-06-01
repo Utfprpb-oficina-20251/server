@@ -1,11 +1,16 @@
 package br.edu.utfpr.pb.ext.server.auth.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,17 +26,15 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String BEARER_TOKEN_PREFIX = "Bearer ";
+  private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
   private final HandlerExceptionResolver handlerExceptionResolver;
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
 
   /**
-   * Intercepta requisições HTTP e realiza autenticação baseada em JWT.
+   * Realiza autenticação de requisições HTTP com base em token JWT.
    *
-   * <p>Extrai o token JWT do cabeçalho Authorization, valida o token e, se válido, autentica o
-   * usuário no contexto de segurança do Spring. Caso o token esteja ausente, inválido ou a
-   * autenticação já exista, a requisição segue normalmente pela cadeia de filtros. Exceções durante
-   * o processo são tratadas pelo HandlerExceptionResolver.
+   * <p>Extrai o token JWT do cabeçalho Authorization, valida e autentica o usuário no contexto de segurança do Spring caso o token seja válido. Se o token estiver ausente, inválido, expirado ou se já houver autenticação, a requisição segue normalmente pela cadeia de filtros. Tokens expirados ou malformados resultam em resposta HTTP 401 com mensagem apropriada. Outras exceções são delegadas ao HandlerExceptionResolver.
    *
    * @param request requisição HTTP recebida
    * @param response resposta HTTP a ser enviada
@@ -41,7 +44,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    */
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull FilterChain filterChain)
       throws ServletException, IOException {
     final String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
@@ -54,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       final String jwt = authHeader.substring(BEARER_TOKEN_PREFIX.length());
       final String username = jwtService.extractUsername(jwt);
 
-      if (authHeader.substring(BEARER_TOKEN_PREFIX.length()).trim().isEmpty() || username == null) {
+      if (username == null) {
         filterChain.doFilter(request, response);
         return;
       }
@@ -73,6 +78,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
       }
       filterChain.doFilter(request, response);
+    } catch (ExpiredJwtException e) {
+      LOGGER.debug("Tentativa de login com token expirado");
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getWriter().write("Token expirado");
+    } catch (MalformedJwtException e) {
+      LOGGER.debug("Tentativa de login com token inválido");
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getWriter().write("Token inválido");
+
     } catch (Exception e) {
       handlerExceptionResolver.resolveException(request, response, null, e);
     }

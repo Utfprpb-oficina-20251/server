@@ -10,6 +10,7 @@ import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
 import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -30,23 +31,26 @@ public class AuthService {
   private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
   public static final String ALUNOS_UTFPR_EDU_BR = "@alunos.utfpr.edu.br";
   public static final String UTFPR_EDU_BR = "@utfpr.edu.br";
+  public static final String EMAIL_NAO_CADASTRADO = "Email não cadastrado";
   private final UsuarioRepository usuarioRepository;
   private final AuthorityRepository authorityRepository;
   private final EmailServiceImpl emailService;
   private final EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
 
   /**
-   * Cadastra um novo usuário atribuindo a autoridade conforme o domínio do e-mail informado.
+   * Realiza o cadastro de um novo usuário, atribuindo a autoridade conforme o domínio do e-mail.
    *
-   * <p>O papel do usuário é determinado automaticamente com base no domínio do e-mail, podendo ser
-   * aluno ou servidor. Lança uma exceção com status 400 caso a autoridade correspondente não seja
-   * encontrada.
+   * O papel do usuário é definido automaticamente como aluno ou servidor, de acordo com o domínio do e-mail informado. Caso o e-mail já esteja cadastrado, lança exceção com status 409. Se a autoridade correspondente não for encontrada, lança exceção com status 400.
    *
    * @param dto dados para cadastro do usuário, incluindo nome, e-mail e registro
    * @return o usuário cadastrado e persistido no banco de dados
    */
   @Operation(summary = "Cadastra um novo usuário")
   public Usuario cadastro(CadastroUsuarioDTO dto) {
+    if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Usuário já cadastrado");
+    }
+
     Usuario usuario =
         Usuario.builder().nome(dto.getNome()).email(dto.getEmail()).cpf(dto.getRegistro()).build();
     Set<Authority> authorities = new HashSet<>();
@@ -91,23 +95,24 @@ public class AuthService {
   }
 
   /**
-   * Envia um código OTP para o email do usuário, caso o email esteja cadastrado.
+   * Envia um código OTP para o email informado, caso esteja cadastrado no sistema.
    *
-   * @param email endereço de email do usuário destinatário do código OTP
-   * @return true se o código foi enviado com sucesso
-   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do código
+   * @param email endereço de email do usuário que receberá o código OTP
+   * @throws ResponseStatusException se o email não estiver cadastrado ou se ocorrer erro no envio do código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
-  public boolean solicitarCodigoOtp(String email) {
+  public void solicitarCodigoOtp(String email) {
     logger.info("Solicitação de código para validação de email");
     try {
       // Verificar se o usuário existe
       usuarioRepository
           .findByEmail(email)
-          .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
+          .orElseThrow(() -> new EntityNotFoundException(EMAIL_NAO_CADASTRADO));
       emailService.generateAndSendCode(email, "autenticacao");
       logger.info("Código de verificação enviado");
-      return true;
+    } catch (EntityNotFoundException e) {
+      logger.error(EMAIL_NAO_CADASTRADO, e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EMAIL_NAO_CADASTRADO);
     } catch (Exception e) {
       logger.error("Erro ao enviar código de verificação", e);
       throw new ResponseStatusException(
@@ -116,11 +121,11 @@ public class AuthService {
   }
 
   /**
-   * Realiza a autenticação de um usuário utilizando um código OTP enviado por email.
+   * Autentica um usuário utilizando um código OTP enviado por email.
    *
    * @param dto Objeto contendo o email do usuário e o código OTP recebido.
    * @return O usuário autenticado correspondente ao email informado.
-   * @throws ResponseStatusException Se o código OTP for inválido ou expirado, retorna erro 401.
+   * @throws ResponseStatusException Se o código OTP for inválido ou expirado (HTTP 401).
    * @throws UsernameNotFoundException Se o email informado não estiver cadastrado.
    */
   @Operation(summary = "Autentica um usuário usando o código OTP")
@@ -132,7 +137,7 @@ public class AuthService {
       SecurityContextHolder.getContext().setAuthentication(authentication);
       return usuarioRepository
           .findByEmail(dto.getEmail())
-          .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
+          .orElseThrow(() -> new UsernameNotFoundException(EMAIL_NAO_CADASTRADO));
     } catch (BadCredentialsException ex) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Código inválido ou expirado");
     }
