@@ -11,11 +11,10 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   private transient Object credentials;
 
   /**
-   * Cria um token de autenticação de OTP por e-mail não autenticado, contendo o principal e as
-   * credenciais fornecidas.
+   * Inicializa um token de autenticação de OTP por e-mail em estado não autenticado, armazenando o principal e as credenciais fornecidas.
    *
-   * @param principal identidade do usuário (por exemplo, e-mail)
-   * @param credentials código OTP ou senha temporária
+   * @param principal identidade do usuário, como o endereço de e-mail
+   * @param credentials código OTP ou senha temporária associada à autenticação
    */
   public EmailOtpAuthenticationToken(Object principal, Object credentials) {
     super(null);
@@ -25,11 +24,11 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   }
 
   /**
-   * Instancia um token de autenticação já autenticado para autenticação via OTP por e-mail.
+   * Cria um token de autenticação autenticado para autenticação via OTP por e-mail.
    *
    * @param principal identidade do usuário, como e-mail ou nome de usuário
-   * @param credentials código OTP ou credencial temporária associada ao usuário
-   * @param authorities coleção de permissões concedidas ao usuário autenticado
+   * @param credentials código OTP ou credencial temporária do usuário
+   * @param authorities permissões concedidas ao usuário autenticado
    */
   public EmailOtpAuthenticationToken(
       Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
@@ -63,8 +62,7 @@ public class EmailOtpAuthenticationToken extends AbstractAuthenticationToken {
   /**
    * Remove as credenciais sensíveis deste token, definindo-as como nulas.
    *
-   * <p>Garante que informações confidenciais, como senhas ou OTPs, sejam eliminadas da memória após
-   * a autenticação.
+   * Garante que informações confidenciais, como senhas ou OTPs, sejam eliminadas da memória após a autenticação.
    */
   @Override
   public void eraseCredentials() {

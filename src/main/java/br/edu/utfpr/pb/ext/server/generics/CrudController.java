@@ -112,12 +112,12 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Busca uma entidade pelo identificador e retorna seu DTO correspondente.
+   * Recupera uma entidade pelo identificador e retorna seu DTO correspondente.
    *
-   * <p>Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não existir.
+   * Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não existir.
    *
    * @param i identificador da entidade a ser buscada
-   * @return ResponseEntity contendo o DTO da entidade ou status 404 se não encontrada
+   * @return ResponseEntity com o DTO da entidade ou status 404 se não encontrada
    */
   @GetMapping("{i}")
   @Operation(summary = "Retorna um registro de acordo com o identificador fornecido")
@@ -144,14 +144,13 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Atualiza uma entidade existente com base no identificador fornecido e nos dados do DTO.
+   * Atualiza uma entidade existente com os dados fornecidos, garantindo que o identificador do caminho corresponda ao do DTO.
    *
-   * <p>Retorna HTTP 400 se o ID do caminho não corresponder ao ID do DTO.
+   * Retorna HTTP 400 se houver inconsistência entre o ID do caminho e o ID do DTO.
    *
    * @param i identificador da entidade a ser atualizada
-   * @param entity DTO com os dados atualizados
-   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou 400 em
-   *     caso de inconsistência de IDs
+   * @param entity DTO contendo os dados atualizados
+   * @return ResponseEntity com o DTO atualizado e status 200 em caso de sucesso, ou status 400 em caso de IDs divergentes
    */
   @PutMapping("{i}")
   @Operation(summary = "Atualiza um registro de acordo com o identificador fornecido")

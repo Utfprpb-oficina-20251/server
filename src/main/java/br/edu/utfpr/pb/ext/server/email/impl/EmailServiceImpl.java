@@ -31,12 +31,15 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Gera um código, envia para o e-mail e salva no banco.
+   * Gera um código de verificação, envia para o e-mail informado e registra o código no banco de dados.
    *
-   * @param email destinatário
-   * @param type tipo do código ("cadastro", "recuperacao", etc)
-   * @return resposta do SendGrid
-   * @throws IOException falha no envio
+   * Valida o tipo e o formato do e-mail, verifica o limite diário de envios, gera um código aleatório, envia o e-mail de verificação e salva o código caso o envio seja bem-sucedido.
+   *
+   * @param email endereço de e-mail do destinatário
+   * @param type tipo do código de verificação (por exemplo, "cadastro", "recuperacao")
+   * @return resposta da API do SendGrid referente ao envio do e-mail
+   * @throws IllegalArgumentException se o tipo for nulo, vazio ou se o e-mail for inválido, ou se o limite diário de envios for excedido
+   * @throws IOException se houver falha no envio do e-mail
    */
   public Response generateAndSendCode(String email, String type) throws IOException {
     if (type == null || type.isBlank()) {
