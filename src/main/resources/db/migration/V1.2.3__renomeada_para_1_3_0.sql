@@ -1,0 +1,1 @@
+-- Esta versão foi renomeada para V1.3.0. Mantida para compatibilidade com ambientes que executaram a versão anterior.
