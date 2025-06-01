@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("test")
 @Import(AuthTestConfig.class)
 class AuthControllerTest {
+  public static final String USUARIO_JA_CADASTRADO = "Usuário já cadastrado";
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
 
@@ -129,7 +130,7 @@ class AuthControllerTest {
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isConflict())
-        .andExpect(status().reason("Usuário já cadastrado"));
+        .andExpect(status().reason(USUARIO_JA_CADASTRADO));
   }
 
   @Test
