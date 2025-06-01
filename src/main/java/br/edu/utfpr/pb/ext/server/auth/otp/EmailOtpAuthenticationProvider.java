@@ -19,10 +19,10 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   private final UsuarioRepository usuarioRepository;
 
   /**
-   * Inicializa o provedor de autenticação OTP por e-mail com os serviços necessários.
+   * Cria uma instância do provedor de autenticação OTP por e-mail com os serviços de validação de código e acesso a usuários.
    *
-   * @param emailCodeValidationService serviço para validação de códigos OTP enviados por e-mail
-   * @param usuarioRepository repositório utilizado para buscar usuários pelo e-mail
+   * @param emailCodeValidationService serviço responsável por validar códigos OTP enviados por e-mail
+   * @param usuarioRepository repositório utilizado para buscar informações de usuários pelo e-mail
    */
   public EmailOtpAuthenticationProvider(
       EmailCodeValidationService emailCodeValidationService, UsuarioRepository usuarioRepository) {
@@ -31,13 +31,13 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   }
 
   /**
-   * Realiza a autenticação de um usuário utilizando um código OTP enviado por e-mail.
+   * Autentica um usuário utilizando um código OTP enviado por e-mail.
    *
-   * <p>Valida o código OTP fornecido para o e-mail informado e, se válido, recupera os detalhes do
-   * usuário. Em caso de sucesso, retorna um token de autenticação com as autoridades do usuário.
+   * Valida o código OTP fornecido para o e-mail informado e, se válido, recupera os detalhes do usuário.
+   * Retorna um token de autenticação autenticado com as autoridades do usuário.
    *
    * @param authentication objeto contendo o e-mail e o código OTP.
-   * @return um token de autenticação autenticado com os detalhes do usuário.
+   * @return token de autenticação autenticado com os detalhes e permissões do usuário.
    * @throws BadCredentialsException se o código OTP for inválido ou expirado.
    * @throws UsernameNotFoundException se o usuário não for encontrado pelo e-mail informado.
    */
@@ -65,10 +65,10 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   }
 
   /**
-   * Verifica se este provedor suporta autenticação via token OTP enviado por e-mail.
+   * Indica se este provedor suporta autenticação usando {@code EmailOtpAuthenticationToken}.
    *
    * @param authentication a classe do token de autenticação a ser verificada
-   * @return {@code true} se a classe informada for compatível com {@code EmailOtpAuthenticationToken}
+   * @return {@code true} se a autenticação for do tipo {@code EmailOtpAuthenticationToken}
    */
   @Override
   public boolean supports(Class<?> authentication) {

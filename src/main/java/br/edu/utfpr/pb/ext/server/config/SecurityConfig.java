@@ -48,11 +48,11 @@ public class SecurityConfig {
   private boolean isSwaggerEnabled;
 
   /**
-   * Inicializa a configuração de segurança com as dependências para autenticação e acesso ao ambiente.
+   * Cria a configuração de segurança com as dependências necessárias para autenticação e acesso ao ambiente.
    *
-   * @param environment ambiente Spring usado para acessar propriedades e perfis ativos
-   * @param usuarioRepository repositório para consulta de dados de usuários
-   * @param emailOtpAuthenticationProvider provedor de autenticação via OTP por e-mail
+   * @param environment ambiente Spring para acesso a propriedades e perfis ativos
+   * @param usuarioRepository repositório de usuários utilizado para autenticação
+   * @param emailOtpAuthenticationProvider provedor de autenticação OTP por e-mail
    */
   public SecurityConfig(
       Environment environment,
@@ -64,13 +64,9 @@ public class SecurityConfig {
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação,
-   * autorização, CORS, CSRF e gerenciamento de sessão.
+   * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação, autorização, CORS, CSRF e gerenciamento de sessão.
    *
-   * <p>Define regras de acesso para diferentes endpoints, permitindo acesso público a rotas
-   * específicas, restringindo outras por perfil de usuário e ambiente, e exigindo autenticação para
-   * as demais. O gerenciamento de sessão é stateless e um filtro de autenticação JWT é adicionado à
-   * cadeia.
+   * Permite acesso público a endpoints específicos, restringe rotas conforme perfil de usuário, ambiente e configuração, e exige autenticação para as demais rotas. O gerenciamento de sessão é stateless e um filtro de autenticação JWT é adicionado antes do filtro padrão de autenticação por usuário e senha.
    *
    * @param http configuração de segurança HTTP do Spring
    * @param jwtAuthenticationFilter filtro de autenticação JWT a ser inserido na cadeia
@@ -112,9 +108,9 @@ public class SecurityConfig {
   }
 
   /**
-   * Cria um AuthorizationManager que permite acesso apenas se o perfil ativo do Spring incluir "test".
+   * Retorna um AuthorizationManager que concede acesso somente quando o perfil ativo do Spring inclui "test".
    *
-   * @return AuthorizationManager que concede autorização somente quando o perfil "test" está ativo.
+   * @return AuthorizationManager que autoriza requisições apenas se o perfil "test" estiver ativo.
    */
   private AuthorizationManager<RequestAuthorizationContext> isTestProfile() {
     return (authentication, context) ->
@@ -124,10 +120,9 @@ public class SecurityConfig {
   }
 
   /**
-   * Cria um AuthorizationManager que concede acesso somente quando o Swagger está habilitado na
-   * configuração da aplicação.
+   * Retorna um AuthorizationManager que permite acesso apenas se o Swagger estiver habilitado na configuração da aplicação.
    *
-   * @return AuthorizationManager que autoriza o acesso caso o Swagger esteja ativado.
+   * @return AuthorizationManager que autoriza o acesso quando o Swagger está ativado.
    */
   private AuthorizationManager<RequestAuthorizationContext> isSwaggerEnabled() {
     return (authentication, context) ->
@@ -135,14 +130,12 @@ public class SecurityConfig {
   }
 
   /**
-   * Define a configuração de CORS para a aplicação, permitindo origens, métodos e cabeçalhos
-   * específicos.
+   * Cria e retorna a configuração de CORS para a aplicação.
    *
-   * <p>Utiliza as origens permitidas definidas na propriedade {@code app.client.origins}, autoriza
-   * os métodos HTTP GET, POST, PUT, DELETE e OPTIONS, e os cabeçalhos Authorization, Content-Type,
-   * X-Requested-With e Accept. Permite o envio de credenciais.
+   * <p>Permite apenas as origens, métodos HTTP e cabeçalhos especificados nas propriedades da aplicação,
+   * além de suportar o envio de credenciais.
    *
-   * @return uma instância configurada de {@link CorsConfigurationSource}
+   * @return a configuração de CORS aplicada a todos os endpoints
    */
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
@@ -159,10 +152,9 @@ public class SecurityConfig {
   }
 
   /**
-   * Fornece um serviço de autenticação que carrega detalhes do usuário pelo e-mail.
+   * Cria um serviço que carrega detalhes do usuário a partir do e-mail informado.
    *
-   * @return um UserDetailsService que busca usuários no repositório pelo e-mail e lança
-   *     UsernameNotFoundException se não encontrado
+   * @return um UserDetailsService que busca o usuário no repositório pelo e-mail e lança UsernameNotFoundException caso não seja encontrado
    */
   @Bean
   UserDetailsService userDetailsService() {
@@ -173,11 +165,11 @@ public class SecurityConfig {
   }
 
   /**
-   * Expõe o bean {@link AuthenticationManager} configurado pelo Spring Security.
+   * Fornece o bean {@link AuthenticationManager} configurado pelo Spring Security.
    *
    * @param config configuração de autenticação do Spring Security
-   * @return instância do {@link AuthenticationManager} configurada
-   * @throws Exception se ocorrer erro ao obter o gerenciador de autenticação
+   * @return instância do {@link AuthenticationManager} obtida da configuração
+   * @throws Exception se ocorrer falha ao recuperar o gerenciador de autenticação
    */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)

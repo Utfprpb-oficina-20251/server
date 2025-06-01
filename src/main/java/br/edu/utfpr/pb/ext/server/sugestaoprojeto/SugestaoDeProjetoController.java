@@ -23,11 +23,10 @@ public class SugestaoDeProjetoController
   private final ModelMapper modelMapper;
 
   /**
-   * Cria uma instância do controlador de sugestões de projeto, inicializando o serviço e o model
-   * mapper necessários.
+   * Inicializa o controlador REST para sugestões de projeto com o serviço e o model mapper fornecidos.
    *
-   * @param service implementação do serviço de sugestões de projeto
-   * @param modelMapper instância para conversão entre entidades e DTOs
+   * @param service implementação do serviço responsável pelas operações de sugestão de projeto
+   * @param modelMapper instância utilizada para conversão entre entidades e DTOs
    */
   public SugestaoDeProjetoController(
       SugestaoDeProjetoServiceImpl service, ModelMapper modelMapper) {
@@ -37,9 +36,9 @@ public class SugestaoDeProjetoController
   }
 
   /**
-   * Retorna a instância do serviço responsável pelas operações de CRUD para SugestaoDeProjeto.
+   * Fornece o serviço utilizado para operações CRUD de sugestões de projeto.
    *
-   * @return o serviço de SugestaoDeProjeto utilizado pelo controlador
+   * @return instância do serviço de SugestaoDeProjeto
    */
   @Override
   protected ICrudService<SugestaoDeProjeto, Long> getService() {
@@ -47,9 +46,9 @@ public class SugestaoDeProjetoController
   }
 
   /**
-   * Retorna a instância de ModelMapper utilizada para conversão entre entidades e DTOs.
+   * Fornece o ModelMapper configurado para conversão entre entidades e DTOs neste controlador.
    *
-   * @return o ModelMapper configurado para este controlador
+   * @return o ModelMapper utilizado para mapeamento de entidades e DTOs
    */
   @Override
   protected ModelMapper getModelMapper() {
@@ -57,9 +56,9 @@ public class SugestaoDeProjetoController
   }
 
   /**
-   * Recupera as sugestões de projeto associadas ao usuário autenticado.
+   * Retorna uma lista das sugestões de projeto vinculadas ao usuário atualmente autenticado.
    *
-   * @return resposta HTTP 200 com a lista de sugestões de projeto do usuário logado em formato DTO
+   * @return resposta HTTP 200 contendo a lista de SugestaoDeProjetoDTO referentes ao usuário logado
    */
   @Operation(summary = "Listar sugestões de projeto do usuário logado")
   @GetMapping("/minhas-sugestoes")
@@ -69,10 +68,10 @@ public class SugestaoDeProjetoController
   }
 
   /**
-   * Converte uma entidade SugestaoDeProjeto em seu DTO correspondente.
+   * Converte uma entidade SugestaoDeProjeto para seu DTO correspondente.
    *
    * @param sugestaoDeProjeto entidade de sugestão de projeto a ser convertida
-   * @return DTO representando a sugestão de projeto fornecida
+   * @return DTO da sugestão de projeto
    */
   private SugestaoDeProjetoDTO convertToResponseDTO(SugestaoDeProjeto sugestaoDeProjeto) {
     return getModelMapper().map(sugestaoDeProjeto, SugestaoDeProjetoDTO.class);

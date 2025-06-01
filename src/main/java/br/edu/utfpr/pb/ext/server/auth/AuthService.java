@@ -38,11 +38,11 @@ public class AuthService {
   private final EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
 
   /**
-   * Realiza o cadastro de um novo usuário, atribuindo a autoridade conforme o domínio do e-mail.
+   * Cadastra um novo usuário, atribuindo automaticamente a autoridade conforme o domínio do e-mail.
    *
-   * O papel do usuário é definido automaticamente como aluno ou servidor, de acordo com o domínio do e-mail informado. Caso o e-mail já esteja cadastrado, lança exceção com status 409. Se a autoridade correspondente não for encontrada, lança exceção com status 400.
+   * Define o papel do usuário como aluno ou servidor de acordo com o domínio do e-mail informado. Lança exceção com status 409 se o e-mail já estiver cadastrado e com status 400 se a autoridade correspondente não for encontrada.
    *
-   * @param dto dados para cadastro do usuário, incluindo nome, e-mail e registro
+   * @param dto objeto com nome, e-mail e registro do usuário a ser cadastrado
    * @return o usuário cadastrado e persistido no banco de dados
    */
   @Operation(summary = "Cadastra um novo usuário")
@@ -67,14 +67,13 @@ public class AuthService {
   }
 
   /**
-   * Determina o papel do usuário com base no domínio do e-mail informado.
+   * Retorna o nome da role do usuário com base no domínio do e-mail informado.
    *
-   * <p>Retorna "ROLE_SERVIDOR" se o e-mail termina com "@utfpr.edu.br" ou "ROLE_ALUNO" se termina
-   * com "@alunos.utfpr.edu.br". Lança uma exceção se o domínio do e-mail for inválido.
+   * Retorna "ROLE_SERVIDOR" para e-mails terminados em "@utfpr.edu.br" e "ROLE_ALUNO" para "@alunos.utfpr.edu.br".
    *
-   * @param dto DTO contendo o e-mail do usuário.
-   * @return o nome da role correspondente ao domínio do e-mail.
-   * @throws ResponseStatusException se o e-mail não pertencer a um domínio permitido.
+   * @param dto objeto contendo o e-mail do usuário
+   * @return o nome da role correspondente ao domínio do e-mail
+   * @throws ResponseStatusException se o e-mail não pertencer a um domínio permitido
    */
   @NotNull private static String obtemRoleDeUsuario(CadastroUsuarioDTO dto) {
     final String ROLE_ALUNO = "ROLE_ALUNO";
@@ -95,10 +94,10 @@ public class AuthService {
   }
 
   /**
-   * Envia um código OTP para o email informado, caso esteja cadastrado no sistema.
+   * Solicita o envio de um código OTP para o email informado, caso o usuário esteja cadastrado.
    *
    * @param email endereço de email do usuário que receberá o código OTP
-   * @throws ResponseStatusException se o email não estiver cadastrado ou se ocorrer erro no envio do código
+   * @throws ResponseStatusException com status 404 se o email não estiver cadastrado, ou 500 em caso de falha no envio do código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public void solicitarCodigoOtp(String email) {
@@ -121,7 +120,9 @@ public class AuthService {
   }
 
   /**
-   * Autentica um usuário utilizando um código OTP enviado por email.
+   * Realiza a autenticação de um usuário por meio de código OTP enviado por email.
+   *
+   * Autentica o usuário utilizando o email e o código OTP fornecidos, definindo o contexto de segurança ao autenticar com sucesso.
    *
    * @param dto Objeto contendo o email do usuário e o código OTP recebido.
    * @return O usuário autenticado correspondente ao email informado.

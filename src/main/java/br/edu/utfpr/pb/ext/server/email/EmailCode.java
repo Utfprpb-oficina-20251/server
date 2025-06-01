@@ -45,7 +45,15 @@ public class EmailCode extends BaseEntity {
   @NotBlank(message = "O tipo do código é obrigatório.") @Column(nullable = false)
   private String type;
 
-  // Construtor auxiliar para testes ou uso direto
+  /**
+   * Cria uma nova instância de EmailCode com os valores fornecidos e marca o código como não utilizado.
+   *
+   * @param email endereço de e-mail do destinatário
+   * @param code código gerado para validação
+   * @param generatedAt data e hora em que o código foi gerado
+   * @param expiration data e hora de expiração do código
+   * @param type tipo do código (por exemplo, "cadastro" ou "recuperacao")
+   */
   public EmailCode(
       String email, String code, LocalDateTime generatedAt, LocalDateTime expiration, String type) {
     this.email = email;

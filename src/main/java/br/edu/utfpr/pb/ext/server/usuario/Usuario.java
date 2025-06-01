@@ -68,7 +68,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   private Set<Authority> authorities;
 
   /**
-   * Obtém o conjunto de autoridades (permissões) atribuídas ao usuário.
+   * Retorna as permissões associadas ao usuário.
    *
    * @return um novo conjunto contendo as autoridades do usuário
    */
@@ -80,10 +80,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna sempre null, pois a autenticação do usuário é realizada exclusivamente por OTP ou JWT,
-   * sem uso de senha.
+   * Retorna sempre null, pois a autenticação do usuário é feita exclusivamente por OTP ou JWT, sem armazenamento ou uso de senha.
    *
-   * @return sempre null, indicando que não há senha armazenada ou utilizada para autenticação.
+   * @return null, indicando ausência de senha para autenticação.
    */
   @Override
   public String getPassword() {
@@ -92,9 +91,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna o email do usuário para autenticação.
+   * Retorna o email do usuário, utilizado como nome de usuário para autenticação no sistema.
    *
-   * @return o email cadastrado do usuário
+   * @return o email do usuário
    */
   @Override
   public String getUsername() {
@@ -102,9 +101,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Indica que a conta do usuário nunca expira.
+   * Indica que a conta do usuário está sempre ativa e nunca expira.
    *
-   * @return sempre retorna {@code true}
+   * @return sempre {@code true}, indicando que a conta não expira
    */
   @Override
   @Transient
@@ -113,9 +112,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Indica que a conta do usuário nunca está bloqueada.
+   * Indica que a conta do usuário está sempre desbloqueada.
    *
-   * @return sempre retorna {@code true}
+   * @return sempre {@code true}, indicando que a conta nunca é considerada bloqueada
    */
   @Override
   @Transient
@@ -124,9 +123,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Indica que as credenciais do usuário estão sempre válidas e não expiram.
+   * Indica que as credenciais do usuário nunca expiram.
    *
-   * @return sempre retorna {@code true}
+   * @return sempre retorna {@code true}, sinalizando que as credenciais estão permanentemente válidas
    */
   @Override
   @Transient
@@ -137,8 +136,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   /**
    * Indica se a conta do usuário está habilitada.
    *
-   * @return sempre retorna {@code true}, indicando que a conta está habilitada independentemente do
-   *     estado real de ativação.
+   * @return sempre retorna {@code true}, indicando que a conta está habilitada, independentemente do estado real do usuário.
    */
   @Override
   @Transient

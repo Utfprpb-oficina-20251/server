@@ -11,9 +11,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
   /**
-   * Fornece um bean do ModelMapper para mapeamento automático de objetos entre diferentes tipos.
+   * Cria e fornece um bean ModelMapper para mapeamento automático de objetos entre tipos distintos.
    *
-   * @return uma instância de ModelMapper para uso em injeção de dependências
+   * @return uma instância de ModelMapper disponível para injeção de dependências
    */
   @Bean
   public ModelMapper modelMapper() {
@@ -21,13 +21,11 @@ public class WebConfig implements WebMvcConfigurer {
   }
 
   /**
-   * Adiciona o prefixo "/api/" a todas as rotas de controladores que implementam ou estendem {@code
-   * CrudController}.
+   * Configura o prefixo "/api/" para todas as rotas de controladores que implementam ou estendem {@code CrudController}.
    *
-   * <p>Isso centraliza o versionamento e a organização dos endpoints de CRUD sob o namespace
-   * "/api/".
+   * Centraliza os endpoints de operações CRUD sob o namespace "/api/", facilitando a organização e o roteamento das APIs.
    *
-   * @param configurer objeto utilizado para configurar o mapeamento de caminhos no Spring MVC
+   * @param configurer objeto utilizado para definir regras de mapeamento de caminhos no Spring MVC
    */
   @Override
   public void configurePathMatch(PathMatchConfigurer configurer) {

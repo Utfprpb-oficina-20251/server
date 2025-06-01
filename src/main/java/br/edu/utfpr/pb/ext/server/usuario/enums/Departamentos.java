@@ -24,6 +24,11 @@ public enum Departamentos {
 
   private final String descricao;
 
+  /**
+   * Inicializa o enum com a descrição correspondente ao departamento.
+   *
+   * @param descricao descrição completa do departamento ou unidade acadêmica
+   */
   Departamentos(String descricao) {
     this.descricao = descricao;
   }

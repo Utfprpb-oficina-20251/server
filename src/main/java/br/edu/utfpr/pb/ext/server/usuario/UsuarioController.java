@@ -35,6 +35,14 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   private final JwtService jwtService;
   private final AuthorityRepository authorityRepository;
 
+  /**
+   * Cria uma instância do controlador de usuários, inicializando os serviços necessários para operações CRUD, mapeamento de entidades, geração de tokens JWT e gerenciamento de autoridades.
+   *
+   * @param usuarioService serviço responsável pelas operações de usuário
+   * @param modelMapper instância para mapeamento entre entidades e DTOs
+   * @param jwtService serviço para geração e manipulação de tokens JWT
+   * @param authorityRepository repositório para consulta de autoridades (roles)
+   */
   public UsuarioController(
       IUsuarioService usuarioService,
       ModelMapper modelMapper,
@@ -47,15 +55,20 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     this.authorityRepository = authorityRepository;
   }
 
+  /**
+   * Fornece o serviço CRUD específico para a entidade Usuario.
+   *
+   * @return a instância de ICrudService utilizada para operações com Usuario
+   */
   @Override
   protected ICrudService<Usuario, Long> getService() {
     return usuarioService;
   }
 
   /**
-   * Retorna a instância de ModelMapper usada para mapear entidades e DTOs neste controlador.
+   * Fornece a instância de ModelMapper utilizada para conversão entre entidades e DTOs neste controlador.
    *
-   * @return ModelMapper configurado para este controlador
+   * @return a instância de ModelMapper usada para mapeamento de objetos
    */
   @Override
   protected ModelMapper getModelMapper() {
@@ -63,7 +76,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Cria um novo usuário com perfil de servidor e retorna uma resposta de login com token JWT e data de expiração.
+   * Cria um novo usuário com perfil de servidor, atribui a autoridade "ROLE_SERVIDOR" e retorna um token JWT com data de expiração.
    *
    * Retorna HTTP 400 se a autoridade "ROLE_SERVIDOR" não for encontrada.
    *
@@ -96,8 +109,8 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return getRespostaLoginDTOResponseEntity(usuario, authorities, servidorAuthority);
   }
 
-  /**
-   * Cria um novo usuário com perfil de aluno e retorna uma resposta de login contendo o token JWT e o tempo de expiração.
+  /****
+   * Cria um novo usuário com perfil de aluno e retorna uma resposta de login com token JWT e tempo de expiração.
    *
    * Retorna HTTP 200 com o token de autenticação e tempo de expiração caso a criação seja bem-sucedida.
    * Retorna HTTP 400 se a autoridade "ROLE_ALUNO" não for encontrada.
@@ -132,13 +145,13 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Gera uma resposta HTTP com token JWT e tempo de expiração após salvar o usuário com a autoridade especificada.
+   * Retorna uma resposta HTTP contendo um token JWT e o tempo de expiração após salvar o usuário com a autoridade informada.
    *
-   * Retorna HTTP 400 se a autoridade fornecida for nula.
+   * Retorna HTTP 400 se a autoridade fornecida for nula; caso contrário, salva o usuário com a autoridade, gera o token e retorna HTTP 200 com o DTO de login.
    *
-   * @param usuario usuário a ser salvo
-   * @param authorities conjunto de autoridades atribuídas ao usuário
-   * @param authority autoridade a ser adicionada ao usuário
+   * @param usuario usuário a ser salvo com a autoridade
+   * @param authorities conjunto de autoridades a serem atribuídas ao usuário
+   * @param authority autoridade específica a ser adicionada
    * @return resposta HTTP 200 com DTO contendo token e expiração, ou HTTP 400 se a autoridade for nula
    */
   @NotNull private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(

@@ -11,6 +11,11 @@ public enum StatusProjeto {
 
   private final String descricao;
 
+  /**
+   * Cria uma nova instância do status do projeto com a descrição fornecida.
+   *
+   * @param descricao descrição associada ao status do projeto
+   */
   StatusProjeto(String descricao) {
     this.descricao = descricao;
   }

@@ -17,28 +17,27 @@ import org.springframework.web.bind.annotation.*;
 public abstract class CrudController<T extends BaseEntity, D, I extends Serializable> {
 
   /**
-   * Fornece a instância do serviço CRUD responsável pelas operações de persistência para a
-   * entidade.
-   *
-   * @return implementação de ICrudService para a entidade e identificador especificados
-   */
+ * Retorna o serviço CRUD responsável pelas operações de persistência da entidade.
+ *
+ * @return implementação de ICrudService correspondente à entidade e ao identificador genéricos
+ */
   protected abstract ICrudService<T, I> getService();
 
   /**
-   * Retorna a instância de ModelMapper utilizada para conversão entre entidades e DTOs.
-   *
-   * @return ModelMapper para conversão de tipos no controlador CRUD.
-   */
+ * Fornece a instância de ModelMapper usada para converter entre entidades e DTOs neste controlador CRUD.
+ *
+ * @return a instância de ModelMapper utilizada para mapeamento de tipos.
+ */
   protected abstract ModelMapper getModelMapper();
 
   private final Class<T> typeClass;
   private final Class<D> typeDtoClass;
 
   /**
-   * Constrói um controlador CRUD genérico para a entidade e DTO informados.
+   * Inicializa o controlador CRUD genérico com as classes da entidade e do DTO especificados.
    *
-   * @param typeClass classe da entidade que será gerenciada
-   * @param typeDtoClass classe do DTO associado à entidade
+   * @param typeClass classe da entidade a ser gerenciada
+   * @param typeDtoClass classe do DTO correspondente à entidade
    */
   protected CrudController(Class<T> typeClass, Class<D> typeDtoClass) {
     this.typeClass = typeClass;
@@ -46,38 +45,38 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna a classe do tipo DTO associado ao controlador.
+   * Retorna a classe do tipo DTO gerenciado por este controlador.
    *
-   * @return a classe correspondente ao tipo DTO
+   * @return a classe do DTO associado ao controlador
    */
   public Class<D> getTypeDtoClass() {
     return typeDtoClass;
   }
 
   /**
-   * Converte uma entidade do tipo T para seu DTO correspondente do tipo D usando ModelMapper.
+   * Converte uma entidade do tipo T em seu DTO correspondente do tipo D utilizando ModelMapper.
    *
-   * @param entity a entidade a ser convertida
-   * @return o DTO resultante da conversão
+   * @param entity entidade a ser convertida
+   * @return DTO correspondente à entidade fornecida
    */
   private D convertToDto(T entity) {
     return getModelMapper().map(entity, this.typeDtoClass);
   }
 
   /**
-   * Converte um DTO em uma entidade do tipo gerenciado pelo controlador.
+   * Converte um DTO para a entidade correspondente do tipo gerenciado por este controlador.
    *
-   * @param entityDto objeto DTO a ser convertido
-   * @return entidade correspondente ao DTO fornecido
+   * @param entityDto o DTO a ser convertido
+   * @return a entidade resultante da conversão do DTO
    */
   protected T convertToEntity(D entityDto) {
     return getModelMapper().map(entityDto, this.typeClass);
   }
 
   /**
-   * Recupera todos os registros e os retorna convertidos para DTOs.
+   * Retorna todos os registros convertidos para DTOs.
    *
-   * @return ResponseEntity com a lista de DTOs e status HTTP 200 OK
+   * @return ResponseEntity contendo a lista de DTOs e status HTTP 200 OK
    */
   @GetMapping
   @Operation(summary = "Retorna uma lista de todos os registros")
@@ -86,14 +85,13 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna uma página de entidades convertidas para DTOs, com suporte a paginação e ordenação
-   * opcionais.
+   * Retorna uma página de DTOs das entidades, com suporte a paginação e ordenação opcionais.
    *
-   * @param page número da página a ser retornada (começando em 0)
+   * @param page número da página a ser retornada (iniciando em 0)
    * @param size quantidade de itens por página
    * @param order campo opcional para ordenação dos resultados
    * @param asc define se a ordenação é ascendente (true) ou descendente (false)
-   * @return página de DTOs conforme os critérios de paginação e ordenação especificados
+   * @return página contendo os DTOs conforme os critérios especificados
    */
   @GetMapping("page")
   @Operation(
@@ -112,12 +110,12 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Recupera uma entidade pelo identificador e retorna seu DTO correspondente.
+   * Busca uma entidade pelo identificador e retorna seu DTO correspondente.
    *
-   * Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não existir.
+   * Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não for localizada.
    *
-   * @param i identificador da entidade a ser buscada
-   * @return ResponseEntity com o DTO da entidade ou status 404 se não encontrada
+   * @param i identificador da entidade
+   * @return ResponseEntity contendo o DTO da entidade ou status 404 se não encontrada
    */
   @GetMapping("{i}")
   @Operation(summary = "Retorna um registro de acordo com o identificador fornecido")
@@ -131,10 +129,10 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Cria uma nova entidade com base no DTO fornecido e retorna o DTO persistido.
+   * Cria uma nova entidade a partir do DTO fornecido e retorna o DTO correspondente persistido.
    *
-   * @param entity DTO representando os dados da nova entidade (validação aplicada)
-   * @return ResponseEntity com o DTO salvo e status HTTP 201 Created
+   * @param entity DTO validado com os dados para criação da entidade
+   * @return ResponseEntity contendo o DTO salvo e status HTTP 201 Created
    */
   @PostMapping
   @Operation(summary = "Cria um novo registro com os dados fornecidos")
@@ -144,13 +142,13 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Atualiza uma entidade existente com os dados fornecidos, garantindo que o identificador do caminho corresponda ao do DTO.
+   * Atualiza uma entidade existente com os dados do DTO fornecido, garantindo que o identificador do caminho seja igual ao do DTO.
    *
-   * Retorna HTTP 400 se houver inconsistência entre o ID do caminho e o ID do DTO.
+   * Retorna HTTP 400 se os identificadores forem diferentes.
    *
-   * @param i identificador da entidade a ser atualizada
-   * @param entity DTO contendo os dados atualizados
-   * @return ResponseEntity com o DTO atualizado e status 200 em caso de sucesso, ou status 400 em caso de IDs divergentes
+   * @param i identificador da entidade no caminho da requisição
+   * @param entity DTO com os dados atualizados
+   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou status 400 se houver divergência de identificadores
    */
   @PutMapping("{i}")
   @Operation(summary = "Atualiza um registro de acordo com o identificador fornecido")
@@ -165,10 +163,10 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna se existe uma entidade com o identificador fornecido.
+   * Verifica se existe uma entidade com o identificador especificado.
    *
-   * @param i identificador da entidade
-   * @return ResponseEntity com true se a entidade existe, ou false caso contrário
+   * @param i identificador da entidade a ser verificada
+   * @return ResponseEntity contendo true se a entidade existe, ou false caso contrário
    */
   @GetMapping("exists/{i}")
   @Operation(summary = "Verifica se um registro existe de acordo com o identificador fornecido")
@@ -177,9 +175,9 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna o número total de entidades cadastradas.
+   * Retorna a quantidade total de entidades existentes.
    *
-   * @return ResponseEntity com a contagem total de entidades
+   * @return ResponseEntity contendo o número total de registros cadastrados
    */
   @GetMapping("count")
   @Operation(summary = "Retorna a quantidade total de registros")
@@ -188,12 +186,11 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Remove a entidade correspondente ao identificador fornecido.
+   * Exclui a entidade correspondente ao identificador fornecido.
    *
-   * <p>Retorna HTTP 204 No Content após a tentativa de exclusão, independentemente da existência da
-   * entidade.
+   * <p>Sempre retorna HTTP 204 No Content, independentemente da existência prévia da entidade.
    *
-   * @param i identificador da entidade a ser removida
+   * @param i identificador da entidade a ser excluída
    * @return resposta HTTP 204 No Content
    */
   @DeleteMapping("{i}")

@@ -25,19 +25,19 @@ public class ErrorHandler implements ErrorController {
   private final ErrorAttributes errorAttributes;
 
   /**
-   * Cria uma instância do controlador de erros utilizando o ErrorAttributes fornecido.
+   * Inicializa o controlador de erros com o ErrorAttributes fornecido.
    *
-   * @param errorAttributes objeto utilizado para extrair detalhes do erro da requisição web
+   * @param errorAttributes fonte dos detalhes do erro extraídos das requisições web
    */
   public ErrorHandler(ErrorAttributes errorAttributes) {
     this.errorAttributes = errorAttributes;
   }
 
   /**
-   * Retorna um objeto de erro formatado para requisições HTTP sem efeito colateral (como GET).
+   * Retorna um objeto {@link ApiError} contendo detalhes do erro ocorrido em requisições HTTP sem efeito colateral, como GET.
    *
    * @param webRequest contexto da requisição web atual
-   * @return instância de {@link ApiError} representando os detalhes do erro ocorrido
+   * @return objeto {@link ApiError} com informações sobre o erro, incluindo mensagem, URL e status HTTP
    */
   @GetMapping("/error")
   @Operation(summary = "Retorna o erro proveniente de métodos HTTP sem efeito colateral")
@@ -46,11 +46,10 @@ public class ErrorHandler implements ErrorController {
   }
 
   /**
-   * Retorna um objeto de erro formatado para requisições HTTP com efeito colateral (como POST, PUT
-   * ou DELETE).
+   * Retorna um objeto de erro formatado para requisições HTTP que podem causar efeitos colaterais, como POST, PUT ou DELETE.
    *
    * @param webRequest a requisição web atual
-   * @return um objeto {@link ApiError} contendo detalhes do erro ocorrido
+   * @return um {@link ApiError} com detalhes do erro ocorrido na requisição
    */
   @PostMapping("/error")
   @Operation(summary = "Retorna o erro proveniente de métodos HTTP com efeito colateral")
@@ -58,6 +57,14 @@ public class ErrorHandler implements ErrorController {
     return buildApiError(webRequest);
   }
 
+  /**
+   * Constrói um objeto ApiError a partir dos atributos de erro extraídos do WebRequest.
+   *
+   * Extrai mensagem, caminho da requisição e status HTTP dos atributos de erro, utilizando 500 caso o status não esteja presente.
+   *
+   * @param webRequest contexto da requisição web contendo os detalhes do erro
+   * @return uma instância de ApiError representando o erro ocorrido
+   */
   private ApiError buildApiError(WebRequest webRequest) {
     Map<String, Object> attributes =
         errorAttributes.getErrorAttributes(
