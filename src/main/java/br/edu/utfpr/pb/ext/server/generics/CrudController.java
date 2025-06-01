@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.generics;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.io.Serializable;
 import java.util.List;
@@ -121,11 +122,11 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   @GetMapping("{i}")
   @Operation(summary = "Retorna um registro de acordo com o identificador fornecido")
   public ResponseEntity<D> findOne(@PathVariable I i) {
-    T entity = getService().findOne(i);
-    if (entity != null) {
+    try {
+      T entity = getService().findOne(i);
       return ResponseEntity.ok(convertToDto(entity));
-    } else {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    } catch (EntityNotFoundException e) {
+      return ResponseEntity.notFound().build();
     }
   }
 

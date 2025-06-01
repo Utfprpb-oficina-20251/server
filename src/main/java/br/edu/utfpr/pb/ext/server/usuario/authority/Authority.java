@@ -20,7 +20,5 @@ public class Authority implements GrantedAuthority {
   private Long id;
 
   @Column(nullable = false, unique = true, length = 50)
-  @NotBlank(message = "O nome da permissão é obrigatório.")
-  @Size(max = 50, message = "O nome da permissão deve ter no máximo 50 caracteres.")
-  private String authority;
+  @NotBlank(message = "O nome da permissão é obrigatório.") @Size(max = 50, message = "O nome da permissão deve ter no máximo 50 caracteres.") private String authority;
 }

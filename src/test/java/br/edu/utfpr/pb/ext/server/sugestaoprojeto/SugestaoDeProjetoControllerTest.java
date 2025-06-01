@@ -13,6 +13,7 @@ import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoServi
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioNomeIdDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -118,7 +119,7 @@ class SugestaoDeProjetoControllerTest {
   void findOne_whenNotExists_shouldReturnNotFound() throws Exception {
     // Arrange
     Long id = 1L;
-    when(service.findOne(id)).thenReturn(null);
+    when(service.findOne(id)).thenThrow(EntityNotFoundException.class);
 
     // Act & Assert
     mockMvc.perform(get("/sugestao/{id}", id)).andExpect(status().isNotFound());

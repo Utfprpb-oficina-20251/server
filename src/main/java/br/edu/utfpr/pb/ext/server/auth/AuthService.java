@@ -10,6 +10,7 @@ import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
 import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class AuthService {
   private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
   public static final String ALUNOS_UTFPR_EDU_BR = "@alunos.utfpr.edu.br";
   public static final String UTFPR_EDU_BR = "@utfpr.edu.br";
+  public static final String EMAIL_NAO_CADASTRADO = "Email não cadastrado";
   private final UsuarioRepository usuarioRepository;
   private final AuthorityRepository authorityRepository;
   private final EmailServiceImpl emailService;
@@ -108,10 +110,12 @@ public class AuthService {
       // Verificar se o usuário existe
       usuarioRepository
           .findByEmail(email)
-          .orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email não cadastrado"));
+          .orElseThrow(() -> new EntityNotFoundException(EMAIL_NAO_CADASTRADO));
       emailService.generateAndSendCode(email, "autenticacao");
       logger.info("Código de verificação enviado");
+    } catch (EntityNotFoundException e) {
+      logger.error(EMAIL_NAO_CADASTRADO, e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EMAIL_NAO_CADASTRADO);
     } catch (Exception e) {
       logger.error("Erro ao enviar código de verificação", e);
       throw new ResponseStatusException(
@@ -136,7 +140,7 @@ public class AuthService {
       SecurityContextHolder.getContext().setAuthentication(authentication);
       return usuarioRepository
           .findByEmail(dto.getEmail())
-          .orElseThrow(() -> new UsernameNotFoundException("Email não cadastrado"));
+          .orElseThrow(() -> new UsernameNotFoundException(EMAIL_NAO_CADASTRADO));
     } catch (BadCredentialsException ex) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Código inválido ou expirado");
     }
