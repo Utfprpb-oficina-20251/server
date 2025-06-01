@@ -65,11 +65,10 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   }
 
   /**
-   * Indica se este provedor suporta autenticação baseada em token OTP enviado por e-mail.
+   * Verifica se este provedor suporta autenticação via token OTP enviado por e-mail.
    *
-   * @param authentication classe do token de autenticação a ser verificado
-   * @return {@code true} se a classe informada for compatível com {@code
-   *     EmailOtpAuthenticationToken}
+   * @param authentication a classe do token de autenticação a ser verificada
+   * @return {@code true} se a classe informada for compatível com {@code EmailOtpAuthenticationToken}
    */
   @Override
   public boolean supports(Class<?> authentication) {

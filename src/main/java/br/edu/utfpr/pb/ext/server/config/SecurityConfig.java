@@ -48,13 +48,11 @@ public class SecurityConfig {
   private boolean isSwaggerEnabled;
 
   /**
-   * Constrói a configuração de segurança com as dependências necessárias para autenticação e acesso
-   * a propriedades do ambiente.
+   * Inicializa a configuração de segurança com as dependências para autenticação e acesso ao ambiente.
    *
-   * @param environment ambiente Spring utilizado para acessar propriedades e perfis ativos
-   * @param usuarioRepository repositório responsável pelo acesso aos dados dos usuários
-   * @param emailOtpAuthenticationProvider provedor de autenticação baseado em OTP enviado por
-   *     e-mail
+   * @param environment ambiente Spring usado para acessar propriedades e perfis ativos
+   * @param usuarioRepository repositório para consulta de dados de usuários
+   * @param emailOtpAuthenticationProvider provedor de autenticação via OTP por e-mail
    */
   public SecurityConfig(
       Environment environment,
@@ -114,10 +112,9 @@ public class SecurityConfig {
   }
 
   /**
-   * Retorna um AuthorizationManager que autoriza requisições apenas quando o perfil ativo do Spring
-   * inclui "test".
+   * Cria um AuthorizationManager que permite acesso apenas se o perfil ativo do Spring incluir "test".
    *
-   * @return AuthorizationManager que concede acesso somente se o perfil "test" estiver ativo.
+   * @return AuthorizationManager que concede autorização somente quando o perfil "test" está ativo.
    */
   private AuthorizationManager<RequestAuthorizationContext> isTestProfile() {
     return (authentication, context) ->

@@ -132,7 +132,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    * Recupera uma entidade pelo seu identificador.
    *
    * @param i identificador da entidade a ser buscada
-   * @return a entidade correspondente ao ID informado, ou {@code null} se não encontrada
+   * @return a entidade correspondente ao ID informado
+   * @throws EntityNotFoundException se nenhuma entidade for encontrada com o ID fornecido
    */
   @Override
   public T findOne(I i) {

@@ -8,26 +8,26 @@ import org.springframework.stereotype.Repository;
 public interface SugestaoDeProjetoRepository extends JpaRepository<SugestaoDeProjeto, Long> {
 
   /**
-   * Recupera todas as sugestões de projeto associadas a um aluno pelo seu ID.
-   *
-   * @param alunoId ID do aluno para o qual as sugestões de projeto serão buscadas
-   * @return lista de sugestões de projeto vinculadas ao aluno informado
-   */
+ * Retorna todas as sugestões de projeto vinculadas a um aluno específico pelo seu ID.
+ *
+ * @param alunoId identificador do aluno cujas sugestões de projeto serão recuperadas
+ * @return lista de sugestões de projeto associadas ao aluno informado
+ */
   List<SugestaoDeProjeto> findByAlunoId(Long alunoId);
 
   /**
-   * Retorna todas as sugestões de projeto associadas a um professor específico.
-   *
-   * @param professorId identificador único do professor
-   * @return lista de sugestões de projeto vinculadas ao professor informado
-   */
+ * Recupera todas as sugestões de projeto vinculadas a um professor específico.
+ *
+ * @param professorId identificador do professor
+ * @return lista de sugestões de projeto associadas ao professor
+ */
   List<SugestaoDeProjeto> findByProfessorId(Long professorId);
 
   /**
-   * Retorna todas as sugestões de projeto que possuem o status especificado.
-   *
-   * @param status status pelo qual as sugestões de projeto serão filtradas
-   * @return lista de sugestões de projeto com o status informado
-   */
+ * Busca todas as sugestões de projeto com o status especificado.
+ *
+ * @param status status pelo qual as sugestões de projeto serão filtradas
+ * @return lista de sugestões de projeto que possuem o status informado
+ */
   List<SugestaoDeProjeto> findByStatus(StatusSugestao status);
 }
