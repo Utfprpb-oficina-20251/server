@@ -1,7 +1,13 @@
-#Config compartilhada
+app:
+  client:
+    origins: ${APP_ALLOWED_ORIGINS:http://localhost:3000}
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration-time: ${JWT_EXPIRATION_TIME:7200000}
+  swagger:
+    enabled: ${SWAGGER_ENABLED:false}
 spring:
-  profiles:
-    active: dev
   jpa:
     hibernate:
       ddl-auto: none
@@ -10,9 +16,10 @@ spring:
       hibernate:
         format_sql: false
     show-sql: true
-  flyway:
-    enabled: false
-    baseline-on-migrate: false
+    flyway:
+      enabled: true
+      baseline-on-migrate: true
+      locations: classpath:db/migration
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME:postgres}
@@ -20,24 +27,11 @@ spring:
     driver-class-name: org.postgresql.Driver
   config:
     import: optional:file:.env[.properties]
+  # SendGrid API Key configuration. Em produção, defina SENDGRID_API_KEY como variável de ambiente ou utilize um gerenciador de segredos.
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY:sendgridkey}
 ---
-# Perfil de prod
-spring:
-  config:
-    activate:
-      on-profile: prod
-  flyway:
-    locations: classpath:db/prod
----
-# Desenvolvimento
-spring:
-  config:
-    activate:
-      on-profile: dev
-  flyway:
-    locations: classpath:db/dev
 
----
 # Testes
 spring:
   config:
@@ -47,8 +41,17 @@ spring:
     url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     driver-class-name: org.h2.Driver
     username: sa
+    password: ""
   flyway:
-    locations: classpath:db/test
+    locations: classpath:db/migration,classpath:db/test
   h2:
     console:
       enabled: true
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+app:
+  swagger:
+    enabled: true

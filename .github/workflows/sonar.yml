@@ -37,10 +37,8 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Set Environment
-        env:
-          JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
       - name: Build and analyze
         env:
+          JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=Utfprpb-oficina-20251_server 
