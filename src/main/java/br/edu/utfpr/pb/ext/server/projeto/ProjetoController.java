@@ -126,13 +126,13 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
             description = "Invalid request, such as empty or invalid emails",
             content = @Content(mediaType = "application/json"))
       })
-      
- /**
- * Atualiza um projeto existente com os dados informados.
- * @param id ID do projeto a ser atualizado.
- * @param projetoDTO dados atualizados do projeto.
- * @return Projeto atualizado.
- */
+
+  /**
+   * Atualiza um projeto existente com os dados informados.
+   * @param id ID do projeto a ser atualizado.
+   * @param projetoDTO dados atualizados do projeto.
+   * @return Projeto atualizado.
+   */
 
   @PutMapping("/{id}")
   public ResponseEntity<ProjetoDTO> update(
@@ -170,8 +170,6 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     projeto.setPublicoAlvo(dto.getPublicoAlvo());
     projeto.setVinculadoDisciplina(dto.isVinculadoDisciplina());
     projeto.setRestricaoPublico(dto.getRestricaoPublico());
-    projeto.setEquipeExecutora(usuarios.stream().flatMap(Optional::stream).toList());
-
     Projeto projetoResponse = projetoService.save(projeto);
     ProjetoDTO projetoDTO = modelMapper.map(projetoResponse, ProjetoDTO.class);
 
