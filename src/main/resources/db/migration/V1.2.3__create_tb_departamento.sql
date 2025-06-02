@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS tb_departamento (
-                                               id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+                                               id BIGINT PRIMARY KEY,
                                                sigla VARCHAR(20) NOT NULL UNIQUE,
     nome VARCHAR(255) NOT NULL
     );

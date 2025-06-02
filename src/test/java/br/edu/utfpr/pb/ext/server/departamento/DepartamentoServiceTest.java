@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 /**
@@ -121,4 +122,33 @@ public class DepartamentoServiceTest {
         d.setNome(nome);
         return d;
     }
+
+    @Test
+ void shouldThrowExceptionWhenDepartamentoNotFoundInAssociarResponsavel() {
+           when(departamentoRepository.findById(999L)).thenReturn(Optional.empty());
+
+                    assertThatThrownBy(() -> service.associarResponsavel(999L, 10L))
+                         .isInstanceOf(RuntimeException.class)
+                        .hasMessage("Departamento não encontrado");
+         }
+
+         @Test
+ void shouldThrowExceptionWhenUsuarioNotFoundInAssociarResponsavel() {
+             Departamento departamento = createDepartamento(1L, "DAINF", "Computação");
+             when(departamentoRepository.findById(1L)).thenReturn(Optional.of(departamento));
+             when(usuarioRepository.findById(999L)).thenReturn(Optional.empty());
+
+                    assertThatThrownBy(() -> service.associarResponsavel(1L, 999L))
+                        .isInstanceOf(RuntimeException.class)
+                         .hasMessage("Usuário não encontrado");
+         }
+
+    @Test
+ void shouldThrowExceptionWhenDepartamentoNotFound() {
+             when(departamentoRepository.findById(999L)).thenReturn(Optional.empty());
+
+                     assertThatThrownBy(() -> service.findOne(999L))
+                         .isInstanceOf(RuntimeException.class)
+                         .hasMessage("Departamento não encontrado");
+         }
 }

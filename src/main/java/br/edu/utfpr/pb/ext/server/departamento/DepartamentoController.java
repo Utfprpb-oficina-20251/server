@@ -89,6 +89,9 @@ public class DepartamentoController {
     dto.setId(entity.getId());
     dto.setNome(entity.getNome());
     dto.setSigla(entity.getSigla());
+    if (entity.getResponsavel() != null) {
+      dto.setResponsavelId(entity.getResponsavel().getId());
+    }
     return dto;
   }
 

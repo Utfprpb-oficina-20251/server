@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,6 +26,8 @@ public class Departamento extends BaseEntity {
    * Sigla do departamento (ex: DAINF, DAADM).
    * Deve ser única e conter no máximo 20 caracteres.
    */
+  @NotBlank(message = "Sigla é obrigatória")
+  @Size(max = 20, message = "Sigla deve ter no máximo 20 caracteres")
   @Column(nullable = false, unique = true, length = 20)
   private String sigla;
 
@@ -31,6 +35,7 @@ public class Departamento extends BaseEntity {
    * Nome completo do departamento.
    * Campo obrigatório.
    */
+  @NotBlank(message = "Nome é obrigatório")
   @Column(nullable = false)
   private String nome;
 
