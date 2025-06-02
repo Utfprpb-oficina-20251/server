@@ -1,13 +1,14 @@
 package br.edu.utfpr.pb.ext.server.departamento;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Data Transfer Object (DTO) para a entidade Departamento.
- * Utilizado para transferência de dados entre as camadas da aplicação,
- * especialmente entre o backend e o frontend (ou APIs externas).
+ * DTO utilizado para transferir dados da entidade Departamento
+ * entre as camadas da aplicação (Controller, Service, etc.).
  */
-@Data
+@Getter
+@Setter
 public class DepartamentoDto {
 
   /**
@@ -16,7 +17,7 @@ public class DepartamentoDto {
   private Long id;
 
   /**
-   * Sigla do departamento (exemplo: DAINF, DAADM).
+   * Sigla do departamento (ex: DAINF, DAADM).
    */
   private String sigla;
 
@@ -24,4 +25,9 @@ public class DepartamentoDto {
    * Nome completo do departamento.
    */
   private String nome;
+
+  /**
+   * ID do usuário responsável pelo departamento.
+   */
+  private Long responsavelId;
 }

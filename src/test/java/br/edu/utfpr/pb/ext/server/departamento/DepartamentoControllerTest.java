@@ -143,4 +143,23 @@ class DepartamentoControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(service, times(1)).delete(1L);
     }
+    /**
+     * Testa o endpoint PUT /api/departamentos/{id}/responsavel/{usuarioId}
+     * Deve associar corretamente um usuário como responsável pelo departamento.
+     */
+    @Test
+    void deveAssociarResponsavelAoDepartamento() {
+        Long departamentoId = 1L;
+        Long usuarioId = 10L;
+
+        // Simula o comportamento esperado
+        doNothing().when(service).associarResponsavel(departamentoId, usuarioId);
+
+        // Chama o endpoint do controller
+        ResponseEntity<Void> response = controller.associarResponsavel(departamentoId, usuarioId);
+
+        // Verifica o status e a chamada do método
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(service, times(1)).associarResponsavel(departamentoId, usuarioId);
+    }
 }

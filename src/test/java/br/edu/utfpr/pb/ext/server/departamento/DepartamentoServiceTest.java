@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.departamento;
 
-import br.edu.utfpr.pb.ext.server.generics.ICrudService;
+import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,20 +14,22 @@ import static org.mockito.Mockito.*;
 
 /**
  * Testes unitários para a classe DepartamentoServiceImpl.
- * Verifica o funcionamento básico dos métodos herdados da ICrudService.
+ * Verifica o funcionamento dos métodos de negócio da camada de serviço.
  */
 public class DepartamentoServiceTest {
 
     private DepartamentoRepository departamentoRepository;
-    private ICrudService<Departamento, Long> service;
+    private UsuarioRepository usuarioRepository;
+    private DepartamentoServiceImpl service;
 
     /**
-     * Inicializa o mock do repositório e a instância do serviço antes de cada teste.
+     * Inicializa os mocks dos repositórios e a instância do serviço antes de cada teste.
      */
     @BeforeEach
     void setUp() {
         departamentoRepository = mock(DepartamentoRepository.class);
-        service = new DepartamentoServiceImpl(departamentoRepository);
+        usuarioRepository = mock(UsuarioRepository.class);
+        service = new DepartamentoServiceImpl(departamentoRepository, usuarioRepository);
     }
 
     /**
@@ -83,6 +86,24 @@ public class DepartamentoServiceTest {
     void shouldDeleteById() {
         service.delete(1L);
         verify(departamentoRepository, times(1)).deleteById(1L);
+    }
+
+    /**
+     * Testa se o método associarResponsavel() associa corretamente um usuário ao departamento.
+     */
+    @Test
+    void shouldAssociateResponsavelToDepartamento() {
+        Departamento departamento = createDepartamento(1L, "DAINF", "Computação");
+        Usuario usuario = new Usuario();
+        usuario.setId(10L);
+
+        when(departamentoRepository.findById(1L)).thenReturn(Optional.of(departamento));
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+
+        service.associarResponsavel(1L, 10L);
+
+        assertThat(departamento.getResponsavel()).isEqualTo(usuario);
+        verify(departamentoRepository).save(departamento);
     }
 
     /**

@@ -13,4 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * - deleteById
  * - existsById
  */
-public interface DepartamentoRepository extends JpaRepository<Departamento, Long> {}
+
+public interface DepartamentoRepository extends JpaRepository<Departamento, Long> {
+}

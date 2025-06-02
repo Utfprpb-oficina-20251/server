@@ -100,4 +100,16 @@ public class DepartamentoController {
     entity.setSigla(dto.getSigla());
     return entity;
   }
+
+  /**
+   * Associa um usuário como responsável por um departamento.
+   * @param id ID do departamento.
+   * @param usuarioId ID do usuário que será associado como responsável.
+   * @return Resposta HTTP 200 (OK) em caso de sucesso.
+   */
+  @PutMapping("/{id}/responsavel/{usuarioId}")
+  public ResponseEntity<Void> associarResponsavel(@PathVariable Long id, @PathVariable Long usuarioId) {
+    service.associarResponsavel(id, usuarioId);
+    return ResponseEntity.ok().build();
+  }
 }

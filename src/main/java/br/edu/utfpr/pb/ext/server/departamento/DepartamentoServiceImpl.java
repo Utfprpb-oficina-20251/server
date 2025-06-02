@@ -1,36 +1,73 @@
 package br.edu.utfpr.pb.ext.server.departamento;
 
-import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
-import org.springframework.data.jpa.repository.JpaRepository;
+import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
- * Implementação do serviço de Departamento.
- * Estende a classe genérica CrudServiceImpl para reaproveitamento de lógica CRUD.
- * Implementa a interface DepartamentoService para permitir futura expansão de regras de negócio.
+ * Implementação da interface DepartamentoService.
+ * Responsável pela regra de negócio da entidade Departamento.
  */
 @Service
-public class DepartamentoServiceImpl extends CrudServiceImpl<Departamento, Long>
-        implements DepartamentoService {
+@RequiredArgsConstructor
+public class DepartamentoServiceImpl implements DepartamentoService {
 
-  private final DepartamentoRepository repository;
+  private final DepartamentoRepository departamentoRepository;
+  private final UsuarioRepository usuarioRepository;
 
   /**
-   * Construtor que injeta o repositório específico de Departamento.
-   *
-   * @param repository Repositório JPA para a entidade Departamento.
+   * {@inheritDoc}
    */
-  public DepartamentoServiceImpl(DepartamentoRepository repository) {
-    this.repository = repository;
+  @Override
+  public List<Departamento> findAll() {
+    return departamentoRepository.findAll();
   }
 
   /**
-   * Retorna o repositório específico da entidade para uso na classe genérica.
-   *
-   * @return JpaRepository de Departamento.
+   * {@inheritDoc}
    */
   @Override
-  protected JpaRepository<Departamento, Long> getRepository() {
-    return repository;
+  public Departamento findOne(Long id) {
+    return departamentoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Departamento não encontrado"));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Departamento save(Departamento departamento) {
+    return departamentoRepository.save(departamento);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void delete(Long id) {
+    departamentoRepository.deleteById(id);
+  }
+
+  /**
+   * Associa um usuário existente como responsável por um departamento.
+   *
+   * @param departamentoId ID do departamento.
+   * @param usuarioId      ID do usuário que será responsável.
+   */
+  @Override
+  @Transactional
+  public void associarResponsavel(Long departamentoId, Long usuarioId) {
+    Departamento departamento = departamentoRepository.findById(departamentoId)
+            .orElseThrow(() -> new RuntimeException("Departamento não encontrado"));
+
+    Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+    departamento.setResponsavel(usuario);
+    departamentoRepository.save(departamento);
   }
 }

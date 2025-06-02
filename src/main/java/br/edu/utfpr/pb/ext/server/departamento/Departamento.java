@@ -1,8 +1,11 @@
 package br.edu.utfpr.pb.ext.server.departamento;
 
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
+import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,4 +33,12 @@ public class Departamento extends BaseEntity {
    */
   @Column(nullable = false)
   private String nome;
+
+  /**
+   * Responsável pelo departamento.
+   * Relacionamento com a entidade Usuario.
+   */
+  @ManyToOne
+  @JoinColumn(name = "responsavel_id")
+  private Usuario responsavel;
 }
