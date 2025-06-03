@@ -103,7 +103,7 @@ class UsuarioControllerTest {
   @Test
   void postUser_whenUserIsInvalidEmail_receiveBadRequest() {
     UsuarioServidorRequestDTO request = createUsuarioServidorRequestDTO();
-    request.setEmailInstitucional("invalid-email");
+    request.setEmail("invalid-email");
 
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS, request, Object.class);
@@ -164,7 +164,7 @@ class UsuarioControllerTest {
   @Test
   void postUserAluno_whenUserIsInvalidEmail_receiveBadRequest() {
     UsuarioAlunoRequestDTO request = createUsuarioAlunoRequestDTO();
-    request.setEmailInstitucional("invalid-email");
+    request.setEmail("invalid-email");
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
     assertEquals(400, response.getStatusCode().value());
@@ -172,20 +172,20 @@ class UsuarioControllerTest {
 
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {
     UsuarioServidorRequestDTO request = new UsuarioServidorRequestDTO();
-    request.setNomeCompleto("teste");
+    request.setNome("teste");
     request.setCpf("29212492002");
     request.setSiape("1234567");
-    request.setEmailInstitucional("batata@utfpr.edu.br");
+    request.setEmail("batata@utfpr.edu.br");
     request.setDepartamento(Departamentos.DAINF);
     return request;
   }
 
   private UsuarioAlunoRequestDTO createUsuarioAlunoRequestDTO() {
     UsuarioAlunoRequestDTO request = new UsuarioAlunoRequestDTO();
-    request.setNomeCompleto("teste");
+    request.setNome("teste");
     request.setCpf("29212492002");
     request.setRegistroAcademico("1234567");
-    request.setEmailInstitucional("batata@alunos.utfpr.edu.br");
+    request.setEmail("batata@alunos.utfpr.edu.br");
     return request;
   }
 }

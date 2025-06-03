@@ -12,7 +12,7 @@ public class UsuarioServidorRequestDTO {
 
   private Long id;
 
-  @NotNull private String nomeCompleto;
+  @NotNull private String nome;
 
   @NotNull @CPF @UniqueCpf private String cpf;
 
@@ -27,7 +27,7 @@ public class UsuarioServidorRequestDTO {
       regexp = "^[a-zA-Z0-9._%+-]+@(utfpr\\.edu\\.br)$",
       message =
           "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.emailInstitucional}")
-  private String emailInstitucional;
+  private String email;
 
   @Size(min = 11, max = 11) private String telefone;
 

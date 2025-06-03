@@ -73,11 +73,13 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   /**
    * Cria um novo projeto a partir dos dados fornecidos e retorna os detalhes do projeto criado.
    *
-   * Valida se a equipe executora contém e-mails institucionais válidos e existentes no sistema. 
-   * Retorna HTTP 406 caso a lista de e-mails esteja vazia ou algum e-mail não corresponda a um usuário cadastrado.
+   * <p>Valida se a equipe executora contém e-mails institucionais válidos e existentes no sistema.
+   * Retorna HTTP 406 caso a lista de e-mails esteja vazia ou algum e-mail não corresponda a um
+   * usuário cadastrado.
    *
    * @param dto Dados do projeto a ser criado, incluindo informações da equipe executora.
-   * @return ResponseEntity contendo o ProjetoDTO criado e status HTTP 201 em caso de sucesso, ou status HTTP 406 em caso de erro de validação.
+   * @return ResponseEntity contendo o ProjetoDTO criado e status HTTP 201 em caso de sucesso, ou
+   *     status HTTP 406 em caso de erro de validação.
    */
   @Override
   @Operation(
@@ -101,7 +103,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   public ResponseEntity<ProjetoDTO> create(@Valid @RequestBody ProjetoDTO dto) {
     Projeto projeto = new Projeto();
     List<String> emails =
-        dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmailInstitucional).toList();
+        dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmail).toList();
     if (emails.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
     }

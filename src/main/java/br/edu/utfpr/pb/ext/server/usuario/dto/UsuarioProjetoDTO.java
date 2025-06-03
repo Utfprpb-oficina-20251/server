@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 public class UsuarioProjetoDTO {
   private Long id;
 
-  @NotNull private String nomeCompleto;
+  @NotNull private String nome;
 
   @NotNull @Email(regexp = "^[a-zA-Z0-9._%+-]+@(utfpr\\.edu\\.br)$")
-  private String emailInstitucional;
+  private String email;
 }
