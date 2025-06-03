@@ -85,6 +85,7 @@ public class DepartamentoServiceTest {
      */
     @Test
     void shouldDeleteById() {
+        doNothing().when(departamentoRepository).deleteById(1L);
         service.delete(1L);
         verify(departamentoRepository, times(1)).deleteById(1L);
     }
@@ -123,32 +124,31 @@ public class DepartamentoServiceTest {
         return d;
     }
 
-    @Test
- void shouldThrowExceptionWhenDepartamentoNotFoundInAssociarResponsavel() {
-           when(departamentoRepository.findById(999L)).thenReturn(Optional.empty());
+    void shouldThrowExceptionWhenDepartamentoNotFoundInAssociarResponsavel() {
+            when(departamentoRepository.findById(999L)).thenReturn(Optional.empty());
 
-                    assertThatThrownBy(() -> service.associarResponsavel(999L, 10L))
+                     assertThatThrownBy(() -> service.associarResponsavel(999L, 10L))
                          .isInstanceOf(RuntimeException.class)
-                        .hasMessage("Departamento não encontrado");
+                        .hasMessage("Departamento não encontrado com ID: 999");
          }
 
-         @Test
+    @Test
  void shouldThrowExceptionWhenUsuarioNotFoundInAssociarResponsavel() {
              Departamento departamento = createDepartamento(1L, "DAINF", "Computação");
              when(departamentoRepository.findById(1L)).thenReturn(Optional.of(departamento));
              when(usuarioRepository.findById(999L)).thenReturn(Optional.empty());
 
-                    assertThatThrownBy(() -> service.associarResponsavel(1L, 999L))
-                        .isInstanceOf(RuntimeException.class)
-                         .hasMessage("Usuário não encontrado");
+                     assertThatThrownBy(() -> service.associarResponsavel(1L, 999L))
+                         .isInstanceOf(RuntimeException.class)
+                         .hasMessage("Usuário não encontrado com ID: 999");
          }
 
     @Test
- void shouldThrowExceptionWhenDepartamentoNotFound() {
+    void shouldThrowExceptionWhenDepartamentoNotFound() {
              when(departamentoRepository.findById(999L)).thenReturn(Optional.empty());
 
-                     assertThatThrownBy(() -> service.findOne(999L))
-                         .isInstanceOf(RuntimeException.class)
-                         .hasMessage("Departamento não encontrado");
+                   assertThatThrownBy(() -> service.findOne(999L))
+                        .isInstanceOf(RuntimeException.class)
+                        .hasMessage("Departamento não encontrado com ID: 999");
          }
 }
