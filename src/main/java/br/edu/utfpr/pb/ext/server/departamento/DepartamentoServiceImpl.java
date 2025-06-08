@@ -50,4 +50,11 @@ public class DepartamentoServiceImpl extends CrudServiceImpl<Departamento, Long>
     departamento.setResponsavel(usuario);
     departamentoRepository.save(departamento);
   }
+
+  @Override
+  public Departamento findOne(Long id) {
+    return departamentoRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException(
+                    String.format("Departamento não encontrado com ID: %d", id)));
+  }
 }
