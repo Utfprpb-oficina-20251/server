@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 /**
  * Testes unitários para EmailServiceImpl, garantindo que a geração e envio de código funcione
@@ -28,6 +29,7 @@ class EmailServiceImplTest {
 
   @Mock private EmailCodeRepository emailCodeRepository;
   @Mock private SendGrid sendGrid;
+  @Mock private SpringTemplateEngine springTemplateEngine;
   @InjectMocks private EmailServiceImpl emailService;
 
   /** Teste para verificar envio com sucesso. */
@@ -39,6 +41,7 @@ class EmailServiceImplTest {
     when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(Collections.emptyList());
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
+    when(springTemplateEngine.process(anyString(), any())).thenReturn("<html>Email content</html>");
 
     Response response = emailService.generateAndSendCode(email, tipo);
 
@@ -91,7 +94,8 @@ class EmailServiceImplTest {
 
     when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(Collections.emptyList());
-    when(sendGrid.api(any())).thenReturn(errorResponse);
+    when(sendGrid.api(any())).thenReturn(new Response(400, "Bad Request", null));
+    when(springTemplateEngine.process(anyString(), any())).thenReturn("<html>Email content</html>");
 
     IOException ex =
         assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
