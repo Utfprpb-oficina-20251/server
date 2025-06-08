@@ -25,7 +25,6 @@ public class DepartamentoServiceImpl extends CrudServiceImpl<Departamento, Long>
     return departamentoRepository;
   }
 
-  @Override
   protected String getEntityName() {
     return "Departamento";
   }
