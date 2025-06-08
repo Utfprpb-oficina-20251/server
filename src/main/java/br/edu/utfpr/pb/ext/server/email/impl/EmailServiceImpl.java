@@ -12,7 +12,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.context.Context;
 
 /** Serviço responsável por gerar códigos, enviar e-mails e registrar os dados no banco. */
 @Service
@@ -24,6 +28,9 @@ public class EmailServiceImpl {
 
   private final EmailCodeRepository repository;
   private final SendGrid sendGrid;
+
+  @Autowired
+  private SpringTemplateEngine springTemplateEngine;
 
   /**
    * Cria uma instância do serviço de e-mail com o repositório de códigos e o cliente SendGrid fornecidos.
@@ -137,9 +144,13 @@ public class EmailServiceImpl {
   private Response enviarEmailDeVerificacao(String email, String code, String type)
       throws IOException {
     String assunto = "Código de Verificação - " + type;
-    String mensagem =
-        "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
-    return sendEmail(email, assunto, mensagem, "text/plain");
+//    String mensagem =
+//        "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
+    Context context = new Context();
+    context.setVariable("otpCode", code);
+
+    String mensagemHtml = springTemplateEngine.process("otp-template", context);
+    return sendEmail(email, assunto, mensagemHtml, "text/html");
   }
 
   /**
