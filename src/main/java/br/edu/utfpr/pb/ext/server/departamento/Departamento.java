@@ -13,8 +13,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Entidade que representa um Departamento da instituição.
- * Cada departamento possui uma sigla única e um nome.
+ * Entidade que representa um Departamento da instituição. Cada departamento possui uma sigla única
+ * e um nome.
  */
 @Entity
 @Table(name = "tb_departamento") // Nome da tabela no banco de dados
@@ -22,27 +22,15 @@ import lombok.Setter;
 @Setter
 public class Departamento extends BaseEntity {
 
-  /**
-   * Sigla do departamento (ex: DAINF, DAADM).
-   * Deve ser única e conter no máximo 20 caracteres.
-   */
-  @NotBlank(message = "Sigla é obrigatória")
-  @Size(max = 20, message = "Sigla deve ter no máximo 20 caracteres")
-  @Column(nullable = false, unique = true, length = 20)
+  /** Sigla do departamento (ex: DAINF, DAADM). Deve ser única e conter no máximo 20 caracteres. */
+  @NotBlank(message = "Sigla é obrigatória") @Size(max = 20, message = "Sigla deve ter no máximo 20 caracteres") @Column(nullable = false, unique = true, length = 20)
   private String sigla;
 
-  /**
-   * Nome completo do departamento.
-   * Campo obrigatório.
-   */
-  @NotBlank(message = "Nome é obrigatório")
-  @Column(nullable = false)
+  /** Nome completo do departamento. Campo obrigatório. */
+  @NotBlank(message = "Nome é obrigatório") @Column(nullable = false)
   private String nome;
 
-  /**
-   * Responsável pelo departamento.
-   * Relacionamento com a entidade Usuario.
-   */
+  /** Responsável pelo departamento. Relacionamento com a entidade Usuario. */
   @ManyToOne
   @JoinColumn(name = "responsavel_id")
   private Usuario responsavel;
