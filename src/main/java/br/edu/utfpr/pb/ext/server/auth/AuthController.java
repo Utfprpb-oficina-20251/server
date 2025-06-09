@@ -29,7 +29,7 @@ public class AuthController {
   /**
    * Registra um novo usuário e retorna os dados do usuário cadastrado.
    *
-   * Recebe os dados de cadastro, cria o usuário e retorna as informações do usuário cadastrado.
+   * <p>Recebe os dados de cadastro, cria o usuário e retorna as informações do usuário cadastrado.
    *
    * @param cadastroUsuarioDTO informações para cadastro do novo usuário
    * @return resposta HTTP com os dados do usuário cadastrado
@@ -49,7 +49,8 @@ public class AuthController {
   /**
    * Solicita o envio de um código OTP para o endereço de email fornecido.
    *
-   * Gera e envia um código de uso único (OTP) para o email informado, permitindo a autenticação do usuário por meio desse código.
+   * <p>Gera e envia um código de uso único (OTP) para o email informado, permitindo a autenticação
+   * do usuário por meio desse código.
    *
    * @param email Endereço de email que receberá o código OTP.
    * @return Objeto contendo mensagem de confirmação do envio do código.
@@ -67,7 +68,8 @@ public class AuthController {
   }
 
   /**
-   * Autentica um usuário por meio de email e código OTP, retornando um token JWT e o tempo de expiração.
+   * Realiza a autenticação de um usuário utilizando email e código OTP, retornando um token JWT e o
+   * tempo de expiração.
    *
    * @param requestDTO objeto contendo o email do usuário e o código OTP para autenticação
    * @return resposta com o token JWT gerado e o tempo de expiração em segundos

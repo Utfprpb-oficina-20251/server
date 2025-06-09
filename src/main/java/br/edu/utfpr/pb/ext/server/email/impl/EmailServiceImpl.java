@@ -12,11 +12,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 /** Serviço responsável por gerar códigos, enviar e-mails e registrar os dados no banco. */
 @Service
@@ -29,26 +27,33 @@ public class EmailServiceImpl {
   private final EmailCodeRepository repository;
   private final SendGrid sendGrid;
 
-  @Autowired
-  private SpringTemplateEngine springTemplateEngine;
+  private final SpringTemplateEngine springTemplateEngine;
 
   /**
-   * Cria uma instância do serviço de e-mail com o repositório de códigos e o cliente SendGrid fornecidos.
+   * Cria uma instância do serviço de e-mail com o repositório de códigos e o cliente SendGrid
+   * fornecidos.
    */
-  public EmailServiceImpl(EmailCodeRepository repository, SendGrid sendGrid) {
+  public EmailServiceImpl(
+      EmailCodeRepository repository,
+      SendGrid sendGrid,
+      SpringTemplateEngine springTemplateEngine) {
     this.repository = repository;
     this.sendGrid = sendGrid;
+    this.springTemplateEngine = springTemplateEngine;
   }
 
   /**
-   * Gera e envia um código de verificação para o e-mail informado, registrando o código no banco de dados.
+   * Gera e envia um código de verificação para o e-mail informado, registrando o código no banco de
+   * dados.
    *
-   * Valida o tipo e o formato do e-mail, verifica o limite diário de envios, gera um código aleatório, envia o e-mail de verificação e salva o código caso o envio seja aceito.
+   * <p>Valida o tipo e o formato do e-mail, verifica o limite diário de envios, gera um código
+   * aleatório, envia o e-mail de verificação e salva o código caso o envio seja aceito.
    *
    * @param email endereço de e-mail do destinatário
    * @param type tipo do código de verificação (ex: "cadastro", "recuperacao")
    * @return resposta da API do SendGrid referente ao envio do e-mail
-   * @throws IllegalArgumentException se o tipo for nulo, vazio, se o e-mail for inválido ou se o limite diário de envios for excedido
+   * @throws IllegalArgumentException se o tipo for nulo, vazio, se o e-mail for inválido ou se o
+   *     limite diário de envios for excedido
    * @throws IOException se o envio do e-mail falhar
    */
   public Response generateAndSendCode(String email, String type) throws IOException {
@@ -77,7 +82,6 @@ public class EmailServiceImpl {
    * @param email endereço de e-mail a ser validado
    * @throws IllegalArgumentException se o e-mail for nulo ou não corresponder ao padrão esperado
    */
-
   private void validarEmail(String email) {
     if (email == null || !EMAIL_REGEX.matcher(email).matches()) {
       throw new IllegalArgumentException("Endereço de e-mail inválido.");
@@ -85,9 +89,11 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Verifica se o limite diário de envio de códigos para o e-mail e tipo especificados foi atingido.
+   * Verifica se o limite diário de envio de códigos para o e-mail e tipo especificados foi
+   * atingido.
    *
-   * Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior ao permitido.
+   * <p>Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior
+   * ao permitido.
    *
    * @param email endereço de e-mail a ser verificado
    * @param type tipo de código relacionado ao envio
@@ -113,7 +119,8 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Salva um novo código de verificação de e-mail no banco de dados, incluindo informações de validade e status de uso.
+   * Salva um novo código de verificação de e-mail no banco de dados, incluindo informações de
+   * validade e status de uso.
    *
    * @param email endereço de e-mail associado ao código
    * @param code código de verificação gerado
@@ -133,7 +140,7 @@ public class EmailServiceImpl {
   /**
    * Envia um e-mail de verificação contendo um código para o endereço especificado.
    *
-   * O e-mail inclui o código de verificação e informa o tempo de validade em minutos.
+   * <p>O e-mail inclui o código de verificação e informa o tempo de validade em minutos.
    *
    * @param email endereço de e-mail do destinatário
    * @param code código de verificação a ser enviado
@@ -144,19 +151,25 @@ public class EmailServiceImpl {
   private Response enviarEmailDeVerificacao(String email, String code, String type)
       throws IOException {
     String assunto = "Código de Verificação - " + type;
-//    String mensagem =
-//        "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
+
     Context context = new Context();
     context.setVariable("otpCode", code);
-
-    String mensagemHtml = springTemplateEngine.process("otp-template", context);
-    return sendEmail(email, assunto, mensagemHtml, "text/html");
+    context.setVariable("expirationMinutes", CODE_EXPIRATION_MINUTES);
+    try {
+      String mensagemHtml = springTemplateEngine.process("otp-template", context);
+      return sendEmail(email, assunto, mensagemHtml, "text/html");
+    } catch (Exception e) {
+      throw new IOException("Erro ao processar o template do e-mail: " + e.getMessage(), e);
+    }
   }
 
   /**
-   * Envia um e-mail de notificação com conteúdo HTML para o destinatário informado, de acordo com o tipo de notificação e dados do projeto.
+   * Envia um e-mail de notificação com conteúdo HTML para o destinatário informado, de acordo com o
+   * tipo de notificação e dados do projeto.
    *
-   * Dependendo do tipo de notificação, o assunto e a mensagem do e-mail são personalizados para informar sobre inscrição de aluno, notificação ao professor ou atualização de status de sugestão de projeto.
+   * <p>Dependendo do tipo de notificação, o assunto e a mensagem do e-mail são personalizados para
+   * informar sobre inscrição de aluno, notificação ao professor ou atualização de status de
+   * sugestão de projeto.
    *
    * @param email endereço de e-mail do destinatário
    * @param tipo tipo de notificação a ser enviada

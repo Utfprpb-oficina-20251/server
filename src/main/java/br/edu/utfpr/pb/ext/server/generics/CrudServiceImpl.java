@@ -12,10 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class CrudServiceImpl<T, I extends Serializable> implements ICrudService<T, I> {
 
   /**
- * Fornece o repositório JPA responsável pelas operações de persistência da entidade.
- *
- * @return o repositório JPA associado ao tipo de entidade gerenciado
- */
+   * Fornece o repositório JPA responsável pelas operações de persistência da entidade.
+   *
+   * @return o repositório JPA associado ao tipo de entidade gerenciado
+   */
   protected abstract JpaRepository<T, I> getRepository();
 
   /**
@@ -40,7 +40,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Recupera uma página de entidades do repositório conforme os critérios de paginação e ordenação especificados.
+   * Recupera uma página de entidades do repositório conforme os critérios de paginação e ordenação
+   * especificados.
    *
    * @param pageable objeto que define as informações de página e ordenação
    * @return página contendo as entidades correspondentes à consulta
@@ -53,7 +54,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Salva uma entidade, aplicando ganchos de pré e pós-processamento.
    *
-   * Executa {@code preSave} antes de persistir a entidade e {@code postsave} após a persistência.
+   * <p>Executa o método {@code preSave} antes de persistir a entidade e {@code postsave} após a
+   * persistência. Lança uma exceção se a entidade fornecida for nula.
    *
    * @param entity entidade a ser salva
    * @return a entidade salva, possivelmente modificada pelos ganchos de pré ou pós-processamento
@@ -73,7 +75,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Permite customizar ou validar a entidade antes de sua persistência.
    *
-   * Pode ser sobrescrito para aplicar validações ou alterações na entidade antes de ser salva no repositório.
+   * <p>Pode ser sobrescrito para aplicar validações ou alterações na entidade antes de ser salva no
+   * repositório.
    *
    * @param entity entidade a ser processada antes do salvamento
    * @return a entidade, possivelmente modificada, que será persistida
@@ -85,8 +88,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Ponto de extensão chamado após a persistência de uma entidade.
    *
-   * <p>Pode ser sobrescrito para executar lógica adicional após o salvamento da entidade.
-   * Por padrão, retorna a entidade sem alterações.
+   * <p>Pode ser sobrescrito para executar lógica adicional após o salvamento da entidade. Por
+   * padrão, retorna a entidade sem alterações.
    *
    * @param entity entidade recém-salva
    * @return a entidade, possivelmente modificada após o salvamento
@@ -117,9 +120,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
     return getRepository().saveAll(iterable);
   }
 
-  /**
-   * Sincroniza imediatamente todas as alterações pendentes do repositório com o banco de dados.
-   */
+  /** Sincroniza imediatamente todas as alterações pendentes do repositório com o banco de dados. */
   @Override
   public void flush() {
     getRepository().flush();
@@ -130,7 +131,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    *
    * @param i identificador da entidade
    * @return a entidade correspondente ao identificador
-   * @throws EntityNotFoundException se nenhuma entidade for encontrada com o identificador informado
+   * @throws EntityNotFoundException se nenhuma entidade for encontrada com o identificador
+   *     informado
    */
   @Override
   public T findOne(I i) {
@@ -181,9 +183,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
     getRepository().deleteAll(iterable);
   }
 
-  /**
-   * Remove todas as entidades do repositório de forma permanente.
-   */
+  /** Remove todas as entidades do repositório de forma permanente. */
   @Override
   public void deleteAll() {
     getRepository().deleteAll();

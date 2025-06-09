@@ -19,10 +19,12 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   private final UsuarioRepository usuarioRepository;
 
   /**
-   * Cria uma instância do provedor de autenticação OTP por e-mail com os serviços de validação de código e acesso a usuários.
+   * Cria uma instância do provedor de autenticação OTP por e-mail com os serviços de validação de
+   * código e acesso a usuários.
    *
-   * @param emailCodeValidationService serviço responsável por validar códigos OTP enviados por e-mail
-   * @param usuarioRepository repositório utilizado para buscar informações de usuários pelo e-mail
+   * @param emailCodeValidationService serviço responsável por validar códigos OTP enviados por
+   *     e-mail
+   * @param usuarioRepository repositório para busca de usuários pelo e-mail
    */
   public EmailOtpAuthenticationProvider(
       EmailCodeValidationService emailCodeValidationService, UsuarioRepository usuarioRepository) {
@@ -33,8 +35,8 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   /**
    * Autentica um usuário utilizando um código OTP enviado por e-mail.
    *
-   * Valida o código OTP fornecido para o e-mail informado e, se válido, recupera os detalhes do usuário.
-   * Retorna um token de autenticação autenticado com as autoridades do usuário.
+   * <p>Valida o código OTP fornecido para o e-mail informado e, se válido, recupera os detalhes do
+   * usuário. Em caso de sucesso, retorna um token de autenticação com as autoridades do usuário.
    *
    * @param authentication objeto contendo o e-mail e o código OTP.
    * @return token de autenticação autenticado com os detalhes e permissões do usuário.
@@ -67,8 +69,9 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   /**
    * Indica se este provedor suporta autenticação usando {@code EmailOtpAuthenticationToken}.
    *
-   * @param authentication a classe do token de autenticação a ser verificada
-   * @return {@code true} se a autenticação for do tipo {@code EmailOtpAuthenticationToken}
+   * @param authentication classe do token de autenticação a ser verificado
+   * @return {@code true} se o tipo de autenticação for compatível com {@code
+   *     EmailOtpAuthenticationToken}
    */
   @Override
   public boolean supports(Class<?> authentication) {
