@@ -97,8 +97,8 @@ class AuthControllerTest {
   }
 
   @Test
-  @DisplayName("Autenticar com código OTP inválido deve retornar Unauthorized")
-  void autenticacao_whenCodigoOTPInvalido_DeveRetornar401() throws Exception {
+  @DisplayName("Autenticar com código OTP inválido deve retornar Unprocessable Entity")
+  void autenticacao_whenCodigoOTPInvalido_DeveRetornar422() throws Exception {
     EmailOtpAuthRequestDTO authRequestDTO =
         EmailOtpAuthRequestDTO.builder()
             .email("testuser@alunos.utfpr.edu.br")
@@ -110,7 +110,7 @@ class AuthControllerTest {
             post("/api/auth/login-otp")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(authRequestDTO)))
-        .andExpect(status().isUnauthorized());
+        .andExpect(status().isUnprocessableEntity());
   }
 
   @Test
