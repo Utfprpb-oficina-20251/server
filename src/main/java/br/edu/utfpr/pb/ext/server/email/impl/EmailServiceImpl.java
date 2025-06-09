@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /** Serviço responsável por gerar códigos, enviar e-mails e registrar os dados no banco. */
@@ -26,6 +28,7 @@ public class EmailServiceImpl {
       "Quantidade de solicitações ultrapassa o limite das últimas 24 horas.";
   public static final String ERRO_LIMITE_CURTO =
       "Limite de solicitações atingido, tente novamente em %d minutos.";
+  private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
 
   private final EmailCodeRepository repository;
   private final SendGrid sendGrid;
@@ -62,10 +65,6 @@ public class EmailServiceImpl {
 
     String code = gerarCodigoAleatorio();
     Response response = enviarEmailDeVerificacao(email, code, type);
-
-    if (response.getStatusCode() != 202) {
-      throw new IOException("Erro ao enviar e-mail. Código: " + response.getStatusCode());
-    }
     salvarCodigo(email, code, type);
     return response;
   }
@@ -248,10 +247,14 @@ public class EmailServiceImpl {
     request.setBody(mail.build());
 
     Response response = sendGrid.api(request);
-    if (response.getStatusCode() != 202) {
-      throw new IOException("Erro ao enviar e-mail, status code: " + response.getStatusCode());
-    } else {
-      return response;
+
+    if (response == null || response.getStatusCode() != 202) {
+      logger.error(
+          "Erro ao enviar e-mail por sendgrid, status code: {}",
+          response != null ? response.getStatusCode() : 0);
+      throw new IOException("Erro ao tentar enviar e-mail, tente novamente mais tarde");
     }
+
+    return response;
   }
 }

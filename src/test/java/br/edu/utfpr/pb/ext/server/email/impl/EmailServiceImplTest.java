@@ -34,12 +34,12 @@ class EmailServiceImplTest {
   @Mock private SendGrid sendGrid;
   @InjectMocks private EmailServiceImpl emailService;
 
+  private String email = "teste@utfpr.edu.br";
+  private String tipo = "cadastro";
+
   /** Teste para verificar envio com sucesso. */
   @Test
   void testGenerateAndSendCode_Success() throws IOException {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
-
     when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(0L);
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
@@ -66,9 +66,6 @@ class EmailServiceImplTest {
   /** Teste para validar que o limite de envio diário é respeitado. */
   @Test
   void testGenerateAndSendCode_MaxDailyLimitReached() {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
-
     when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(MAX_DAILY_LIMIT_MAIS_UM);
 
@@ -82,9 +79,6 @@ class EmailServiceImplTest {
   @Test
   @DisplayName("Valida que o serviço gera erro ao ultrapassar o limite curto de envios")
   void generateAndSendCode_WhenLimiteCurtoFoiUltrapassado_ReturnErroLimiteCurto() {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
-
     when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(MAX_SHORT_PERIOD_MAIS_UM);
 
@@ -94,11 +88,19 @@ class EmailServiceImplTest {
     assertEquals(ERRO_LIMITE_CURTO, ex.getMessage());
   }
 
+  @Test
+  void generateAndSendCode_WhenSendGridResponseIsNull_ReturnIllegalArgumentException() {
+
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(0L);
+    IOException ex =
+        assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
+    assertEquals("Erro ao tentar enviar e-mail, tente novamente mais tarde", ex.getMessage());
+  }
+
   /** Teste para simular falha no envio pelo SendGrid. */
   @Test
   void testGenerateAndSendCode_SendGridFails() throws IOException {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
     Response errorResponse = new Response(400, "", null);
 
     when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
@@ -108,18 +110,16 @@ class EmailServiceImplTest {
     IOException ex =
         assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
 
-    assertTrue(ex.getMessage().contains("Erro ao enviar e-mail"));
+    assertTrue(ex.getMessage().contains("Erro ao tentar enviar e-mail"));
   }
 
   /** Teste para e-mail inválido (regex não passa). */
   @Test
   void testGenerateAndSendCode_InvalidEmail() {
-    String email = "email_invalido";
-    String tipo = "cadastro";
-
     IllegalArgumentException ex =
         assertThrows(
-            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
+            IllegalArgumentException.class,
+            () -> emailService.generateAndSendCode("email_invalido", tipo));
 
     assertEquals("Endereço de e-mail inválido.", ex.getMessage());
   }
@@ -127,12 +127,9 @@ class EmailServiceImplTest {
   @Test
   @DisplayName("Garante que erro é retornado no caso de não haver o tipo do código na solicitação")
   void testGenerateAndSendSendCode_whenTypeIsNull_ShouldReturnIllegalArgumentException() {
-    String email = "teste@utfpr.edu.br";
-    String type = null;
-
     IllegalArgumentException ex =
         assertThrows(
-            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, type));
+            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, null));
     assertEquals("O tipo do código é obrigatório.", ex.getMessage());
   }
 }
