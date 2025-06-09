@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.usuario;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -97,8 +97,7 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorSemRoleServidor_DeveLancarIllegalArgumentException() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set auths =
-        Set.of(new SimpleGrantedAuthority("ROLE_ALUNO"), new SimpleGrantedAuthority("ROLE_OTHER"));
+    Set<Authority> auths = Set.of(new Authority(1L, "ROLE_ALUNO"), new Authority(2L, "ROLE_OTHER"));
     when(usuario.getAuthorities()).thenReturn(auths);
 
     IllegalArgumentException ex =
@@ -110,9 +109,7 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorValido_NaoDeveLancarExcecao() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set auths =
-        Set.of(
-            new SimpleGrantedAuthority("ROLE_SERVIDOR"), new SimpleGrantedAuthority("ROLE_OTHER"));
+    Set<Authority> auths = Set.of(new Authority(1L, "ROLE_SERVIDOR"), new Authority(2L, "ROLE_OTHER"));
     when(usuario.getAuthorities()).thenReturn(auths);
 
     assertDoesNotThrow(() -> usuarioService.validarProfessor(usuario));
@@ -121,7 +118,7 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorComApenasRoleServidor_NaoDeveLancarExcecao() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set auths = Set.of(new SimpleGrantedAuthority("ROLE_SERVIDOR"));
+    Set<Authority> auths = Set.of(new Authority(1L, "ROLE_SERVIDOR"));
     when(usuario.getAuthorities()).thenReturn(auths);
 
     assertDoesNotThrow(() -> usuarioService.validarProfessor(usuario));

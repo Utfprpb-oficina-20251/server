@@ -12,4 +12,5 @@ import lombok.Data;
 public class RespostaLoginDTO {
   private String token;
   private long expiresIn;
+  private UsuarioLoginDTO user;
 }

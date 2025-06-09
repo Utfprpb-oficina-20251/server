@@ -97,6 +97,45 @@ class AuthControllerTest {
   }
 
   @Test
+  @Transactional
+  @DisplayName(
+      "Cadastrar um aluno, solicitar código OTP e autenticar com código válido deve retornar informação do aluno")
+  void cadastroEAutenticacao_whenCodigoOTPValido_DeveRetornarInformacaoUsuarioAluno()
+      throws Exception {
+    String email = "testuser@alunos.utfpr.edu.br";
+    String code = "123456";
+
+    CadastroUsuarioDTO cadastroDTO =
+        CadastroUsuarioDTO.builder().nome("testuser").email(email).registro("12345678901").build();
+
+    EmailOtpAuthRequestDTO authRequestDTO =
+        EmailOtpAuthRequestDTO.builder().email(email).code(code).build();
+
+    // Cadastrar usuário
+    mockMvc
+        .perform(
+            post("/api/auth/cadastro")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cadastroDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.email").value(email));
+
+    // Autenticar com código OTP
+    mockMvc
+        .perform(
+            post("/api/auth/login-otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(authRequestDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.user").exists())
+        .andExpect(jsonPath("$.user.email").exists())
+        .andExpect(jsonPath("$.user.email").value(email))
+        .andExpect(jsonPath("$.user.authorities").exists())
+        .andExpect(jsonPath("$.user.authorities[0]").exists())
+        .andExpect(jsonPath("$.user.authorities[0]").value("ROLE_ALUNO"));
+  }
+
+  @Test
   @DisplayName("Autenticar com código OTP inválido deve retornar Unprocessable Entity")
   void autenticacao_whenCodigoOTPInvalido_DeveRetornar422() throws Exception {
     EmailOtpAuthRequestDTO authRequestDTO =

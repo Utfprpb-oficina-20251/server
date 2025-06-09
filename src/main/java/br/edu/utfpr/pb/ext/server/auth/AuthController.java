@@ -80,15 +80,22 @@ public class AuthController {
       responseCode = "200",
       description = "Usuário autenticado com sucesso",
       content = @Content(schema = @Schema(implementation = RespostaLoginDTO.class)))
+  @ApiResponse(responseCode = "422", description = "Usuário ou código inválido")
   @PostMapping("/login-otp")
   public ResponseEntity<RespostaLoginDTO> autenticacaoOtp(
       @RequestBody @Valid EmailOtpAuthRequestDTO requestDTO) {
     Usuario usuarioAutenticado = authService.autenticacaoOtp(requestDTO);
     String tokenJwt = jwtService.generateToken(usuarioAutenticado);
+
     RespostaLoginDTO respostaLoginDTO =
         RespostaLoginDTO.builder()
             .token(tokenJwt)
             .expiresIn(jwtService.getExpirationTime())
+            .user(
+                UsuarioLoginDTO.builder()
+                    .email(usuarioAutenticado.getEmail())
+                    .authorities(usuarioAutenticado.getAuthoritiesStrings())
+                    .build())
             .build();
     return ResponseEntity.ok(respostaLoginDTO);
   }

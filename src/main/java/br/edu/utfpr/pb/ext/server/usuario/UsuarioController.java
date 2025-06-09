@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
+import br.edu.utfpr.pb.ext.server.auth.dto.UsuarioLoginDTO;
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtService;
 import br.edu.utfpr.pb.ext.server.generics.CrudController;
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
@@ -171,6 +172,10 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     Usuario salvo = usuarioService.save(usuario);
     String token = jwtService.generateToken(salvo);
     long expiration = jwtService.getExpirationTime();
-    return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
+    return ResponseEntity.ok(
+        new RespostaLoginDTO(
+            token,
+            expiration,
+            new UsuarioLoginDTO(salvo.getEmail(), salvo.getAuthoritiesStrings())));
   }
 }
