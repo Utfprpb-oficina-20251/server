@@ -1,5 +1,5 @@
 -- =============================================================
--- Script: V1.2.3__create_tb_departamento.sql
+-- Script: V1.2.4__create_tb_departamento.sql
 -- Descrição: Criação da tabela de departamentos – compatível PG 9+ e H2
 -- Autor: Luiz Alberto dos Passos
 -- Data: 2025-06-08
