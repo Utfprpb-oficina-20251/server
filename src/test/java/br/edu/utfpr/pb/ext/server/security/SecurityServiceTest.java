@@ -50,7 +50,7 @@ class SecurityServiceTest {
     }
 
     /**
-     * Testa se o método retorna TRUE quando o usuário logado FAZ PARTE da equipe executora.
+     * Testa se  retorna TRUE quando o usuário logado FAZ PARTE da equipe executora.
      */
     @Test
     void podeEditarProjeto_quandoUsuarioEstaNaEquipe_deveRetornarTrue() {
@@ -80,7 +80,7 @@ class SecurityServiceTest {
     }
 
     /**
-     * Testa se o método retorna FALSE quando o usuário logado NÃO FAZ PARTE da equipe executora.
+     * Testa se retorna FALSE quando o usuário logado NÃO FAZ PARTE da equipe executora.
      */
     @Test
     void podeEditarProjeto_quandoUsuarioNaoEstaNaEquipe_deveRetornarFalse() {
@@ -112,7 +112,7 @@ class SecurityServiceTest {
     }
 
     /**
-     * Testa se o método lança uma exceção quando o projeto a ser verificado não é encontrado.
+     * Testa se lança uma exceção quando o projeto a ser verificado não é encontrado.
      */
     @Test
     void podeEditarProjeto_quandoProjetoNaoExiste_deveLancarExcecao() {
