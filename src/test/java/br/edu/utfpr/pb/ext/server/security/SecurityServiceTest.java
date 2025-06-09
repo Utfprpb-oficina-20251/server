@@ -127,7 +127,7 @@ class SecurityServiceTest {
         when(projetoRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        // Verifica se a chamada ao método lança a exceção esperada
+        // Verifica se a chamada  lança a exceção esperada
         assertThrows(RuntimeException.class, () -> securityService.podeEditarProjeto(99L));
     }
 }
