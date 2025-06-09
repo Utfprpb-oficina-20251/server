@@ -102,9 +102,9 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Gera um código aleatório de 4 caracteres em letras maiúsculas.
+   * Gera um código aleatório de 4 caracteres alfanuméricos em maiúsculas.
    *
-   * @return código aleatório de 4 caracteres
+   * @return código aleatório de 4 caracteres alfanuméricos
    */
   private String gerarCodigoAleatorio() {
     return UUID.randomUUID().toString().substring(0, 4).toUpperCase();
