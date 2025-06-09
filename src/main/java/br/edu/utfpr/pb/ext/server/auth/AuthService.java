@@ -124,14 +124,13 @@ public class AuthService {
   }
 
   /**
-   * Realiza a autenticação de um usuário por meio de código OTP enviado por email.
+   * Autentica um usuário utilizando um código OTP enviado por email.
    *
-   * <p>Autentica o usuário utilizando o email e o código OTP fornecidos, definindo o contexto de
-   * segurança ao autenticar com sucesso.
+   * Recebe o email e o código OTP, realiza a autenticação e define o contexto de segurança ao autenticar com sucesso.
    *
-   * @param dto Objeto contendo o email do usuário e o código OTP recebido.
+   * @param dto Objeto com o email do usuário e o código OTP recebido.
    * @return O usuário autenticado correspondente ao email informado.
-   * @throws ResponseStatusException Se o código OTP for inválido ou expirado (HTTP 401).
+   * @throws ResponseStatusException Se o código OTP for inválido ou expirado (HTTP 422).
    * @throws UsernameNotFoundException Se o email informado não estiver cadastrado.
    */
   @Operation(summary = "Autentica um usuário usando o código OTP")
@@ -145,7 +144,8 @@ public class AuthService {
           .findByEmail(dto.getEmail())
           .orElseThrow(() -> new UsernameNotFoundException(EMAIL_NAO_CADASTRADO));
     } catch (BadCredentialsException ex) {
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Código inválido ou expirado");
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY, "Código inválido ou expirado");
     }
   }
 }
