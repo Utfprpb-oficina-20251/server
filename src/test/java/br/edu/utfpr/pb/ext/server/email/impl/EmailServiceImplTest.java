@@ -9,8 +9,6 @@ import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +24,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class EmailServiceImplTest {
 
+  public static final long MAX_DAILY_LIMIT_MAIS_UM = 31L;
+  public static final String ERRO_LIMITE_DIARIO_ATINGIDO =
+      "Quantidade de solicitações ultrapassa o limite das últimas 24 horas.";
+  private static final Long MAX_SHORT_PERIOD_MAIS_UM = 6L;
+  private static final String ERRO_LIMITE_CURTO =
+      "Limite de solicitações atingido, tente novamente em %d minutos.".formatted(15L);
   @Mock private EmailCodeRepository emailCodeRepository;
   @Mock private SendGrid sendGrid;
   @InjectMocks private EmailServiceImpl emailService;
@@ -36,8 +40,8 @@ class EmailServiceImplTest {
     String email = "teste@utfpr.edu.br";
     String tipo = "cadastro";
 
-    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
-        .thenReturn(Collections.emptyList());
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(0L);
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
 
     Response response = emailService.generateAndSendCode(email, tipo);
@@ -61,25 +65,33 @@ class EmailServiceImplTest {
 
   /** Teste para validar que o limite de envio diário é respeitado. */
   @Test
-  void testGenerateAndSendCode_MaxLimitReached() {
+  void testGenerateAndSendCode_MaxDailyLimitReached() {
     String email = "teste@utfpr.edu.br";
     String tipo = "cadastro";
 
-    EmailCode code1 = new EmailCode();
-    code1.setGeneratedAt(LocalDateTime.now().minusMinutes(1));
-    EmailCode code2 = new EmailCode();
-    code2.setGeneratedAt(LocalDateTime.now().minusHours(1));
-    EmailCode code3 = new EmailCode();
-    code3.setGeneratedAt(LocalDateTime.now().minusHours(2));
-
-    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
-        .thenReturn(List.of(code1, code2, code3));
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(MAX_DAILY_LIMIT_MAIS_UM);
 
     IllegalArgumentException ex =
         assertThrows(
             IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
 
-    assertEquals("Limite diário de envio atingido.", ex.getMessage());
+    assertEquals(ERRO_LIMITE_DIARIO_ATINGIDO, ex.getMessage());
+  }
+
+  @Test
+  @DisplayName("Valida que o serviço gera erro ao ultrapassar o limite curto de envios")
+  void generateAndSendCode_WhenLimiteCurtoFoiUltrapassado_ReturnErroLimiteCurto() {
+    String email = "teste@utfpr.edu.br";
+    String tipo = "cadastro";
+
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(MAX_SHORT_PERIOD_MAIS_UM);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
+    assertEquals(ERRO_LIMITE_CURTO, ex.getMessage());
   }
 
   /** Teste para simular falha no envio pelo SendGrid. */
@@ -89,8 +101,8 @@ class EmailServiceImplTest {
     String tipo = "cadastro";
     Response errorResponse = new Response(400, "", null);
 
-    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
-        .thenReturn(Collections.emptyList());
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(0L);
     when(sendGrid.api(any())).thenReturn(errorResponse);
 
     IOException ex =

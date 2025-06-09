@@ -9,7 +9,6 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
@@ -19,8 +18,14 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl {
 
   private static final int CODE_EXPIRATION_MINUTES = 10;
-  private static final int MAX_CODES_PER_DAY = 3;
+  private static final int MAX_CODES_PER_DAY = 30;
+  private static final int MAX_CODES_IN_SHORT_PERIOD = 5;
+  private static final int SHORT_PERIOD_REST_IN_MINUTES = 15;
   private static final Pattern EMAIL_REGEX = Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
+  public static final String ERRO_LIMITE_DIARIO =
+      "Quantidade de solicitações ultrapassa o limite das últimas 24 horas.";
+  public static final String ERRO_LIMITE_CURTO =
+      "Limite de solicitações atingido, tente novamente em %d minutos.";
 
   private final EmailCodeRepository repository;
   private final SendGrid sendGrid;
@@ -58,12 +63,11 @@ public class EmailServiceImpl {
     String code = gerarCodigoAleatorio();
     Response response = enviarEmailDeVerificacao(email, code, type);
 
-    if (response.getStatusCode() == 202) {
-      salvarCodigo(email, code, type);
-      return response;
+    if (response.getStatusCode() != 202) {
+      throw new IOException("Erro ao enviar e-mail. Código: " + response.getStatusCode());
     }
-
-    throw new IOException("Erro ao enviar e-mail. Código: " + response.getStatusCode());
+    salvarCodigo(email, code, type);
+    return response;
   }
 
   // ======================
@@ -92,12 +96,17 @@ public class EmailServiceImpl {
    * @throws IllegalArgumentException se o limite diário de envio for atingido
    */
   private void verificarLimiteEnvio(String email, String type) {
-    LocalDateTime inicio = LocalDateTime.now().minusHours(24);
-    List<EmailCode> codigosRecentes =
-        repository.findAllByEmailAndTypeAndGeneratedAtAfter(email, type, inicio);
+    LocalDateTime limiteDiario = LocalDateTime.now().minusHours(24);
+    Long codigos = repository.countByEmailAndTypeAndGeneratedAtAfter(email, type, limiteDiario);
+    if (codigos > MAX_CODES_PER_DAY) {
+      throw new IllegalArgumentException(ERRO_LIMITE_DIARIO);
+    }
 
-    if (codigosRecentes.size() >= MAX_CODES_PER_DAY) {
-      throw new IllegalArgumentException("Limite diário de envio atingido.");
+    LocalDateTime limiteCurto = LocalDateTime.now().minusMinutes(SHORT_PERIOD_REST_IN_MINUTES);
+    codigos = repository.countByEmailAndTypeAndGeneratedAtAfter(email, type, limiteCurto);
+
+    if (codigos > MAX_CODES_IN_SHORT_PERIOD) {
+      throw new IllegalArgumentException(ERRO_LIMITE_CURTO.formatted(SHORT_PERIOD_REST_IN_MINUTES));
     }
   }
 
