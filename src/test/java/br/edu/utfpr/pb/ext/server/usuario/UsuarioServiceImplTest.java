@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
+import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,7 +98,9 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorSemRoleServidor_DeveLancarIllegalArgumentException() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set<Authority> auths = Set.of(new Authority(1L, "ROLE_ALUNO"), new Authority(2L, "ROLE_OTHER"));
+    Set<Authority> auths = new HashSet<>();
+    auths.add(new Authority(1L, "ROLE_ALUNO"));
+    auths.add(new Authority(2L, "ROLE_OTHER"));
     when(usuario.getAuthorities()).thenReturn(auths);
 
     IllegalArgumentException ex =
@@ -109,7 +112,9 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorValido_NaoDeveLancarExcecao() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set<Authority> auths = Set.of(new Authority(1L, "ROLE_SERVIDOR"), new Authority(2L, "ROLE_OTHER"));
+    Set<Authority> auths = new HashSet<>();
+    auths.add(new Authority(1L, "ROLE_SERVIDOR"));
+    auths.add(new Authority(2L, "ROLE_OTHER"));
     when(usuario.getAuthorities()).thenReturn(auths);
 
     assertDoesNotThrow(() -> usuarioService.validarProfessor(usuario));
@@ -118,7 +123,8 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorComApenasRoleServidor_NaoDeveLancarExcecao() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set<Authority> auths = Set.of(new Authority(1L, "ROLE_SERVIDOR"));
+    Set<Authority> auths = new HashSet<>();
+    auths.add(new Authority(1L, "ROLE_SERVIDOR"));
     when(usuario.getAuthorities()).thenReturn(auths);
 
     assertDoesNotThrow(() -> usuarioService.validarProfessor(usuario));
