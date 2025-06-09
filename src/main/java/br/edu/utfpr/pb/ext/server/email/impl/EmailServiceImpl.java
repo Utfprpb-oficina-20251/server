@@ -43,17 +43,14 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Gera e envia um código de verificação para o e-mail informado, registrando o código no banco de
-   * dados.
+   * Gera e envia um código de verificação para o e-mail informado e registra o código no banco de dados.
    *
-   * <p>Valida o tipo e o formato do e-mail, verifica o limite diário de envios, gera um código
-   * aleatório, envia o e-mail de verificação e salva o código caso o envio seja aceito.
+   * Valida o tipo e o formato do e-mail, verifica os limites diário e de curto prazo de envios, gera um código aleatório, envia o e-mail de verificação e salva o código gerado.
    *
    * @param email endereço de e-mail do destinatário
-   * @param type tipo do código de verificação (ex: "cadastro", "recuperacao")
+   * @param type tipo do código de verificação (por exemplo, "cadastro" ou "recuperacao")
    * @return resposta da API do SendGrid referente ao envio do e-mail
-   * @throws IllegalArgumentException se o tipo for nulo, vazio, se o e-mail for inválido ou se o
-   *     limite diário de envios for excedido
+   * @throws IllegalArgumentException se o tipo for nulo, vazio, se o e-mail for inválido ou se os limites de envio forem excedidos
    * @throws IOException se o envio do e-mail falhar
    */
   public Response generateAndSendCode(String email, String type) throws IOException {
@@ -84,15 +81,14 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Verifica se o limite diário de envio de códigos para o e-mail e tipo especificados foi
-   * atingido.
+   * Verifica se o envio de códigos para o e-mail e tipo especificados excede os limites diário e de curto prazo.
    *
-   * <p>Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior
-   * ao permitido.
+   * Lança uma exceção se o número de códigos enviados nas últimas 24 horas atingir o limite diário permitido,
+   * ou se o número de códigos enviados nos últimos minutos exceder o limite de curto prazo.
    *
    * @param email endereço de e-mail a ser verificado
    * @param type tipo de código relacionado ao envio
-   * @throws IllegalArgumentException se o limite diário de envio for atingido
+   * @throws IllegalArgumentException se algum dos limites de envio for atingido
    */
   private void verificarLimiteEnvio(String email, String type) {
     LocalDateTime limiteDiario = LocalDateTime.now().minusHours(24);
@@ -225,14 +221,14 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Envia um e-mail utilizando o serviço SendGrid.
+   * Envia um e-mail para o destinatário especificado utilizando o serviço SendGrid.
    *
    * @param to endereço de e-mail do destinatário
    * @param subject assunto do e-mail
-   * @param contentText conteúdo do e-mail (texto ou HTML)
+   * @param contentText conteúdo do e-mail, podendo ser texto simples ou HTML
    * @param tipo tipo do conteúdo do e-mail, como "text/plain" ou "text/html"
-   * @return o objeto Response do SendGrid em caso de envio bem-sucedido
-   * @throws IOException se o envio do e-mail falhar ou retornar status diferente de 202
+   * @return resposta da API SendGrid em caso de envio bem-sucedido
+   * @throws IOException se o envio do e-mail falhar ou se a resposta da API não for 202
    */
   public Response sendEmail(String to, String subject, String contentText, String tipo)
       throws IOException {
