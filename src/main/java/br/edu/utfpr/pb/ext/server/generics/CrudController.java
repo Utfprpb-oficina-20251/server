@@ -17,17 +17,18 @@ import org.springframework.web.bind.annotation.*;
 public abstract class CrudController<T extends BaseEntity, D, I extends Serializable> {
 
   /**
- * Retorna o serviço CRUD responsável pelas operações de persistência da entidade.
- *
- * @return implementação de ICrudService correspondente à entidade e ao identificador genéricos
- */
+   * Retorna o serviço CRUD responsável pelas operações de persistência da entidade.
+   *
+   * @return implementação de ICrudService correspondente à entidade e ao identificador genéricos
+   */
   protected abstract ICrudService<T, I> getService();
 
   /**
- * Fornece a instância de ModelMapper usada para converter entre entidades e DTOs neste controlador CRUD.
- *
- * @return a instância de ModelMapper utilizada para mapeamento de tipos.
- */
+   * Fornece a instância de ModelMapper usada para converter entre entidades e DTOs neste
+   * controlador CRUD.
+   *
+   * @return a instância de ModelMapper utilizada para mapeamento de tipos.
+   */
   protected abstract ModelMapper getModelMapper();
 
   private final Class<T> typeClass;
@@ -112,7 +113,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   /**
    * Busca uma entidade pelo identificador e retorna seu DTO correspondente.
    *
-   * Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não for localizada.
+   * <p>Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não for localizada.
    *
    * @param i identificador da entidade
    * @return ResponseEntity contendo o DTO da entidade ou status 404 se não encontrada
@@ -142,13 +143,15 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Atualiza uma entidade existente com os dados do DTO fornecido, garantindo que o identificador do caminho seja igual ao do DTO.
+   * Atualiza uma entidade existente com os dados do DTO fornecido, garantindo que o identificador
+   * do caminho seja igual ao do DTO.
    *
-   * Retorna HTTP 400 se os identificadores forem diferentes.
+   * <p>Retorna HTTP 400 se os identificadores forem diferentes.
    *
    * @param i identificador da entidade no caminho da requisição
    * @param entity DTO com os dados atualizados
-   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou status 400 se houver divergência de identificadores
+   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou status 400
+   *     se houver divergência de identificadores
    */
   @PutMapping("{i}")
   @Operation(summary = "Atualiza um registro de acordo com o identificador fornecido")

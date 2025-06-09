@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.EmailOtpAuthRequestDTO;
+import br.edu.utfpr.pb.ext.server.auth.dto.SolicitacaoCodigoOTPRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,18 +39,24 @@ class AuthControllerTest {
             .registro("12345678901")
             .build();
 
+    SolicitacaoCodigoOTPRequestDTO solicitacaoDTO =
+        SolicitacaoCodigoOTPRequestDTO.builder().email("testuser@alunos.utfpr.edu.br").build();
+
     // Cadastrar usuário
     mockMvc
         .perform(
             post("/api/auth/cadastro")
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.email").value("testuser@alunos.utfpr.edu.br"));
 
     // Solicitar código OTP
     mockMvc
-        .perform(post("/api/auth/solicitar-codigo").param("email", "testuser@alunos.utfpr.edu.br"))
+        .perform(
+            post("/api/auth/solicitar-codigo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(solicitacaoDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.mensagem").exists());
   }
@@ -73,7 +80,7 @@ class AuthControllerTest {
     mockMvc
         .perform(
             post("/api/auth/cadastro")
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.email").value(email));
@@ -120,14 +127,14 @@ class AuthControllerTest {
     mockMvc
         .perform(
             post("/api/auth/cadastro")
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isOk());
 
     mockMvc
         .perform(
             post("/api/auth/cadastro")
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isConflict())
         .andExpect(status().reason(USUARIO_JA_CADASTRADO));
@@ -147,7 +154,7 @@ class AuthControllerTest {
     mockMvc
         .perform(
             post("/api/auth/cadastro")
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(status().reason("E-mail deve ser @utfpr.edu.br ou @alunos.utfpr.edu.br"));
@@ -156,8 +163,32 @@ class AuthControllerTest {
   @Test
   @DisplayName("Solicitar código OTP para um e-mail que não existe deve retornar NotFound")
   void solicitarCodigoOtp_whenEmailNaoExiste_DeveRetornar404() throws Exception {
+    SolicitacaoCodigoOTPRequestDTO solicitacaoDTO =
+        SolicitacaoCodigoOTPRequestDTO.builder().email("testuser@utfpr.edu.br").build();
     mockMvc
-        .perform(post("/api/auth/solicitar-codigo").param("email", "testuser@dominio.com"))
+        .perform(
+            post("/api/auth/solicitar-codigo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(solicitacaoDTO)))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName(
+      "Solicitar código OTP para um e-mail que não pertence ao domínio UTFPR deve retornar BadRequest")
+  void solicitarCodigoOtp_whenEmailNaoPertenceAoDominioUtfpr_DeveRetornarErroDeValidacao()
+      throws Exception {
+    SolicitacaoCodigoOTPRequestDTO solicitacaoDTO =
+        SolicitacaoCodigoOTPRequestDTO.builder().email("testuser@dominio.com").build();
+    mockMvc
+        .perform(
+            post("/api/auth/solicitar-codigo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(solicitacaoDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Validation Error"))
+        .andExpect(
+            jsonPath("$.validationErrors.email")
+                .value("E-mail deve ser @utfpr.edu.br ou @alunos.utfpr.edu.br"));
   }
 }
