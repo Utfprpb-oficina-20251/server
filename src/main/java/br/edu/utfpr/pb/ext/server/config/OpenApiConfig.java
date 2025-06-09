@@ -13,7 +13,8 @@ public class OpenApiConfig {
   /**
    * Cria e configura uma instância do OpenAPI com suporte à autenticação JWT via Bearer Token.
    *
-   * Adiciona um requisito de segurança "bearerAuth" e define o esquema de segurança HTTP Bearer com formato JWT na documentação OpenAPI da aplicação.
+   * <p>Adiciona um requisito de segurança "bearerAuth" e define o esquema de segurança HTTP Bearer
+   * com formato JWT na documentação OpenAPI da aplicação.
    *
    * @return instância do OpenAPI configurada para autenticação JWT Bearer
    */

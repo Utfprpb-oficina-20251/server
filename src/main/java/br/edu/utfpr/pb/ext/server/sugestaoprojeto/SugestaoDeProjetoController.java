@@ -23,7 +23,8 @@ public class SugestaoDeProjetoController
   private final ModelMapper modelMapper;
 
   /**
-   * Inicializa o controlador REST para sugestões de projeto com o serviço e o model mapper fornecidos.
+   * Inicializa o controlador REST para sugestões de projeto com o serviço e o model mapper
+   * fornecidos.
    *
    * @param service implementação do serviço responsável pelas operações de sugestão de projeto
    * @param modelMapper instância utilizada para conversão entre entidades e DTOs

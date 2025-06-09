@@ -14,7 +14,8 @@ public class UniqueSiapeValidator implements ConstraintValidator<UniqueSiape, St
    *
    * @param siape valor do siape a ser validado
    * @param context contexto de validação fornecido pelo framework
-   * @return {@code true} se não existir usuário com o siape informado; caso contrário, {@code false}
+   * @return {@code true} se não existir usuário com o siape informado; caso contrário, {@code
+   *     false}
    */
   @Override
   public boolean isValid(String siape, jakarta.validation.ConstraintValidatorContext context) {
