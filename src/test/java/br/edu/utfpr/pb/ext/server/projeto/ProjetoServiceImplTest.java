@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import jakarta.persistence.EntityNotFoundException;
+
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,5 +97,52 @@ class ProjetoServiceImplTest {
 
         verify(projetoRepository, never()).save(any());
         verify(modelMapper, never()).map(any(), any());
+    }
+    /**
+     * Testa o método 'findAll' herdado de CrudServiceImpl.
+     * Cobre o cenário de buscar todos os projetos.
+     */
+    @Test
+    void findAll_quandoExistemProjetos_deveRetornarListaDeProjetos() {
+        // Arrange
+        Projeto projeto1 = new Projeto();
+        projeto1.setId(1L);
+        Projeto projeto2 = new Projeto();
+        projeto2.setId(2L);
+        List<Projeto> listaDeProjetos = List.of(projeto1, projeto2);
+
+        // Configura o mock do repositório para retornar a lista quando findAll for chamado
+        when(projetoRepository.findAll()).thenReturn(listaDeProjetos);
+
+        // Act
+        List<Projeto> resultado = projetoService.findAll();
+
+        // Assert
+        assertNotNull(resultado);
+        assertEquals(2, resultado.size());
+        assertEquals(listaDeProjetos, resultado);
+        verify(projetoRepository).findAll(); // Verifica se o método do repositório foi chamado
+    }
+
+    /**
+     * Testa o método 'delete' herdado de CrudServiceImpl.
+     * Cobre o cenário de deletar um projeto por ID.
+     */
+    @Test
+    void delete_quandoIdFornecido_deveChamarDeleteByIdDoRepositorio() {
+        // Arrange
+        Long projetoIdParaDeletar = 1L;
+
+        // O método deleteById do repositório é 'void', então não retorna nada.
+        // Usamos doNothing() para configurar o mock para uma chamada void.
+        doNothing().when(projetoRepository).deleteById(projetoIdParaDeletar);
+
+        // Act
+        projetoService.delete(projetoIdParaDeletar);
+
+        // Assert
+        // A asserção mais importante para um método void é verificar se ele foi chamado.
+        verify(projetoRepository).deleteById(projetoIdParaDeletar);
+        verify(projetoRepository, times(1)).deleteById(projetoIdParaDeletar); // Garante que foi chamado exatamente uma vez.
     }
 }
