@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,5 +29,17 @@ public class ExceptionHandlerAdvice {
         .url(request.getServletPath())
         .validationErrors(validationErrors)
         .build();
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ApiError> handleIllegalArgumentException(
+          IllegalArgumentException ex, HttpServletRequest request) {
+    ApiError apiError =
+            ApiError.builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message(ex.getMessage()) // Usa a mensagem da exceção original
+                    .url(request.getServletPath())
+                    .build();
+    return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
   }
 }

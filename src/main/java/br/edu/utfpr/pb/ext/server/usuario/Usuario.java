@@ -55,6 +55,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Column(name = "data_atualizacao")
   private Date dataAtualizacao;
 
+  @Column(name = "endereco_completo")
+  private String enderecoCompleto;
+
   @ManyToMany(
       fetch = FetchType.EAGER,
       cascade = {
@@ -80,7 +83,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   }
 
   /**
-   * Retorna sempre null, pois a autenticação do usuário é feita exclusivamente por OTP ou JWT, sem armazenamento ou uso de senha.
+   * Retorna sempre null, pois a autenticação do usuário é feita exclusivamente por OTP ou JWT, sem
+   * armazenamento ou uso de senha.
    *
    * @return null, indicando ausência de senha para autenticação.
    */
@@ -125,7 +129,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   /**
    * Indica que as credenciais do usuário nunca expiram.
    *
-   * @return sempre retorna {@code true}, sinalizando que as credenciais estão permanentemente válidas
+   * @return sempre retorna {@code true}, sinalizando que as credenciais estão permanentemente
+   *     válidas
    */
   @Override
   @Transient
@@ -136,7 +141,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   /**
    * Indica se a conta do usuário está habilitada.
    *
-   * @return sempre retorna {@code true}, indicando que a conta está habilitada, independentemente do estado real do usuário.
+   * @return sempre retorna {@code true}, indicando que a conta está habilitada, independentemente
+   *     do estado real do usuário.
    */
   @Override
   @Transient

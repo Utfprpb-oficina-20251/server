@@ -34,11 +34,7 @@ class ProjetoControllerTest {
     ProjetoDTO projetoDTO = new ProjetoDTO();
     projetoDTO.setTitulo("Projeto Teste");
     projetoDTO.setEquipeExecutora(
-        List.of(
-            UsuarioProjetoDTO.builder()
-                .nomeCompleto("batata")
-                .emailInstitucional("batata@utfpr.edu.br")
-                .build()));
+        List.of(UsuarioProjetoDTO.builder().nome("batata").email("batata@utfpr.edu.br").build()));
 
     Usuario usuario = new Usuario();
     usuario.setEmail("batata@utfpr.edu.br");
