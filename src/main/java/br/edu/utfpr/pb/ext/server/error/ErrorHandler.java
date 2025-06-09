@@ -34,10 +34,12 @@ public class ErrorHandler implements ErrorController {
   }
 
   /**
-   * Retorna um objeto {@link ApiError} contendo detalhes do erro ocorrido em requisições HTTP sem efeito colateral, como GET.
+   * Retorna um objeto {@link ApiError} contendo detalhes do erro ocorrido em requisições HTTP sem
+   * efeito colateral, como GET.
    *
    * @param webRequest contexto da requisição web atual
-   * @return objeto {@link ApiError} com informações sobre o erro, incluindo mensagem, URL e status HTTP
+   * @return objeto {@link ApiError} com informações sobre o erro, incluindo mensagem, URL e status
+   *     HTTP
    */
   @GetMapping("/error")
   @Operation(summary = "Retorna o erro proveniente de métodos HTTP sem efeito colateral")
@@ -46,7 +48,8 @@ public class ErrorHandler implements ErrorController {
   }
 
   /**
-   * Retorna um objeto de erro formatado para requisições HTTP que podem causar efeitos colaterais, como POST, PUT ou DELETE.
+   * Retorna um objeto de erro formatado para requisições HTTP que podem causar efeitos colaterais,
+   * como POST, PUT ou DELETE.
    *
    * @param webRequest a requisição web atual
    * @return um {@link ApiError} com detalhes do erro ocorrido na requisição
@@ -60,7 +63,8 @@ public class ErrorHandler implements ErrorController {
   /**
    * Constrói um objeto ApiError a partir dos atributos de erro extraídos do WebRequest.
    *
-   * Extrai mensagem, caminho da requisição e status HTTP dos atributos de erro, utilizando 500 caso o status não esteja presente.
+   * <p>Extrai mensagem, caminho da requisição e status HTTP dos atributos de erro, utilizando 500
+   * caso o status não esteja presente.
    *
    * @param webRequest contexto da requisição web contendo os detalhes do erro
    * @return uma instância de ApiError representando o erro ocorrido

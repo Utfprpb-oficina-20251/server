@@ -30,9 +30,11 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   }
 
   /**
-   * Prepara a entidade SugestaoDeProjeto para persistência, definindo o usuário logado como aluno, status como AGUARDANDO e validando o professor, se informado.
+   * Prepara a entidade SugestaoDeProjeto para persistência, definindo o usuário logado como aluno,
+   * status como AGUARDANDO e validando o professor, se informado.
    *
-   * Caso um professor seja especificado, valida sua existência e papel; lança EntityNotFoundException se não encontrado.
+   * <p>Caso um professor seja especificado, valida sua existência e papel; lança
+   * EntityNotFoundException se não encontrado.
    *
    * @param entity sugestão de projeto a ser preparada para salvamento
    * @return a entidade SugestaoDeProjeto pronta para persistência

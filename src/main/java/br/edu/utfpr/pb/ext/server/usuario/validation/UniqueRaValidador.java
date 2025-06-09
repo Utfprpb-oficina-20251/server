@@ -12,10 +12,12 @@ public class UniqueRaValidador implements ConstraintValidator<UniqueRa, String> 
   /**
    * Valida se o número de registro acadêmico (RA) informado é único entre os usuários cadastrados.
    *
-   * Retorna {@code true} se o RA for {@code null}, vazio, composto apenas por espaços em branco ou não existir nenhum usuário com esse RA; caso contrário, retorna {@code false}.
+   * <p>Retorna {@code true} se o RA for {@code null}, vazio, composto apenas por espaços em branco
+   * ou não existir nenhum usuário com esse RA; caso contrário, retorna {@code false}.
    *
    * @param ra número de registro acadêmico a ser verificado
-   * @return {@code true} se o RA for único ou não informado; {@code false} se já existir um usuário com esse RA
+   * @return {@code true} se o RA for único ou não informado; {@code false} se já existir um usuário
+   *     com esse RA
    */
   @Override
   public boolean isValid(String ra, jakarta.validation.ConstraintValidatorContext context) {

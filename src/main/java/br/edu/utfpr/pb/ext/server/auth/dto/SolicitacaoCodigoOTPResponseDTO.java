@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class SolicitacaoCodigoDTO {
+public class SolicitacaoCodigoOTPResponseDTO {
   private String mensagem;
 }
