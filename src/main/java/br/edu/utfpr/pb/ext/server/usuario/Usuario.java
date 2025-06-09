@@ -71,7 +71,7 @@ public class Usuario extends BaseEntity implements UserDetails {
   private Set<Authority> authorities;
 
   /**
-   * Retorna as permissões associadas ao usuário.
+   * Retorna uma cópia das autoridades (permissões) atribuídas ao usuário.
    *
    * @return um novo conjunto contendo as autoridades do usuário
    */
@@ -82,6 +82,11 @@ public class Usuario extends BaseEntity implements UserDetails {
     return new HashSet<>(authorities);
   }
 
+  /**
+   * Retorna um conjunto com os nomes das autoridades (permissões) atribuídas ao usuário.
+   *
+   * @return um conjunto de strings representando os nomes das autoridades do usuário
+   */
   public Set<String> getAuthoritiesStrings() {
     return authorities.stream().map(Authority::getAuthority).collect(Collectors.toSet());
   }
