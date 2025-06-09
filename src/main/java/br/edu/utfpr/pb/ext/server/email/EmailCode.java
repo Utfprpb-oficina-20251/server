@@ -46,7 +46,8 @@ public class EmailCode extends BaseEntity {
   private String type;
 
   /**
-   * Cria uma nova instância de EmailCode com os valores fornecidos e marca o código como não utilizado.
+   * Cria uma nova instância de EmailCode com os valores fornecidos e marca o código como não
+   * utilizado.
    *
    * @param email endereço de e-mail do destinatário
    * @param code código gerado para validação
