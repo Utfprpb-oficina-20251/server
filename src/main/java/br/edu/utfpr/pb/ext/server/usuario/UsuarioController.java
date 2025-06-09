@@ -17,14 +17,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -36,7 +36,8 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   private final AuthorityRepository authorityRepository;
 
   /**
-   * Cria uma instância do controlador de usuários, inicializando os serviços necessários para operações CRUD, mapeamento de entidades, geração de tokens JWT e gerenciamento de autoridades.
+   * Cria uma instância do controlador de usuários, inicializando os serviços necessários para
+   * operações CRUD, mapeamento de entidades, geração de tokens JWT e gerenciamento de autoridades.
    *
    * @param usuarioService serviço responsável pelas operações de usuário
    * @param modelMapper instância para mapeamento entre entidades e DTOs
@@ -66,7 +67,8 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Fornece a instância de ModelMapper utilizada para conversão entre entidades e DTOs neste controlador.
+   * Fornece a instância de ModelMapper utilizada para conversão entre entidades e DTOs neste
+   * controlador.
    *
    * @return a instância de ModelMapper usada para mapeamento de objetos
    */
@@ -76,12 +78,14 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Cria um novo usuário com perfil de servidor, atribui a autoridade "ROLE_SERVIDOR" e retorna um token JWT com data de expiração.
+   * Cria um novo usuário com perfil de servidor, atribui a autoridade "ROLE_SERVIDOR" e retorna um
+   * token JWT com data de expiração.
    *
-   * Retorna HTTP 400 se a autoridade "ROLE_SERVIDOR" não for encontrada.
+   * <p>Retorna HTTP 400 se a autoridade "ROLE_SERVIDOR" não for encontrada.
    *
    * @param usuarioServidorRequestDTO dados para criação do usuário com perfil de servidor
-   * @return resposta HTTP 200 com token JWT e data de expiração em caso de sucesso, ou HTTP 400 se a autoridade estiver ausente
+   * @return resposta HTTP 200 com token JWT e data de expiração em caso de sucesso, ou HTTP 400 se
+   *     a autoridade estiver ausente
    */
   @Operation(
       summary = "Create a new servidor user",
@@ -145,14 +149,17 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Retorna uma resposta HTTP contendo um token JWT e o tempo de expiração após salvar o usuário com a autoridade informada.
+   * Retorna uma resposta HTTP contendo um token JWT e o tempo de expiração após salvar o usuário
+   * com a autoridade informada.
    *
-   * Retorna HTTP 400 se a autoridade fornecida for nula; caso contrário, salva o usuário com a autoridade, gera o token e retorna HTTP 200 com o DTO de login.
+   * <p>Retorna HTTP 400 se a autoridade fornecida for nula; caso contrário, salva o usuário com a
+   * autoridade, gera o token e retorna HTTP 200 com o DTO de login.
    *
    * @param usuario usuário a ser salvo com a autoridade
    * @param authorities conjunto de autoridades a serem atribuídas ao usuário
    * @param authority autoridade específica a ser adicionada
-   * @return resposta HTTP 200 com DTO contendo token e expiração, ou HTTP 400 se a autoridade for nula
+   * @return resposta HTTP 200 com DTO contendo token e expiração, ou HTTP 400 se a autoridade for
+   *     nula
    */
   @NotNull private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(
       Usuario usuario, Set<Authority> authorities, Authority authority) {
@@ -165,5 +172,41 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     String token = jwtService.generateToken(salvo);
     long expiration = jwtService.getExpirationTime();
     return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
+  }
+
+
+  /**
+   * Retorna uma lista de todos os usuários servidores ativos no sistema.
+   *
+   * <p>Este endpoint consulta o serviço de usuários para obter uma lista de todos os usuários
+   * que possuem o perfil "ROLE_SERVIDOR" e estão marcados como ativos. A lista de entidades
+   * {@link Usuario} é então convertida para uma lista de {@link UsuarioServidorResponseDTO}
+   * antes de ser retornada no corpo da resposta HTTP.
+   *
+   * @return ResponseEntity contendo uma lista de {@link UsuarioServidorResponseDTO} representando
+   *     os servidores ativos e status HTTP 200 OK. A lista pode estar vazia se nenhum servidor
+   *     ativo for encontrado.
+   */
+  @Operation(
+          summary = "List all active servidor users",
+          description = "Returns a list of all active users with the ROLE_SERVIDOR.")
+  @ApiResponses(
+          value = {
+                  @ApiResponse(
+                          responseCode = "200",
+                          description = "Successfully retrieved list",
+                          content =
+                          @Content(
+                                  mediaType = "application/json",
+                                  array = @io.swagger.v3.oas.annotations.media.ArraySchema(schema = @Schema(implementation = UsuarioServidorResponseDTO.class))))
+          })
+  @GetMapping("/servidores-ativos")
+  public ResponseEntity<List<UsuarioServidorResponseDTO>> getServidoresAtivos() {
+    List<Usuario> servidoresAtivos = ((IUsuarioService) getService()).findServidoresAtivos();
+    List<UsuarioServidorResponseDTO> responseDTOs =
+            servidoresAtivos.stream()
+                    .map(usuario -> modelMapper.map(usuario, UsuarioServidorResponseDTO.class))
+                    .collect(Collectors.toList());
+    return ResponseEntity.ok(responseDTOs);
   }
 }

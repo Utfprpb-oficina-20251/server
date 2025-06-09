@@ -1,5 +1,7 @@
 package br.edu.utfpr.pb.ext.server.sugestaoprojeto.service;
 
+import br.edu.utfpr.pb.ext.server.curso.Curso;
+import br.edu.utfpr.pb.ext.server.curso.CursoRepository;
 import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.*;
 import br.edu.utfpr.pb.ext.server.usuario.*;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +21,7 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   private final SugestaoDeProjetoRepository repository;
   private final UsuarioRepository usuarioRepository;
   private final IUsuarioService usuarioService;
+  private final CursoRepository cursoRepository;
 
   /**
    * Fornece o repositório específico para operações CRUD da entidade SugestaoDeProjeto.
@@ -30,9 +34,11 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   }
 
   /**
-   * Prepara a entidade SugestaoDeProjeto para persistência, definindo o usuário logado como aluno, status como AGUARDANDO e validando o professor, se informado.
+   * Prepara a entidade SugestaoDeProjeto para persistência, definindo o usuário logado como aluno,
+   * status como AGUARDANDO e validando o professor, se informado.
    *
-   * Caso um professor seja especificado, valida sua existência e papel; lança EntityNotFoundException se não encontrado.
+   * <p>Caso um professor seja especificado, valida sua existência e papel; lança
+   * EntityNotFoundException se não encontrado.
    *
    * @param entity sugestão de projeto a ser preparada para salvamento
    * @return a entidade SugestaoDeProjeto pronta para persistência
@@ -54,7 +60,27 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
       usuarioService.validarProfessor(professor);
       entity.setProfessor(professor);
     }
-    return super.preSave(entity);
+
+    if (entity.getCurso() != null && entity.getCurso().getId() != null) {
+      Long cursoId = entity.getCurso().getId();
+      Curso cursoGerenciado =
+              cursoRepository
+                      .findById(cursoId)
+                      .orElseThrow(() -> new EntityNotFoundException("Curso não encontrado com ID: " + cursoId));
+      entity.setCurso(cursoGerenciado); // Define a entidade Curso GERENCIADA
+    }
+
+    return entity;
+  }
+
+  @Override
+  @Transactional // ESSENCIAL para operações de escrita no banco!
+  public SugestaoDeProjeto save(SugestaoDeProjeto entity) {
+    // A chamada super.save(entity) irá executar:
+    // 1. this.preSave(entity) (o método preSave desta classe SugestaoDeProjetoServiceImpl)
+    // 2. getRepository().save(entity)
+    // 3. this.postsave(entity) (que é um no-op no CrudServiceImpl por padrão)
+    return super.save(entity);
   }
 
   /**
