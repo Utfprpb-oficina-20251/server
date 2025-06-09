@@ -30,9 +30,10 @@ public class JwtService {
   Logger logger = LoggerFactory.getLogger(JwtService.class.getName());
 
   /**
-   * Valida se a chave secreta decodificada possui pelo menos 64 bytes, requisito para uso seguro do algoritmo HS512.
+   * Valida se a chave secreta decodificada possui pelo menos 64 bytes, requisito para uso seguro do
+   * algoritmo HS512.
    *
-   * Lança uma {@link IllegalStateException} se a chave for inválida.
+   * <p>Lança uma {@link IllegalStateException} se a chave for inválida.
    */
   @PostConstruct
   private void validateSecretKey() {
@@ -47,7 +48,8 @@ public class JwtService {
    * Extrai o nome de usuário (subject) de um token JWT.
    *
    * @param token token JWT do qual o nome de usuário será extraído
-   * @return o nome de usuário presente no subject do token, ou {@code null} se não for possível extrair
+   * @return o nome de usuário presente no subject do token, ou {@code null} se não for possível
+   *     extrair
    */
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -59,7 +61,8 @@ public class JwtService {
    * @param <T> tipo do valor a ser extraído dos claims
    * @param token token JWT do qual extrair as informações
    * @param claimsResolver função que recebe os claims e retorna o valor desejado
-   * @return o valor extraído dos claims, ou {@code null} se o token for inválido ou os claims não puderem ser obtidos
+   * @return o valor extraído dos claims, ou {@code null} se o token for inválido ou os claims não
+   *     puderem ser obtidos
    */
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
@@ -91,7 +94,8 @@ public class JwtService {
   }
 
   /**
-   * Gera um token JWT assinado contendo as claims fornecidas, o usuário especificado e o tempo de expiração definido.
+   * Gera um token JWT assinado contendo as claims fornecidas, o usuário especificado e o tempo de
+   * expiração definido.
    *
    * @param extraClaims mapa de claims adicionais a serem incluídas no token
    * @param userDetails detalhes do usuário que será definido como subject do token
@@ -113,13 +117,16 @@ public class JwtService {
   }
 
   /**
-   * Verifica se o token JWT pertence ao usuário especificado e se ainda está dentro do prazo de validade.
+   * Verifica se o token JWT pertence ao usuário especificado e se ainda está dentro do prazo de
+   * validade.
    *
-   * O token é considerado válido se o nome de usuário extraído corresponder ao do usuário fornecido e se não estiver expirado.
+   * <p>O token é considerado válido se o nome de usuário extraído corresponder ao do usuário
+   * fornecido e se não estiver expirado.
    *
    * @param token token JWT a ser verificado
    * @param userDetails detalhes do usuário esperado
-   * @return {@code true} se o token for válido e não expirado para o usuário; caso contrário, {@code false}
+   * @return {@code true} se o token for válido e não expirado para o usuário; caso contrário,
+   *     {@code false}
    */
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
@@ -131,7 +138,8 @@ public class JwtService {
   /**
    * Verifica se o token JWT está expirado em relação à data e hora atual.
    *
-   * Retorna {@code true} se o token estiver expirado ou se a data de expiração não puder ser extraída; caso contrário, retorna {@code false}.
+   * <p>Retorna {@code true} se o token estiver expirado ou se a data de expiração não puder ser
+   * extraída; caso contrário, retorna {@code false}.
    *
    * @param token token JWT a ser verificado
    * @return {@code true} se o token estiver expirado ou inválido, {@code false} caso contrário
@@ -155,7 +163,8 @@ public class JwtService {
    * Extrai todos os claims de um token JWT após validar sua assinatura.
    *
    * @param token o token JWT a ser analisado
-   * @return os claims extraídos do token; retorna um objeto vazio se o token for inválido ou ocorrer erro na extração
+   * @return os claims extraídos do token; retorna um objeto vazio se o token for inválido ou
+   *     ocorrer erro na extração
    */
   private Claims extractAllClaims(String token) {
     try {
@@ -169,7 +178,8 @@ public class JwtService {
   }
 
   /**
-   * Decodifica a chave secreta em base64 e retorna uma instância de {@link SecretKey} para assinatura HMAC SHA.
+   * Decodifica a chave secreta em base64 e retorna uma instância de {@link SecretKey} para
+   * assinatura HMAC SHA.
    *
    * @return a chave secreta derivada da configuração, utilizada para assinar e validar tokens JWT
    */

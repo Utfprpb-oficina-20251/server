@@ -26,7 +26,8 @@ public class EmailServiceImpl {
   private final SendGrid sendGrid;
 
   /**
-   * Cria uma instância do serviço de e-mail com o repositório de códigos e o cliente SendGrid fornecidos.
+   * Cria uma instância do serviço de e-mail com o repositório de códigos e o cliente SendGrid
+   * fornecidos.
    */
   public EmailServiceImpl(EmailCodeRepository repository, SendGrid sendGrid) {
     this.repository = repository;
@@ -34,14 +35,17 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Gera e envia um código de verificação para o e-mail informado, registrando o código no banco de dados.
+   * Gera e envia um código de verificação para o e-mail informado, registrando o código no banco de
+   * dados.
    *
-   * Valida o tipo e o formato do e-mail, verifica o limite diário de envios, gera um código aleatório, envia o e-mail de verificação e salva o código caso o envio seja aceito.
+   * <p>Valida o tipo e o formato do e-mail, verifica o limite diário de envios, gera um código
+   * aleatório, envia o e-mail de verificação e salva o código caso o envio seja aceito.
    *
    * @param email endereço de e-mail do destinatário
    * @param type tipo do código de verificação (ex: "cadastro", "recuperacao")
    * @return resposta da API do SendGrid referente ao envio do e-mail
-   * @throws IllegalArgumentException se o tipo for nulo, vazio, se o e-mail for inválido ou se o limite diário de envios for excedido
+   * @throws IllegalArgumentException se o tipo for nulo, vazio, se o e-mail for inválido ou se o
+   *     limite diário de envios for excedido
    * @throws IOException se o envio do e-mail falhar
    */
   public Response generateAndSendCode(String email, String type) throws IOException {
@@ -70,7 +74,6 @@ public class EmailServiceImpl {
    * @param email endereço de e-mail a ser validado
    * @throws IllegalArgumentException se o e-mail for nulo ou não corresponder ao padrão esperado
    */
-
   private void validarEmail(String email) {
     if (email == null || !EMAIL_REGEX.matcher(email).matches()) {
       throw new IllegalArgumentException("Endereço de e-mail inválido.");
@@ -78,9 +81,11 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Verifica se o limite diário de envio de códigos para o e-mail e tipo especificados foi atingido.
+   * Verifica se o limite diário de envio de códigos para o e-mail e tipo especificados foi
+   * atingido.
    *
-   * Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior ao permitido.
+   * <p>Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior
+   * ao permitido.
    *
    * @param email endereço de e-mail a ser verificado
    * @param type tipo de código relacionado ao envio
@@ -97,16 +102,17 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Gera um código aleatório de 6 caracteres em letras maiúsculas.
+   * Gera um código aleatório de 4 caracteres alfanuméricos em maiúsculas.
    *
-   * @return código aleatório de 6 caracteres
+   * @return código aleatório de 4 caracteres alfanuméricos
    */
   private String gerarCodigoAleatorio() {
-    return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+    return UUID.randomUUID().toString().substring(0, 4).toUpperCase();
   }
 
   /**
-   * Salva um novo código de verificação de e-mail no banco de dados, incluindo informações de validade e status de uso.
+   * Salva um novo código de verificação de e-mail no banco de dados, incluindo informações de
+   * validade e status de uso.
    *
    * @param email endereço de e-mail associado ao código
    * @param code código de verificação gerado
@@ -126,7 +132,7 @@ public class EmailServiceImpl {
   /**
    * Envia um e-mail de verificação contendo um código para o endereço especificado.
    *
-   * O e-mail inclui o código de verificação e informa o tempo de validade em minutos.
+   * <p>O e-mail inclui o código de verificação e informa o tempo de validade em minutos.
    *
    * @param email endereço de e-mail do destinatário
    * @param code código de verificação a ser enviado
@@ -143,9 +149,12 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Envia um e-mail de notificação com conteúdo HTML para o destinatário informado, de acordo com o tipo de notificação e dados do projeto.
+   * Envia um e-mail de notificação com conteúdo HTML para o destinatário informado, de acordo com o
+   * tipo de notificação e dados do projeto.
    *
-   * Dependendo do tipo de notificação, o assunto e a mensagem do e-mail são personalizados para informar sobre inscrição de aluno, notificação ao professor ou atualização de status de sugestão de projeto.
+   * <p>Dependendo do tipo de notificação, o assunto e a mensagem do e-mail são personalizados para
+   * informar sobre inscrição de aluno, notificação ao professor ou atualização de status de
+   * sugestão de projeto.
    *
    * @param email endereço de e-mail do destinatário
    * @param tipo tipo de notificação a ser enviada
