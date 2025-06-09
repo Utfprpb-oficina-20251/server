@@ -47,7 +47,7 @@ class AuthControllerTest {
         .perform(
             post("/api/auth/cadastro")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(solicitacaoDTO)))
+                .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.email").value("testuser@alunos.utfpr.edu.br"));
 
@@ -56,7 +56,7 @@ class AuthControllerTest {
         .perform(
             post("/api/auth/solicitar-codigo")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(cadastroDTO)))
+                .content(objectMapper.writeValueAsString(solicitacaoDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.mensagem").exists());
   }
