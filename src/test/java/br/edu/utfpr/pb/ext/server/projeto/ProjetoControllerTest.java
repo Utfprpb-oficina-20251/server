@@ -8,6 +8,8 @@ import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import java.util.List;
 import java.util.Optional;
+
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,5 +58,50 @@ class ProjetoControllerTest {
     verify(usuarioRepository).findByEmail("batata@utfpr.edu.br");
     verify(projetoService).save(any(Projeto.class));
     verify(modelMapper).map(any(Projeto.class), eq(ProjetoDTO.class));
+  }
+  @Test
+  void update_quandoProjetoExiste_retornaOkEProjetoDTO() {
+    // Arrange (Organização)
+    Long projetoId = 1L;
+
+    ProjetoDTO dtoRequest = new ProjetoDTO();
+    dtoRequest.setTitulo("Título Atualizado");
+
+    ProjetoDTO dtoResponse = new ProjetoDTO();
+    dtoResponse.setId(projetoId);
+    dtoResponse.setTitulo("Título Atualizado");
+
+    when(projetoService.atualizarProjeto(eq(projetoId), any(ProjetoDTO.class))).thenReturn(dtoResponse);
+
+    // Act (Ação)
+    ResponseEntity<ProjetoDTO> response = projetoController.update(projetoId, dtoRequest);
+
+    // Assert (Verificação)
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(dtoResponse, response.getBody());
+    verify(projetoService).atualizarProjeto(eq(projetoId), any(ProjetoDTO.class));
+  }
+
+  @Test
+  void update_quandoProjetoNaoExiste_deveLancarEntityNotFoundException() {
+    // Arrange (Organização)
+    Long projetoIdInexistente = 99L;
+    String mensagemErro = "Projeto com ID " + projetoIdInexistente + " não encontrado.";
+
+    ProjetoDTO dtoRequest = new ProjetoDTO();
+    dtoRequest.setTitulo("Qualquer Título");
+
+    when(projetoService.atualizarProjeto(eq(projetoIdInexistente), any(ProjetoDTO.class)))
+            .thenThrow(new EntityNotFoundException(mensagemErro));
+
+    // Act & Assert (Ação e Verificação)
+    EntityNotFoundException exception =
+            assertThrows(
+                    EntityNotFoundException.class,
+                    () -> projetoController.update(projetoIdInexistente, dtoRequest));
+
+    assertEquals(mensagemErro, exception.getMessage());
+    verify(projetoService).atualizarProjeto(eq(projetoIdInexistente), any(ProjetoDTO.class));
   }
 }

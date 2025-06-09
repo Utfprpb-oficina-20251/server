@@ -10,6 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.access.AccessDeniedException;
+
 
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
@@ -38,6 +40,18 @@ public class ExceptionHandlerAdvice {
     return ApiError.builder()
             .status(404)
             .message(exception.getMessage())
+            .url(request.getServletPath())
+            .build();
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN) // Define o status da resposta para 403 Forbidden
+  public ApiError handleAccessDeniedException(
+          AccessDeniedException exception, HttpServletRequest request) {
+
+    return ApiError.builder()
+            .status(403)
+            .message("Acesso negado. Você não tem permissão para executar esta ação.")
             .url(request.getServletPath())
             .build();
   }
