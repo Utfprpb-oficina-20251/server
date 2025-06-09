@@ -126,7 +126,8 @@ public class AuthService {
   /**
    * Autentica um usuário utilizando um código OTP enviado por email.
    *
-   * Recebe o email e o código OTP, realiza a autenticação e define o contexto de segurança ao autenticar com sucesso.
+   * <p>Autentica o usuário utilizando o email e o código OTP fornecidos, definindo o contexto de
+   * segurança ao autenticar com sucesso.
    *
    * @param dto Objeto com o email do usuário e o código OTP recebido.
    * @return O usuário autenticado correspondente ao email informado.

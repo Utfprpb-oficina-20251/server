@@ -28,12 +28,13 @@ public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
   Optional<EmailCode> findByCodeAndExpirationAfterAndUsedFalse(String code, LocalDateTime now);
 
   /**
- * Conta quantos códigos de e-mail existem para um endereço e tipo específicos, gerados após a data e hora informadas.
- *
- * @param email endereço de e-mail a ser considerado
- * @param type tipo do código de e-mail
- * @param generatedAt data e hora a partir da qual os códigos devem ter sido gerados (exclusivo)
- * @return quantidade de códigos de e-mail que atendem aos critérios especificados
- */
+   * Conta quantos códigos de e-mail existem para um endereço e tipo específicos, gerados após a
+   * data e hora informadas.
+   *
+   * @param email endereço de e-mail a ser considerado
+   * @param type tipo do código de e-mail
+   * @param generatedAt data e hora a partir da qual os códigos devem ter sido gerados (exclusivo)
+   * @return quantidade de códigos de e-mail que atendem aos critérios especificados
+   */
   Long countByEmailAndTypeAndGeneratedAtAfter(String email, String type, LocalDateTime generatedAt);
 }

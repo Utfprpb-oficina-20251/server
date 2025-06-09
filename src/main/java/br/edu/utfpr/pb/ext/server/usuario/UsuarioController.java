@@ -150,14 +150,17 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Salva o usuário com a autoridade fornecida e retorna uma resposta HTTP contendo o token JWT, tempo de expiração e informações do usuário.
+   * Retorna uma resposta HTTP contendo um token JWT e o tempo de expiração após salvar o usuário
+   * com a autoridade informada.
    *
-   * Retorna HTTP 400 se a autoridade for nula; caso contrário, adiciona a autoridade ao usuário, salva-o, gera o token e retorna HTTP 200 com os dados de autenticação e identificação do usuário.
+   * <p>Retorna HTTP 400 se a autoridade for nula; caso contrário, adiciona a
+   * autoridade ao usuário, salva-o, gera o token e retorna HTTP 200 com os dados de autenticação e identificação do usuário.
    *
    * @param usuario entidade do usuário a ser salva
    * @param authorities conjunto de autoridades a serem atribuídas ao usuário
    * @param authority autoridade específica a ser adicionada ao usuário
-   * @return resposta HTTP 200 com DTO contendo token JWT, expiração e dados do usuário, ou HTTP 400 se a autoridade for nula
+   * @return resposta HTTP 200 com DTO contendo token JWT, expiração e dados do usuário, ou HTTP 400 se a autoridade for
+   *     nula
    */
   @NotNull private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(
       Usuario usuario, Set<Authority> authorities, Authority authority) {
