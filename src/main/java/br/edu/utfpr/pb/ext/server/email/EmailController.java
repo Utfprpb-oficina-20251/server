@@ -25,7 +25,8 @@ public class EmailController {
   private final EmailCodeValidationService validationService;
 
   /**
-   * Cria uma instância do controlador de e-mail com os serviços necessários para envio e validação de códigos.
+   * Cria uma instância do controlador de e-mail com os serviços necessários para envio e validação
+   * de códigos.
    *
    * @param emailService serviço responsável por gerar e enviar códigos de verificação por e-mail
    * @param validationService serviço responsável por validar códigos de verificação recebidos
@@ -88,9 +89,10 @@ public class EmailController {
   }
 
   /**
-   * Manipula exceções do tipo IllegalArgumentException lançadas durante o processamento das requisições.
+   * Manipula exceções do tipo IllegalArgumentException lançadas durante o processamento das
+   * requisições.
    *
-   * Retorna uma resposta HTTP 400 (Bad Request) com uma mensagem de erro em formato JSON.
+   * <p>Retorna uma resposta HTTP 400 (Bad Request) com uma mensagem de erro em formato JSON.
    *
    * @param e exceção IllegalArgumentException capturada
    * @return resposta HTTP 400 contendo a mensagem de erro
@@ -116,12 +118,13 @@ public class EmailController {
   // ======================
   // Métodos auxiliares
   /**
-   * Valida se o endereço de e-mail fornecido não é nulo, não está em branco e segue o formato padrão de e-mail.
+   * Valida se o endereço de e-mail fornecido não é nulo, não está em branco e segue o formato
+   * padrão de e-mail.
    *
    * @param email endereço de e-mail a ser validado
-   * @throws IllegalArgumentException se o e-mail for nulo, estiver em branco ou não corresponder ao formato válido
+   * @throws IllegalArgumentException se o e-mail for nulo, estiver em branco ou não corresponder ao
+   *     formato válido
    */
-
   private void validarEmail(String email) {
     if (email == null || email.isBlank() || !email.matches("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
       throw new IllegalArgumentException("Email inválido");

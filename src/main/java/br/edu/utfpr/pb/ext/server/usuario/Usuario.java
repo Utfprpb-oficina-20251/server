@@ -9,11 +9,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import java.util.*;
+import java.util.stream.Collectors;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.br.CPF;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -71,15 +71,24 @@ public class Usuario extends BaseEntity implements UserDetails {
   private Set<Authority> authorities;
 
   /**
-   * Retorna as permissões associadas ao usuário.
+   * Retorna uma cópia das autoridades (permissões) atribuídas ao usuário.
    *
    * @return um novo conjunto contendo as autoridades do usuário
    */
   @Override
   @Transient
   @JsonIgnore
-  public Collection<? extends GrantedAuthority> getAuthorities() {
+  public Collection<Authority> getAuthorities() {
     return new HashSet<>(authorities);
+  }
+
+  /**
+   * Retorna um conjunto com os nomes das autoridades (permissões) atribuídas ao usuário.
+   *
+   * @return um conjunto de strings representando os nomes das autoridades do usuário
+   */
+  public Set<String> getAuthoritiesStrings() {
+    return authorities.stream().map(Authority::getAuthority).collect(Collectors.toSet());
   }
 
   /**

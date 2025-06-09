@@ -27,7 +27,6 @@ public class EmailCodeDto {
    *
    * @return o ID do código de e-mail
    */
-
   public Long getId() {
     return id;
   }
