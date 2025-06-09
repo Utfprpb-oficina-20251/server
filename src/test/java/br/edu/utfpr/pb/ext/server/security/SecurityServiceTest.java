@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import br.edu.utfpr.pb.ext.server.projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.projeto.ProjetoRepository;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -130,4 +132,31 @@ class SecurityServiceTest {
         // Verifica se a chamada  lança a exceção esperada
         assertThrows(RuntimeException.class, () -> securityService.podeEditarProjeto(99L));
     }
+  /**
+   * Testa o cenário de borda onde o projeto existe, mas sua equipe executora está vazia.
+   * O resultado esperado é 'false', pois o usuário não pode pertencer a uma equipe vazia.
+   */
+  @Test
+  void podeEditarProjeto_quandoEquipeExecutoraEstaVazia_deveRetornarFalse() {
+    // Arrange
+    // 1. Cria um usuário e um projeto com equipe vazia
+    Usuario usuarioLogado = new Usuario();
+    usuarioLogado.setId(10L);
+
+    Projeto projetoComEquipeVazia = new Projeto();
+    projetoComEquipeVazia.setId(1L);
+    projetoComEquipeVazia.setEquipeExecutora(Collections.emptyList()); // Equipe vazia
+
+    // 2. Simula o usuário logado
+    when(authentication.getPrincipal()).thenReturn(usuarioLogado);
+
+    // 3. Simula a busca do projeto
+    when(projetoRepository.findById(1L)).thenReturn(Optional.of(projetoComEquipeVazia));
+
+    // Act
+    boolean temPermissao = securityService.podeEditarProjeto(1L);
+
+    // Assert
+    assertFalse(temPermissao);
+  }
 }
