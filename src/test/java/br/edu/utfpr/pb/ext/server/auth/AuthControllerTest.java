@@ -164,12 +164,31 @@ class AuthControllerTest {
   @DisplayName("Solicitar código OTP para um e-mail que não existe deve retornar NotFound")
   void solicitarCodigoOtp_whenEmailNaoExiste_DeveRetornar404() throws Exception {
     SolicitacaoCodigoOTPRequestDTO solicitacaoDTO =
-        SolicitacaoCodigoOTPRequestDTO.builder().email("testuser@dominio.com").build();
+        SolicitacaoCodigoOTPRequestDTO.builder().email("testuser@utfpr.edu.br").build();
     mockMvc
         .perform(
             post("/api/auth/solicitar-codigo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(solicitacaoDTO)))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName(
+      "Solicitar código OTP para um e-mail que não pertence ao domínio UTFPR deve retornar BadRequest")
+  void solicitarCodigoOtp_whenEmailNaoPertenceAoDominioUtfpr_DeveRetornarErroDeValidacao()
+      throws Exception {
+    SolicitacaoCodigoOTPRequestDTO solicitacaoDTO =
+        SolicitacaoCodigoOTPRequestDTO.builder().email("testuser@dominio.com").build();
+    mockMvc
+        .perform(
+            post("/api/auth/solicitar-codigo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(solicitacaoDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Validation Error"))
+        .andExpect(
+            jsonPath("$.validationErrors.email")
+                .value("E-mail deve ser @utfpr.edu.br ou @alunos.utfpr.edu.br"));
   }
 }
