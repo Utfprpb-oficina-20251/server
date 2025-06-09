@@ -145,7 +145,7 @@ public class AuthService {
           .findByEmail(dto.getEmail())
           .orElseThrow(() -> new UsernameNotFoundException(EMAIL_NAO_CADASTRADO));
     } catch (BadCredentialsException ex) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Código inválido ou expirado");
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Código inválido ou expirado");
     }
   }
 }
