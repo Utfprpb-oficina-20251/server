@@ -3,6 +3,8 @@ package br.edu.utfpr.pb.ext.server.security;
 import br.edu.utfpr.pb.ext.server.projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.projeto.ProjetoRepository;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
