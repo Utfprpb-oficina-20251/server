@@ -20,6 +20,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -128,6 +129,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     return ResponseEntity.status(HttpStatus.CREATED).body(projetoDTO);
   }
 
+
   @PatchMapping("/{id}/cancelar")
   public ResponseEntity<Void> cancelar(
       @PathVariable Long id,
@@ -136,4 +138,22 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     projetoService.cancelar(id, dto, usuario.getId());
     return ResponseEntity.noContent().build();
   }
+
+  @PutMapping("/{id}")
+  @PreAuthorize("@securityService.podeEditarProjeto(#id)")
+  @Operation(summary = "Atualiza um projeto existente")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Projeto atualizado com sucesso"),
+          @ApiResponse(responseCode = "400", description = "Dados inválidos ou violação de regra de negócio"),
+          @ApiResponse(responseCode = "403", description = "Acesso negado. Usuário não autorizado a editar este projeto"),
+          @ApiResponse(responseCode = "404", description = "Projeto não encontrado")
+  })
+  public ResponseEntity<ProjetoDTO> update(
+          @PathVariable Long id,
+          @Valid @RequestBody ProjetoDTO dto) {
+    ProjetoDTO projetoAtualizado = projetoService.atualizarProjeto(id, dto);
+    return ResponseEntity.ok(projetoAtualizado);
+  }
+
+
 }

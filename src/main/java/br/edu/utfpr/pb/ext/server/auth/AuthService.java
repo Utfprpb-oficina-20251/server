@@ -40,7 +40,9 @@ public class AuthService {
   /**
    * Cadastra um novo usuário, atribuindo automaticamente a autoridade conforme o domínio do e-mail.
    *
-   * Define o papel do usuário como aluno ou servidor de acordo com o domínio do e-mail informado. Lança exceção com status 409 se o e-mail já estiver cadastrado e com status 400 se a autoridade correspondente não for encontrada.
+   * <p>Define o papel do usuário como aluno ou servidor de acordo com o domínio do e-mail
+   * informado. Lança exceção com status 409 se o e-mail já estiver cadastrado e com status 400 se a
+   * autoridade correspondente não for encontrada.
    *
    * @param dto objeto com nome, e-mail e registro do usuário a ser cadastrado
    * @return o usuário cadastrado e persistido no banco de dados
@@ -69,7 +71,8 @@ public class AuthService {
   /**
    * Retorna o nome da role do usuário com base no domínio do e-mail informado.
    *
-   * Retorna "ROLE_SERVIDOR" para e-mails terminados em "@utfpr.edu.br" e "ROLE_ALUNO" para "@alunos.utfpr.edu.br".
+   * <p>Retorna "ROLE_SERVIDOR" para e-mails terminados em "@utfpr.edu.br" e "ROLE_ALUNO" para
+   * "@alunos.utfpr.edu.br".
    *
    * @param dto objeto contendo o e-mail do usuário
    * @return o nome da role correspondente ao domínio do e-mail
@@ -97,7 +100,8 @@ public class AuthService {
    * Solicita o envio de um código OTP para o email informado, caso o usuário esteja cadastrado.
    *
    * @param email endereço de email do usuário que receberá o código OTP
-   * @throws ResponseStatusException com status 404 se o email não estiver cadastrado, ou 500 em caso de falha no envio do código
+   * @throws ResponseStatusException com status 404 se o email não estiver cadastrado, ou 500 em
+   *     caso de falha no envio do código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public void solicitarCodigoOtp(String email) {
@@ -120,13 +124,14 @@ public class AuthService {
   }
 
   /**
-   * Realiza a autenticação de um usuário por meio de código OTP enviado por email.
+   * Autentica um usuário utilizando um código OTP enviado por email.
    *
-   * Autentica o usuário utilizando o email e o código OTP fornecidos, definindo o contexto de segurança ao autenticar com sucesso.
+   * <p>Autentica o usuário utilizando o email e o código OTP fornecidos, definindo o contexto de
+   * segurança ao autenticar com sucesso.
    *
-   * @param dto Objeto contendo o email do usuário e o código OTP recebido.
+   * @param dto Objeto com o email do usuário e o código OTP recebido.
    * @return O usuário autenticado correspondente ao email informado.
-   * @throws ResponseStatusException Se o código OTP for inválido ou expirado (HTTP 401).
+   * @throws ResponseStatusException Se o código OTP for inválido ou expirado (HTTP 422).
    * @throws UsernameNotFoundException Se o email informado não estiver cadastrado.
    */
   @Operation(summary = "Autentica um usuário usando o código OTP")
@@ -140,7 +145,8 @@ public class AuthService {
           .findByEmail(dto.getEmail())
           .orElseThrow(() -> new UsernameNotFoundException(EMAIL_NAO_CADASTRADO));
     } catch (BadCredentialsException ex) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Código inválido ou expirado");
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY, "Código inválido ou expirado");
     }
   }
 }
