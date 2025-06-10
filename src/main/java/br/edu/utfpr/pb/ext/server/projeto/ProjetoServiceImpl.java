@@ -52,41 +52,42 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
    */
   @Override
   public void cancelar(Long id, CancelamentoProjetoDTO dto, Long usuarioId) {
-    if (dto.getJustificativa() == null || dto.getJustificativa().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A justificativa é obrigatória.");
-    }
-    Projeto projeto =
-        projetoRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
-    // Verifica se o projeto já está cancelado
+      if (dto.getJustificativa() == null || dto.getJustificativa().trim().isEmpty()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A justificativa é obrigatória.");
+      }
+      Projeto projeto =
+              projetoRepository
+                      .findById(id)
+                      .orElseThrow(
+                              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
+      // Verifica se o projeto já está cancelado
       if (projeto.getStatus() == StatusProjeto.CANCELADO) {
-         throw new ResponseStatusException(
-           HttpStatus.BAD_REQUEST, "Projeto já está cancelado");
+          throw new ResponseStatusException(
+                  HttpStatus.BAD_REQUEST, "Projeto já está cancelado");
       }
 
-    // Verifica se existe equipe executora
-       if (projeto.getEquipeExecutora() == null || projeto.getEquipeExecutora().isEmpty()) {
+      // Verifica se existe equipe executora
+      if (projeto.getEquipeExecutora() == null || projeto.getEquipeExecutora().isEmpty()) {
           throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST, "Projeto não possui equipe executora definida");
-       }
-    // Aqui assumimos o primeiro da equipe como responsável principal
-    boolean isResponsavelPrincipal =
-        projeto.getEquipeExecutora().stream()
-            .findFirst()
-            .map(u -> u.getId().equals(usuarioId))
-            .orElse(false);
+                  HttpStatus.BAD_REQUEST, "Projeto não possui equipe executora definida");
+      }
+      // Aqui assumimos o primeiro da equipe como responsável principal
+      boolean isResponsavelPrincipal =
+              projeto.getEquipeExecutora().stream()
+                      .findFirst()
+                      .map(u -> u.getId().equals(usuarioId))
+                      .orElse(false);
 
-    if (!isResponsavelPrincipal) {
-      throw new ResponseStatusException(
-          HttpStatus.FORBIDDEN, "Apenas o responsável principal pode cancelar o projeto.");
-    }
+      if (!isResponsavelPrincipal) {
+          throw new ResponseStatusException(
+                  HttpStatus.FORBIDDEN, "Apenas o responsável principal pode cancelar o projeto.");
+      }
 
-    projeto.setStatus(StatusProjeto.CANCELADO);
-    projeto.setJustificativaCancelamento(dto.getJustificativa());
+      projeto.setStatus(StatusProjeto.CANCELADO);
+      projeto.setJustificativaCancelamento(dto.getJustificativa());
 
-    projetoRepository.save(projeto);
+      projetoRepository.save(projeto);
+  }
 
   @Override
   @Transactional
