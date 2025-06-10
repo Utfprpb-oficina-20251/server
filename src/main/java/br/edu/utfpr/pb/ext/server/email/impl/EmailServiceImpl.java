@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 /** Serviço responsável por gerar códigos, enviar e-mails e registrar os dados no banco. */
 @Service
@@ -33,21 +35,27 @@ public class EmailServiceImpl {
   private final EmailCodeRepository repository;
   private final SendGrid sendGrid;
 
+  private final SpringTemplateEngine springTemplateEngine;
+
   /**
    * Cria uma instância do serviço de e-mail com o repositório de códigos e o cliente SendGrid
    * fornecidos.
    */
-  public EmailServiceImpl(EmailCodeRepository repository, SendGrid sendGrid) {
+  public EmailServiceImpl(
+      EmailCodeRepository repository,
+      SendGrid sendGrid,
+      SpringTemplateEngine springTemplateEngine) {
     this.repository = repository;
     this.sendGrid = sendGrid;
+    this.springTemplateEngine = springTemplateEngine;
   }
 
   /**
    * Gera e envia um código de verificação para o e-mail informado e registra o código no banco de
    * dados.
    *
-   * <p>Valida o tipo e o formato do e-mail, verifica os limites diário e de curto prazo de envios, gera um código
-   * aleatório, envia o e-mail de verificação e salva o código gerado.
+   * <p>Valida o tipo e o formato do e-mail, verifica os limites diário e de curto prazo de envios,
+   * gera um código aleatório, envia o e-mail de verificação e salva o código gerado.
    *
    * @param email endereço de e-mail do destinatário
    * @param type tipo do código de verificação (por exemplo, "cadastro" ou "recuperacao")
@@ -83,17 +91,17 @@ public class EmailServiceImpl {
     }
   }
 
-    /**
-     * Verifica se o limite diário de envio de códigos para o e-mail e tipo especificados foi
-     * atingido.
-     *
-     * <p>Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior
-     * ao permitido.
-     *
-     * @param email endereço de e-mail a ser verificado
-     * @param type tipo de código relacionado ao envio
-     * @throws IllegalArgumentException se o limite diário de envio for atingido
-     */
+  /**
+   * Verifica se o limite diário de envio de códigos para o e-mail e tipo especificados foi
+   * atingido.
+   *
+   * <p>Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior
+   * ao permitido.
+   *
+   * @param email endereço de e-mail a ser verificado
+   * @param type tipo de código relacionado ao envio
+   * @throws IllegalArgumentException se o limite diário de envio for atingido
+   */
   private void verificarLimiteEnvio(String email, String type) {
     LocalDateTime limiteDiario = LocalDateTime.now().minusHours(24);
     Long codigos = repository.countByEmailAndTypeAndGeneratedAtAfter(email, type, limiteDiario);
@@ -151,9 +159,16 @@ public class EmailServiceImpl {
   private Response enviarEmailDeVerificacao(String email, String code, String type)
       throws IOException {
     String assunto = "Código de Verificação - " + type;
-    String mensagem =
-        "Seu código é: " + code + "\n\nVálido por " + CODE_EXPIRATION_MINUTES + " minutos.";
-    return sendEmail(email, assunto, mensagem, "text/plain");
+
+    Context context = new Context();
+    context.setVariable("otpCode", code);
+    context.setVariable("expirationMinutes", CODE_EXPIRATION_MINUTES);
+    try {
+      String mensagemHtml = springTemplateEngine.process("otp-template", context);
+      return sendEmail(email, assunto, mensagemHtml, "text/html");
+    } catch (Exception e) {
+      throw new IOException("Erro ao processar o template do e-mail: " + e.getMessage(), e);
+    }
   }
 
   /**

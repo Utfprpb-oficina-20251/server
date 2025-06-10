@@ -71,8 +71,8 @@ public class AuthService {
   /**
    * Retorna o nome da role do usuário com base no domínio do e-mail informado.
    *
-   * <p>Retorna "ROLE_SERVIDOR" para e-mails terminados em "@utfpr.edu.br" e "ROLE_ALUNO" para
-   * "@alunos.utfpr.edu.br".
+   * <p>Retorna "ROLE_SERVIDOR" se o e-mail termina com "@utfpr.edu.br" ou "ROLE_ALUNO" se termina
+   * com "@alunos.utfpr.edu.br". Lança uma exceção se o domínio do e-mail for inválido.
    *
    * @param dto objeto contendo o e-mail do usuário
    * @return o nome da role correspondente ao domínio do e-mail

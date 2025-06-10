@@ -4,5 +4,5 @@ import br.edu.utfpr.pb.ext.server.generics.ICrudService;
 import jakarta.validation.Valid;
 
 public interface IProjetoService extends ICrudService<Projeto, Long> {
-    ProjetoDTO atualizarProjeto(Long id, @Valid ProjetoDTO dto);
+  ProjetoDTO atualizarProjeto(Long id, @Valid ProjetoDTO dto);
 }

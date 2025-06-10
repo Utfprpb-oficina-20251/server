@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 /**
  * Testes unitários para EmailServiceImpl, garantindo que a geração e envio de código funcione
@@ -32,6 +33,7 @@ class EmailServiceImplTest {
       "Limite de solicitações atingido, tente novamente em %d minutos.".formatted(15L);
   @Mock private EmailCodeRepository emailCodeRepository;
   @Mock private SendGrid sendGrid;
+  @Mock private SpringTemplateEngine springTemplateEngine;
   @InjectMocks private EmailServiceImpl emailService;
 
   private String email = "teste@utfpr.edu.br";
@@ -43,6 +45,7 @@ class EmailServiceImplTest {
     when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(0L);
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
+    when(springTemplateEngine.process(anyString(), any())).thenReturn("<html>Email content</html>");
 
     Response response = emailService.generateAndSendCode(email, tipo);
 
@@ -95,17 +98,18 @@ class EmailServiceImplTest {
         .thenReturn(0L);
     IOException ex =
         assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
-    assertEquals("Erro ao tentar enviar e-mail, tente novamente mais tarde", ex.getMessage());
+    assertEquals(
+        "Erro ao processar o template do e-mail: Erro ao tentar enviar e-mail, tente novamente mais tarde",
+        ex.getMessage());
   }
 
   /** Teste para simular falha no envio pelo SendGrid. */
   @Test
   void testGenerateAndSendCode_SendGridFails() throws IOException {
-    Response errorResponse = new Response(400, "", null);
-
     when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(0L);
-    when(sendGrid.api(any())).thenReturn(errorResponse);
+    when(sendGrid.api(any())).thenReturn(new Response(400, "Bad Request", null));
+    when(springTemplateEngine.process(anyString(), any())).thenReturn("<html>Email content</html>");
 
     IOException ex =
         assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
