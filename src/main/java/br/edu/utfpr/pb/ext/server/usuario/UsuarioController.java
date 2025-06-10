@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
+import br.edu.utfpr.pb.ext.server.auth.dto.UsuarioLoginDTO;
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtService;
 import br.edu.utfpr.pb.ext.server.generics.CrudController;
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
@@ -78,14 +79,14 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Cria um novo usuário com perfil de servidor e retorna uma resposta de login contendo um token
-   * JWT e a data de expiração.
+   * Cria um novo usuário com perfil de servidor, atribui a autoridade "ROLE_SERVIDOR" e retorna um
+   * token JWT com data de expiração.
    *
    * <p>Retorna HTTP 400 se a autoridade "ROLE_SERVIDOR" não for encontrada.
    *
-   * @param usuarioServidorRequestDTO dados para criação do usuário servidor
-   * @return resposta HTTP com o token JWT e data de expiração em caso de sucesso, ou HTTP 400 se a
-   *     autoridade estiver ausente
+   * @param usuarioServidorRequestDTO dados para criação do usuário com perfil de servidor
+   * @return resposta HTTP 200 com token JWT e data de expiração em caso de sucesso, ou HTTP 400 se
+   *     a autoridade estiver ausente
    */
   @Operation(
       summary = "Create a new servidor user",
@@ -113,13 +114,14 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return getRespostaLoginDTOResponseEntity(usuario, authorities, servidorAuthority);
   }
 
-  /**
-   * Cria um novo usuário com perfil de aluno e retorna uma resposta de login contendo o token JWT e
-   * o tempo de expiração.
+  /****
+   * Cria um novo usuário com perfil de aluno e retorna uma resposta de login com token JWT e tempo de expiração.
+   *
+   * Retorna HTTP 200 com o token de autenticação e tempo de expiração caso a criação seja bem-sucedida.
+   * Retorna HTTP 400 se a autoridade "ROLE_ALUNO" não for encontrada.
    *
    * @param usuarioAlunoRequestDTO dados do usuário aluno a ser criado
-   * @return resposta HTTP 200 com o token de autenticação e tempo de expiração, ou HTTP 400 se a
-   *     autoridade "ROLE_ALUNO" não for encontrada
+   * @return resposta HTTP 200 com token e expiração, ou HTTP 400 se a autoridade não existir
    */
   @Operation(
       summary = "Create a new aluno user",
@@ -148,16 +150,17 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   }
 
   /**
-   * Gera uma resposta HTTP com um token JWT e tempo de expiração após salvar o usuário com a
-   * autoridade especificada.
+   * Retorna uma resposta HTTP contendo um token JWT e o tempo de expiração após salvar o usuário
+   * com a autoridade informada.
    *
-   * <p>Retorna HTTP 400 se a autoridade fornecida for nula.
+   * <p>Retorna HTTP 400 se a autoridade for nula; caso contrário, adiciona a
+   * autoridade ao usuário, salva-o, gera o token e retorna HTTP 200 com os dados de autenticação e identificação do usuário.
    *
-   * @param usuario usuário a ser salvo
-   * @param authorities conjunto de autoridades do usuário
-   * @param authority autoridade a ser atribuída ao usuário
-   * @return resposta HTTP 200 com DTO de login contendo token e expiração, ou HTTP 400 se a
-   *     autoridade for nula
+   * @param usuario entidade do usuário a ser salva
+   * @param authorities conjunto de autoridades a serem atribuídas ao usuário
+   * @param authority autoridade específica a ser adicionada ao usuário
+   * @return resposta HTTP 200 com DTO contendo token JWT, expiração e dados do usuário, ou HTTP 400 se a autoridade for
+   *     nula
    */
   @NotNull private ResponseEntity<RespostaLoginDTO> getRespostaLoginDTOResponseEntity(
       Usuario usuario, Set<Authority> authorities, Authority authority) {
@@ -169,6 +172,10 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     Usuario salvo = usuarioService.save(usuario);
     String token = jwtService.generateToken(salvo);
     long expiration = jwtService.getExpirationTime();
-    return ResponseEntity.ok(new RespostaLoginDTO(token, expiration));
+    return ResponseEntity.ok(
+        new RespostaLoginDTO(
+            token,
+            expiration,
+            new UsuarioLoginDTO(salvo.getEmail(), salvo.getAuthoritiesStrings())));
   }
 }

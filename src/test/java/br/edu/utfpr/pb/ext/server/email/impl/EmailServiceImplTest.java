@@ -9,8 +9,6 @@ import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,19 +25,25 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @ExtendWith(MockitoExtension.class)
 class EmailServiceImplTest {
 
+  public static final long MAX_DAILY_LIMIT_MAIS_UM = 31L;
+  public static final String ERRO_LIMITE_DIARIO_ATINGIDO =
+      "Quantidade de solicitações ultrapassa o limite das últimas 24 horas.";
+  private static final Long MAX_SHORT_PERIOD_MAIS_UM = 6L;
+  private static final String ERRO_LIMITE_CURTO =
+      "Limite de solicitações atingido, tente novamente em %d minutos.".formatted(15L);
   @Mock private EmailCodeRepository emailCodeRepository;
   @Mock private SendGrid sendGrid;
   @Mock private SpringTemplateEngine springTemplateEngine;
   @InjectMocks private EmailServiceImpl emailService;
 
+  private String email = "teste@utfpr.edu.br";
+  private String tipo = "cadastro";
+
   /** Teste para verificar envio com sucesso. */
   @Test
   void testGenerateAndSendCode_Success() throws IOException {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
-
-    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
-        .thenReturn(Collections.emptyList());
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(0L);
     when(sendGrid.api(any())).thenReturn(new Response(202, "", null));
     when(springTemplateEngine.process(anyString(), any())).thenReturn("<html>Email content</html>");
 
@@ -64,54 +68,62 @@ class EmailServiceImplTest {
 
   /** Teste para validar que o limite de envio diário é respeitado. */
   @Test
-  void testGenerateAndSendCode_MaxLimitReached() {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
-
-    EmailCode code1 = new EmailCode();
-    code1.setGeneratedAt(LocalDateTime.now().minusMinutes(1));
-    EmailCode code2 = new EmailCode();
-    code2.setGeneratedAt(LocalDateTime.now().minusHours(1));
-    EmailCode code3 = new EmailCode();
-    code3.setGeneratedAt(LocalDateTime.now().minusHours(2));
-
-    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
-        .thenReturn(List.of(code1, code2, code3));
+  void testGenerateAndSendCode_MaxDailyLimitReached() {
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(MAX_DAILY_LIMIT_MAIS_UM);
 
     IllegalArgumentException ex =
         assertThrows(
             IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
 
-    assertEquals("Limite diário de envio atingido.", ex.getMessage());
+    assertEquals(ERRO_LIMITE_DIARIO_ATINGIDO, ex.getMessage());
+  }
+
+  @Test
+  @DisplayName("Valida que o serviço gera erro ao ultrapassar o limite curto de envios")
+  void generateAndSendCode_WhenLimiteCurtoFoiUltrapassado_ReturnErroLimiteCurto() {
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(MAX_SHORT_PERIOD_MAIS_UM);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
+    assertEquals(ERRO_LIMITE_CURTO, ex.getMessage());
+  }
+
+  @Test
+  void generateAndSendCode_WhenSendGridResponseIsNull_ReturnIllegalArgumentException() {
+
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(0L);
+    IOException ex =
+        assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
+    assertEquals("Erro ao tentar enviar e-mail, tente novamente mais tarde", ex.getMessage());
   }
 
   /** Teste para simular falha no envio pelo SendGrid. */
   @Test
   void testGenerateAndSendCode_SendGridFails() throws IOException {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
     Response errorResponse = new Response(400, "", null);
 
-    when(emailCodeRepository.findAllByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
-        .thenReturn(Collections.emptyList());
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+        .thenReturn(0L);
     when(sendGrid.api(any())).thenReturn(new Response(400, "Bad Request", null));
     when(springTemplateEngine.process(anyString(), any())).thenReturn("<html>Email content</html>");
 
     IOException ex =
         assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
 
-    assertTrue(ex.getMessage().contains("Erro ao enviar e-mail"));
+    assertTrue(ex.getMessage().contains("Erro ao tentar enviar e-mail"));
   }
 
   /** Teste para e-mail inválido (regex não passa). */
   @Test
   void testGenerateAndSendCode_InvalidEmail() {
-    String email = "email_invalido";
-    String tipo = "cadastro";
-
     IllegalArgumentException ex =
         assertThrows(
-            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, tipo));
+            IllegalArgumentException.class,
+            () -> emailService.generateAndSendCode("email_invalido", tipo));
 
     assertEquals("Endereço de e-mail inválido.", ex.getMessage());
   }
@@ -119,12 +131,9 @@ class EmailServiceImplTest {
   @Test
   @DisplayName("Garante que erro é retornado no caso de não haver o tipo do código na solicitação")
   void testGenerateAndSendSendCode_whenTypeIsNull_ShouldReturnIllegalArgumentException() {
-    String email = "teste@utfpr.edu.br";
-    String type = null;
-
     IllegalArgumentException ex =
         assertThrows(
-            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, type));
+            IllegalArgumentException.class, () -> emailService.generateAndSendCode(email, null));
     assertEquals("O tipo do código é obrigatório.", ex.getMessage());
   }
 }

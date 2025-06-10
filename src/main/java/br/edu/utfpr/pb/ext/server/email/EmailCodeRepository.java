@@ -1,7 +1,6 @@
 package br.edu.utfpr.pb.ext.server.email;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -29,14 +28,13 @@ public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
   Optional<EmailCode> findByCodeAndExpirationAfterAndUsedFalse(String code, LocalDateTime now);
 
   /**
-   * Busca todos os códigos de e-mail associados a um endereço e tipo específicos, gerados após a
+   * Conta quantos códigos de e-mail existem para um endereço e tipo específicos, gerados após a
    * data e hora informadas.
    *
-   * @param email endereço de e-mail para filtrar os códigos
+   * @param email endereço de e-mail a ser considerado
    * @param type tipo do código de e-mail
    * @param generatedAt data e hora a partir da qual os códigos devem ter sido gerados (exclusivo)
-   * @return lista de códigos de e-mail que atendem aos critérios especificados
+   * @return quantidade de códigos de e-mail que atendem aos critérios especificados
    */
-  List<EmailCode> findAllByEmailAndTypeAndGeneratedAtAfter(
-      String email, String type, LocalDateTime generatedAt);
+  Long countByEmailAndTypeAndGeneratedAtAfter(String email, String type, LocalDateTime generatedAt);
 }

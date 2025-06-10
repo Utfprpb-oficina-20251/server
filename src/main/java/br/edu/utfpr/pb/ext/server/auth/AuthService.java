@@ -100,9 +100,8 @@ public class AuthService {
    * Solicita o envio de um código OTP para o email informado, caso o usuário esteja cadastrado.
    *
    * @param email endereço de email do usuário que receberá o código OTP
-   * @return true se o código foi enviado com sucesso
-   * @throws ResponseStatusException se o email não estiver cadastrado ou ocorrer erro no envio do
-   *     código
+   * @throws ResponseStatusException com status 404 se o email não estiver cadastrado, ou 500 em
+   *     caso de falha no envio do código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public void solicitarCodigoOtp(String email) {
@@ -125,14 +124,14 @@ public class AuthService {
   }
 
   /**
-   * Realiza a autenticação de um usuário por meio de código OTP enviado por email.
+   * Autentica um usuário utilizando um código OTP enviado por email.
    *
    * <p>Autentica o usuário utilizando o email e o código OTP fornecidos, definindo o contexto de
    * segurança ao autenticar com sucesso.
    *
-   * @param dto Objeto contendo o email do usuário e o código OTP recebido.
+   * @param dto Objeto com o email do usuário e o código OTP recebido.
    * @return O usuário autenticado correspondente ao email informado.
-   * @throws ResponseStatusException Se o código OTP for inválido ou expirado, retorna erro 401.
+   * @throws ResponseStatusException Se o código OTP for inválido ou expirado (HTTP 422).
    * @throws UsernameNotFoundException Se o email informado não estiver cadastrado.
    */
   @Operation(summary = "Autentica um usuário usando o código OTP")
@@ -146,7 +145,8 @@ public class AuthService {
           .findByEmail(dto.getEmail())
           .orElseThrow(() -> new UsernameNotFoundException(EMAIL_NAO_CADASTRADO));
     } catch (BadCredentialsException ex) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Código inválido ou expirado");
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY, "Código inválido ou expirado");
     }
   }
 }

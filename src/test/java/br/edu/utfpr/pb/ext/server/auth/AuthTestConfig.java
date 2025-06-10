@@ -29,7 +29,8 @@ public class AuthTestConfig {
 
   /**
    * Fornece um mock de EmailServiceImpl para testes, simulando o envio bem-sucedido de código de
-   * autenticação por e-mail.
+   * autenticação
+   * por e-mail.
    *
    * @return uma instância mockada de EmailServiceImpl que retorna uma resposta de sucesso ao chamar
    *     generateAndSendCode com o contexto "autenticacao"
@@ -50,13 +51,15 @@ public class AuthTestConfig {
 
   /**
    * Fornece um mock de EmailCodeValidationService para testes, simulando a validação de códigos de
-   * autenticação por e-mail.
+   * autenticação por
+   * e-mail.
    *
-   * <p>Retorna verdadeiro ao validar o código correto para o e-mail e contexto de autenticação de
-   * teste, e falso para o código inválido em qualquer contexto.
+   * <p>O mock retorna {@code true} apenas quando o e-mail, o contexto e o código correspondem aos
+   * valores de teste válidos; para qualquer código inválido, retorna {@code false},
+   * independentemente do e-mail ou contexto.
    *
-   * @return instância mockada de EmailCodeValidationService com comportamento controlado para
-   *     testes
+   * @return mock de EmailCodeValidationService com comportamento previsível para cenários de teste
+   *     de autenticação por e-mail
    */
   @Bean
   @Primary
@@ -77,11 +80,12 @@ public class AuthTestConfig {
 
   /**
    * Fornece um mock de {@link EmailOtpAuthenticationProvider} para testes, simulando o fluxo de
-   * autenticação OTP por e-mail.
+   * autenticação OTP por
+   * e-mail.
    *
-   * <p>O mock autentica com sucesso apenas quando o e-mail e o código correspondem aos valores de
-   * teste definidos. Caso contrário, lança exceções apropriadas para simular falhas de
-   * autenticação.
+   * <p>O mock autentica com sucesso apenas quando o e-mail e o código fornecidos correspondem aos
+   * valores de teste definidos. Caso contrário, lança exceções para simular falhas de autenticação,
+   * como código inválido ou usuário não encontrado.
    *
    * @param usuarioRepository repositório utilizado para buscar o usuário pelo e-mail durante a
    *     autenticação simulada

@@ -3,6 +3,8 @@ package br.edu.utfpr.pb.ext.server.usuario;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
+import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -97,8 +98,9 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorSemRoleServidor_DeveLancarIllegalArgumentException() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set auths =
-        Set.of(new SimpleGrantedAuthority("ROLE_ALUNO"), new SimpleGrantedAuthority("ROLE_OTHER"));
+    Set<Authority> auths = new HashSet<>();
+    auths.add(Authority.builder().authority("ROLE_ALUNO").build());
+    auths.add(Authority.builder().authority("ROLE_OTHER").build());
     when(usuario.getAuthorities()).thenReturn(auths);
 
     IllegalArgumentException ex =
@@ -110,9 +112,9 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorValido_NaoDeveLancarExcecao() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set auths =
-        Set.of(
-            new SimpleGrantedAuthority("ROLE_SERVIDOR"), new SimpleGrantedAuthority("ROLE_OTHER"));
+    Set<Authority> auths = new HashSet<>();
+    auths.add(Authority.builder().authority("ROLE_SERVIDOR").build());
+    auths.add(Authority.builder().authority("ROLE_OTHER").build());
     when(usuario.getAuthorities()).thenReturn(auths);
 
     assertDoesNotThrow(() -> usuarioService.validarProfessor(usuario));
@@ -121,7 +123,8 @@ class UsuarioServiceImplTest {
   @Test
   void validarProfessor_QuandoProfessorComApenasRoleServidor_NaoDeveLancarExcecao() {
     when(usuario.isAtivo()).thenReturn(true);
-    Set auths = Set.of(new SimpleGrantedAuthority("ROLE_SERVIDOR"));
+    Set<Authority> auths = new HashSet<>();
+    auths.add(Authority.builder().authority("ROLE_SERVIDOR").build());
     when(usuario.getAuthorities()).thenReturn(auths);
 
     assertDoesNotThrow(() -> usuarioService.validarProfessor(usuario));

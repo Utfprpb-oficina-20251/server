@@ -12,4 +12,7 @@ import lombok.Data;
 public class RespostaLoginDTO {
   private String token;
   private long expiresIn;
+
+  @Schema(name = "user", description = "Informações do usuário autenticado")
+  private UsuarioLoginDTO user;
 }

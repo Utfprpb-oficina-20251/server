@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -30,6 +31,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 /** Classe de configuração do Spring Security */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
   private final Environment environment;
 
@@ -48,8 +50,8 @@ public class SecurityConfig {
   private boolean isSwaggerEnabled;
 
   /**
-   * Inicializa a configuração de segurança com as dependências de ambiente, repositório de usuários
-   * e provedor de autenticação OTP por e-mail.
+   * Cria a configuração de segurança com as dependências necessárias para autenticação e acesso ao
+   * ambiente.
    *
    * @param environment ambiente Spring para acesso a propriedades e perfis ativos
    * @param usuarioRepository repositório de usuários utilizado para autenticação
@@ -68,15 +70,10 @@ public class SecurityConfig {
    * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação,
    * autorização, CORS, CSRF e gerenciamento de sessão.
    *
-   * <p>Permite acesso público a endpoints específicos, como GET em `/api/projeto/**`, todas as
-   * rotas em `/api/auth/**`, POST em `/api/usuarios/**`, requisições OPTIONS e `/error`. O acesso
-   * ao console H2 é liberado apenas quando o perfil "test" está ativo, e o acesso à documentação
-   * Swagger depende da configuração de habilitação. POST em `/api/projeto/**` é restrito a usuários
-   * com papel "SERVIDOR". Todas as demais rotas exigem autenticação.
-   *
-   * <p>As sessões são configuradas como stateless, o CORS é habilitado com configuração
-   * personalizada, e um filtro de autenticação JWT é adicionado antes do filtro padrão de
-   * autenticação.
+   * <p>Permite acesso público a endpoints específicos, restringe rotas conforme perfil de usuário,
+   * ambiente e configuração, e exige autenticação para as demais rotas. O gerenciamento de sessão é
+   * stateless e um filtro de autenticação JWT é adicionado antes do filtro padrão de autenticação
+   * por usuário e senha.
    *
    * @param http configuração de segurança HTTP do Spring
    * @param jwtAuthenticationFilter filtro de autenticação JWT a ser inserido na cadeia
@@ -118,7 +115,7 @@ public class SecurityConfig {
   }
 
   /**
-   * Retorna um AuthorizationManager que autoriza requisições apenas quando o perfil ativo do Spring
+   * Retorna um AuthorizationManager que concede acesso somente quando o perfil ativo do Spring
    * inclui "test".
    *
    * @return AuthorizationManager que autoriza requisições apenas se o perfil "test" estiver ativo.
@@ -134,8 +131,7 @@ public class SecurityConfig {
    * Retorna um AuthorizationManager que permite acesso apenas se o Swagger estiver habilitado na
    * configuração da aplicação.
    *
-   * @return AuthorizationManager que concede autorização quando a flag de habilitação do Swagger
-   *     está ativada.
+   * @return AuthorizationManager que autoriza o acesso quando o Swagger está ativado.
    */
   private AuthorizationManager<RequestAuthorizationContext> isSwaggerEnabled() {
     return (authentication, context) ->
