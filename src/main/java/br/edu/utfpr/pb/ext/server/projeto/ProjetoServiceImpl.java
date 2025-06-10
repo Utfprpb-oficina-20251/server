@@ -31,16 +31,22 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
   /**
-   * Cancela um projeto existente, alterando seu status para {@code CANCELADO} e registrando uma justificativa.
-   * <p>Somente o responsável principal pelo projeto está autorizado a realizar essa operação.</p>
+   * Cancela um projeto existente, alterando seu status para {@code CANCELADO} e registrando uma
+   * justificativa.
+   *
+   * <p>Somente o responsável principal pelo projeto está autorizado a realizar essa operação.
    *
    * @param id o identificador do projeto a ser cancelado
    * @param dto objeto contendo a justificativa do cancelamento
    * @param usuarioId identificador do usuário que está tentando realizar o cancelamento
-   * @throws ResponseStatusException se o projeto não for encontrado (404) ou se o usuário não for o responsável (403)
+   * @throws ResponseStatusException se o projeto não for encontrado (404) ou se o usuário não for o
+   *     responsável (403)
    */
   @Override
   public void cancelar(Long id, CancelamentoProjetoDTO dto, Long usuarioId) {
+    if (dto.getJustificativa() == null || dto.getJustificativa().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A justificativa é obrigatória.");
+    }
     Projeto projeto =
         projetoRepository
             .findById(id)

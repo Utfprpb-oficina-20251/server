@@ -7,5 +7,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CancelamentoProjetoDTO {
-  @NotBlank private String justificativa;
+  @NotBlank(message = "A justificativa é obrigatória.") private String justificativa;
 }
