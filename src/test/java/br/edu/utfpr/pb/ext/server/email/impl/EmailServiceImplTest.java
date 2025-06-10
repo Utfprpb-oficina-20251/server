@@ -98,14 +98,14 @@ class EmailServiceImplTest {
         .thenReturn(0L);
     IOException ex =
         assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
-    assertEquals("Erro ao tentar enviar e-mail, tente novamente mais tarde", ex.getMessage());
+    assertEquals(
+        "Erro ao processar o template do e-mail: Erro ao tentar enviar e-mail, tente novamente mais tarde",
+        ex.getMessage());
   }
 
   /** Teste para simular falha no envio pelo SendGrid. */
   @Test
   void testGenerateAndSendCode_SendGridFails() throws IOException {
-    Response errorResponse = new Response(400, "", null);
-
     when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(0L);
     when(sendGrid.api(any())).thenReturn(new Response(400, "Bad Request", null));

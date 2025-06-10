@@ -7,12 +7,10 @@ import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
-
+import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +35,7 @@ class ProjetoControllerTest {
   private ProjetoDTO projetoDTOEntrada;
   private Usuario usuario;
   private Projeto projetoSalvo;
+
   @BeforeEach
   void setUp() {
     // Dados comuns para os testes
@@ -68,7 +67,7 @@ class ProjetoControllerTest {
     projetoDTO.setEquipeExecutora(
         List.of(UsuarioProjetoDTO.builder().nome("batata").email("batata@utfpr.edu.br").build()));
 
-    Usuario usuario = new Usuario();
+    usuario = new Usuario();
     usuario.setEmail("batata@utfpr.edu.br");
 
     Projeto projeto = new Projeto();
@@ -89,6 +88,7 @@ class ProjetoControllerTest {
     verify(projetoService).save(any(Projeto.class));
     verify(modelMapper).map(any(Projeto.class), eq(ProjetoDTO.class));
   }
+
   @Test
   void update_quandoProjetoExiste_retornaOkEProjetoDTO() {
     // Arrange (Organização)
@@ -101,7 +101,8 @@ class ProjetoControllerTest {
     dtoResponse.setId(projetoId);
     dtoResponse.setTitulo("Título Atualizado");
 
-    when(projetoService.atualizarProjeto(eq(projetoId), any(ProjetoDTO.class))).thenReturn(dtoResponse);
+    when(projetoService.atualizarProjeto(eq(projetoId), any(ProjetoDTO.class)))
+        .thenReturn(dtoResponse);
 
     // Act (Ação)
     ResponseEntity<ProjetoDTO> response = projetoController.update(projetoId, dtoRequest);
@@ -123,24 +124,25 @@ class ProjetoControllerTest {
     dtoRequest.setTitulo("Qualquer Título");
 
     when(projetoService.atualizarProjeto(eq(projetoIdInexistente), any(ProjetoDTO.class)))
-            .thenThrow(new EntityNotFoundException(mensagemErro));
+        .thenThrow(new EntityNotFoundException(mensagemErro));
 
     // Act & Assert (Ação e Verificação)
     EntityNotFoundException exception =
-            assertThrows(
-                    EntityNotFoundException.class,
-                    () -> projetoController.update(projetoIdInexistente, dtoRequest));
+        assertThrows(
+            EntityNotFoundException.class,
+            () -> projetoController.update(projetoIdInexistente, dtoRequest));
 
     assertEquals(mensagemErro, exception.getMessage());
     verify(projetoService).atualizarProjeto(eq(projetoIdInexistente), any(ProjetoDTO.class));
   }
+
   @Test
   void create_deveCriarProjeto_quandoDadosSaoValidos() {
     // Arrange (Organizar)
     when(usuarioRepository.findByEmail(anyString())).thenReturn(Optional.of(usuario));
     when(projetoService.save(any(Projeto.class))).thenReturn(projetoSalvo);
     when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class)))
-            .thenReturn(new ProjetoDTO()); // Retorna um DTO mockado/novo
+        .thenReturn(new ProjetoDTO()); // Retorna um DTO mockado/novo
 
     // Act (Agir)
     ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);

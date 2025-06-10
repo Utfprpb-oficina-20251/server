@@ -54,8 +54,8 @@ public class EmailServiceImpl {
    * Gera e envia um código de verificação para o e-mail informado e registra o código no banco de
    * dados.
    *
-   * <p>Valida o tipo e o formato do e-mail, verifica os limites diário e de curto prazo de envios, gera um código
-   * aleatório, envia o e-mail de verificação e salva o código gerado.
+   * <p>Valida o tipo e o formato do e-mail, verifica os limites diário e de curto prazo de envios,
+   * gera um código aleatório, envia o e-mail de verificação e salva o código gerado.
    *
    * @param email endereço de e-mail do destinatário
    * @param type tipo do código de verificação (por exemplo, "cadastro" ou "recuperacao")
@@ -94,14 +94,14 @@ public class EmailServiceImpl {
   /**
    * Verifica se o limite diário de envio de códigos para o e-mail e tipo especificados foi
    * atingido.
-     *
-     * <p>Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior
+   *
+   * <p>Lança uma exceção se o número de códigos enviados nas últimas 24 horas for igual ou superior
    * ao permitido.
-     *
-     * @param email endereço de e-mail a ser verificado
-     * @param type tipo de código relacionado ao envio
-     * @throws IllegalArgumentException se o limite diário de envio for atingido
-     */
+   *
+   * @param email endereço de e-mail a ser verificado
+   * @param type tipo de código relacionado ao envio
+   * @throws IllegalArgumentException se o limite diário de envio for atingido
+   */
   private void verificarLimiteEnvio(String email, String type) {
     LocalDateTime limiteDiario = LocalDateTime.now().minusHours(24);
     Long codigos = repository.countByEmailAndTypeAndGeneratedAtAfter(email, type, limiteDiario);

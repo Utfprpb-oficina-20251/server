@@ -5,13 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.security.access.AccessDeniedException;
-
 
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
@@ -32,27 +31,28 @@ public class ExceptionHandlerAdvice {
         .validationErrors(validationErrors)
         .build();
   }
+
   @ExceptionHandler({EntityNotFoundException.class})
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ApiError handleEntityNotFoundException(
-          EntityNotFoundException exception, HttpServletRequest request) {
+      EntityNotFoundException exception, HttpServletRequest request) {
 
     return ApiError.builder()
-            .status(404)
-            .message(exception.getMessage())
-            .url(request.getServletPath())
-            .build();
+        .status(404)
+        .message(exception.getMessage())
+        .url(request.getServletPath())
+        .build();
   }
 
   @ExceptionHandler(AccessDeniedException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN) // Define o status da resposta para 403 Forbidden
   public ApiError handleAccessDeniedException(
-          AccessDeniedException exception, HttpServletRequest request) {
+      AccessDeniedException exception, HttpServletRequest request) {
 
     return ApiError.builder()
-            .status(403)
-            .message("Acesso negado. Você não tem permissão para executar esta ação.")
-            .url(request.getServletPath())
-            .build();
+        .status(403)
+        .message("Acesso negado. Você não tem permissão para executar esta ação.")
+        .url(request.getServletPath())
+        .build();
   }
 }

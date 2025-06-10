@@ -69,11 +69,12 @@ public class AuthController {
   }
 
   /**
-   * Autentica um usuário utilizando email e código OTP, retornando um token JWT, tempo de
-   * expiração e informações do usuário autenticado.
+   * Autentica um usuário utilizando email e código OTP, retornando um token JWT, tempo de expiração
+   * e informações do usuário autenticado.
    *
    * @param requestDTO dados de autenticação contendo email e código OTP
-   * @return resposta com token JWT, tempo de expiração em segundos e objeto com email e permissões do usuário
+   * @return resposta com token JWT, tempo de expiração em segundos e objeto com email e permissões
+   *     do usuário
    */
   @Operation(summary = "Autentica um usuário usando OTP")
   @ApiResponse(
