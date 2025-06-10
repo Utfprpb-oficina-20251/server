@@ -106,7 +106,7 @@ class EmailControllerTest {
 
   /** Teste para e-mail inválido (regex falha). */
   @Test
-  void testEnviar_EmailInvalido() throws IOException {
+  void testEnviar_EmailInvalido() {
     String email = "email-invalido";
     String tipo = "cadastro";
 
@@ -120,7 +120,7 @@ class EmailControllerTest {
 
   /** Teste para tipo de código vazio. */
   @Test
-  void testEnviar_TipoVazio() throws IOException {
+  void testEnviar_TipoVazio() {
     String email = "teste@utfpr.edu.br";
     String tipo = "";
 
@@ -134,7 +134,7 @@ class EmailControllerTest {
 
   /** Teste para e-mail nulo. */
   @Test
-  void testEnviar_EmailNulo() throws IOException {
+  void testEnviar_EmailNulo() {
     String tipo = "cadastro";
 
     IllegalArgumentException ex =
@@ -147,7 +147,7 @@ class EmailControllerTest {
 
   /** Teste para tipo nulo. */
   @Test
-  void testEnviar_TipoNulo() throws IOException {
+  void testEnviar_TipoNulo() {
     String email = "teste@utfpr.edu.br";
 
     IllegalArgumentException ex =

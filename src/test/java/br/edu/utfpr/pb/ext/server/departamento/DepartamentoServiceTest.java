@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
  * Testes unitários para a classe DepartamentoServiceImpl. Verifica o funcionamento dos métodos de
  * negócio da camada de serviço.
  */
-public class DepartamentoServiceTest {
+class DepartamentoServiceTest {
 
   private DepartamentoRepository departamentoRepository;
   private UsuarioRepository usuarioRepository;
@@ -104,11 +104,11 @@ public class DepartamentoServiceTest {
     assertThatThrownBy(() -> service.associarResponsavel(999L, 10L))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Departamento não encontrado com ID: 999");
-    }
+  }
 
-    /** Testa se exceção é lançada quando usuário não for encontrado na associação. */
-    @Test
-    void shouldThrowExceptionWhenUsuarioNotFoundInAssociarResponsavel() {
+  /** Testa se exceção é lançada quando usuário não for encontrado na associação. */
+  @Test
+  void shouldThrowExceptionWhenUsuarioNotFoundInAssociarResponsavel() {
     Departamento departamento = createDepartamento(1L, "DAINF", "Computação");
     when(departamentoRepository.findById(1L)).thenReturn(Optional.of(departamento));
     when(usuarioRepository.findById(999L)).thenReturn(Optional.empty());

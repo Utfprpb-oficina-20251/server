@@ -30,6 +30,10 @@ spring:
   # SendGrid API Key configuration. Em produção, defina SENDGRID_API_KEY como variável de ambiente ou utilize um gerenciador de segredos.
   sendgrid:
     api-key: ${SENDGRID_API_KEY:sendgridkey}
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
 ---
 
 # Testes
@@ -47,6 +51,10 @@ spring:
   h2:
     console:
       enabled: true
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
 logging:
   level:
     org:

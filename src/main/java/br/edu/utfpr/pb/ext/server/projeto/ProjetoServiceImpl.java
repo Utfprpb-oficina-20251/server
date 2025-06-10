@@ -16,7 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implements IProjetoService {
   private final ProjetoRepository projetoRepository;
- private  final ModelMapper modelMapper;
+  private final ModelMapper modelMapper;
+
   /**
    * Cria uma nova instância do serviço de projetos com o repositório fornecido.
    *
@@ -24,7 +25,7 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
    */
   public ProjetoServiceImpl(ProjetoRepository projetoRepository, ModelMapper modelMapper) {
     this.projetoRepository = projetoRepository;
-      this.modelMapper = modelMapper;
+    this.modelMapper = modelMapper;
   }
 
   /**
@@ -93,8 +94,11 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   @Transactional
   public ProjetoDTO atualizarProjeto(Long id, ProjetoDTO dto) {
 
-    Projeto projeto = this.projetoRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Projeto com ID " + id + " não encontrado."));
+    Projeto projeto =
+        this.projetoRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new EntityNotFoundException("Projeto com ID " + id + " não encontrado."));
     modelMapper.map(dto, projeto);
     Projeto projetoAtualizado = this.save(projeto);
 

@@ -54,8 +54,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Salva uma entidade, aplicando ganchos de pré e pós-processamento.
    *
-   * <p>Executa {@code preSave} antes de persistir a entidade e {@code postsave} após a
-   * persistência.
+   * <p>Executa o método {@code preSave} antes de persistir a entidade e {@code postsave} após a
+   * persistência. Lança uma exceção se a entidade fornecida for nula.
    *
    * @param entity entidade a ser salva
    * @return a entidade salva, possivelmente modificada pelos ganchos de pré ou pós-processamento

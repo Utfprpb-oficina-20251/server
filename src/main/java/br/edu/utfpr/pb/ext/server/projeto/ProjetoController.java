@@ -130,6 +130,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   }
 
 
+
   @PatchMapping("/{id}/cancelar")
   public ResponseEntity<Void> cancelar(
       @PathVariable Long id,
@@ -142,18 +143,21 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   @PutMapping("/{id}")
   @PreAuthorize("@securityService.podeEditarProjeto(#id)")
   @Operation(summary = "Atualiza um projeto existente")
-  @ApiResponses(value = {
-          @ApiResponse(responseCode = "200", description = "Projeto atualizado com sucesso"),
-          @ApiResponse(responseCode = "400", description = "Dados inválidos ou violação de regra de negócio"),
-          @ApiResponse(responseCode = "403", description = "Acesso negado. Usuário não autorizado a editar este projeto"),
-          @ApiResponse(responseCode = "404", description = "Projeto não encontrado")
-  })
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Projeto atualizado com sucesso"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Dados inválidos ou violação de regra de negócio"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Acesso negado. Usuário não autorizado a editar este projeto"),
+        @ApiResponse(responseCode = "404", description = "Projeto não encontrado")
+      })
   public ResponseEntity<ProjetoDTO> update(
-          @PathVariable Long id,
-          @Valid @RequestBody ProjetoDTO dto) {
+      @PathVariable Long id, @Valid @RequestBody ProjetoDTO dto) {
     ProjetoDTO projetoAtualizado = projetoService.atualizarProjeto(id, dto);
     return ResponseEntity.ok(projetoAtualizado);
   }
-
 
 }
