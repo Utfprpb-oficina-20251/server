@@ -52,7 +52,17 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
             .findById(id)
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
+    // Verifica se o projeto já está cancelado
+      if (projeto.getStatus() == StatusProjeto.CANCELADO) {
+         throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST, "Projeto já está cancelado");
+      }
 
+    // Verifica se existe equipe executora
+       if (projeto.getEquipeExecutora() == null || projeto.getEquipeExecutora().isEmpty()) {
+          throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Projeto não possui equipe executora definida");
+       }
     // Aqui assumimos o primeiro da equipe como responsável principal
     boolean isResponsavelPrincipal =
         projeto.getEquipeExecutora().stream()
