@@ -103,6 +103,8 @@ public class SecurityConfig {
                     .hasRole("SERVIDOR")
                     .requestMatchers(HttpMethod.OPTIONS, "/**") // CORS preflight
                     .permitAll()
+                    .requestMatchers("/api/departamentos/**")
+                     .permitAll()
                     .requestMatchers("/error")
                     .permitAll()
                     .anyRequest()

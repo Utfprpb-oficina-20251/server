@@ -5,7 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/departamentos")
+@RequestMapping("/departamentos")
 public class DepartamentoController extends CrudController<Departamento, DepartamentoDto, Long> {
 
   private final DepartamentoService departamentoService;
