@@ -51,6 +51,7 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
      *         - o projeto não for encontrado (404),
      *         - a justificativa estiver vazia ou nula (400),
      *         - o projeto já estiver cancelado (400),
+     *         - não existir equipe executora definida (400),
      *         - o usuário não for um servidor da equipe executora (403)
      */
   @Override
