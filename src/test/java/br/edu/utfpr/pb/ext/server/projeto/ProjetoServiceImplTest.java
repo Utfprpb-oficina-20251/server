@@ -7,6 +7,7 @@ import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 class ProjetoServiceImplTest {
 
   @InjectMocks private ProjetoServiceImpl projetoService;
-
   @Mock private ProjetoRepository projetoRepository;
-
   @Mock private ModelMapper modelMapper;
 
   private Projeto projeto;
@@ -42,12 +41,11 @@ class ProjetoServiceImplTest {
     projeto.setEquipeExecutora(Collections.singletonList(usuario));
   }
 
-  // ✅ Cenário feliz
+  // Cenário feliz
   @Test
   void deveCancelarProjetoComJustificativaValida() {
     CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
     dto.setJustificativa("Justificativa válida");
-
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
     projetoService.cancelar(projetoId, dto, usuarioId);
@@ -57,73 +55,90 @@ class ProjetoServiceImplTest {
     verify(projetoRepository).save(projeto);
   }
 
-  // ✅ Validação de justificativa nula
+  // Justificativa nula
   @Test
   void deveLancarExcecaoSeJustificativaNula() {
     CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
     dto.setJustificativa(null);
 
-    ResponseStatusException ex =
-        assertThrows(
+    ResponseStatusException ex = assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, usuarioId));
+            () -> projetoService.cancelar(projetoId, dto, usuarioId)
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertTrue(ex.getReason().toLowerCase().contains("justificativa"));
   }
 
-  // ✅ Validação de justificativa vazia
+  // Justificativa vazia
   @Test
   void deveLancarExcecaoSeJustificativaVazia() {
     CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
     dto.setJustificativa("   ");
 
-    ResponseStatusException ex =
-        assertThrows(
+    ResponseStatusException ex = assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, usuarioId));
+            () -> projetoService.cancelar(projetoId, dto, usuarioId)
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertTrue(ex.getReason().toLowerCase().contains("justificativa"));
   }
 
-  // ✅ Projeto já cancelado
+  // Projeto já cancelado
   @Test
-  void deveLancarExcecaoSeProjetoJaCancelado() {
+  void cancelar_quandoProjetoJaCancelado_deveLancarExcecao() {
     projeto.setStatus(StatusProjeto.CANCELADO);
     CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
     dto.setJustificativa("Justificativa");
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
-    ResponseStatusException ex =
-        assertThrows(
+    ResponseStatusException ex = assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, usuarioId));
+            () -> projetoService.cancelar(projetoId, dto, usuarioId)
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertTrue(ex.getReason().toLowerCase().contains("já está cancelado"));
   }
 
-  // ✅ Projeto sem equipe executora
+  // Projeto sem equipe
   @Test
-  void deveLancarExcecaoSeProjetoSemEquipeExecutora() {
+  void cancelar_quandoEquipeExecutoraForNula_deveLancarExcecao() {
     projeto.setEquipeExecutora(null);
     CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
     dto.setJustificativa("Justificativa");
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
-    ResponseStatusException ex =
-        assertThrows(
+    ResponseStatusException ex = assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, usuarioId));
+            () -> projetoService.cancelar(projetoId, dto, usuarioId)
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertTrue(ex.getReason().toLowerCase().contains("equipe executora"));
   }
 
-  // ✅ Usuário não é o responsável principal
+  @Test
+  void cancelar_quandoEquipeExecutoraForVazia_deveLancarExcecao() {
+    projeto.setEquipeExecutora(Collections.emptyList());
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Justificativa");
+
+    when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
+
+    ResponseStatusException ex = assertThrows(
+            ResponseStatusException.class,
+            () -> projetoService.cancelar(projetoId, dto, usuarioId)
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertTrue(ex.getReason().toLowerCase().contains("equipe executora"));
+  }
+
+  //Usuário não é o responsável principal
   @Test
   void deveLancarExcecaoSeUsuarioNaoForResponsavelPrincipal() {
     CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
@@ -131,35 +146,49 @@ class ProjetoServiceImplTest {
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
-    ResponseStatusException ex =
-        assertThrows(
-            ResponseStatusException.class, () -> projetoService.cancelar(projetoId, dto, 999L));
+    ResponseStatusException ex = assertThrows(
+            ResponseStatusException.class,
+            () -> projetoService.cancelar(projetoId, dto, 999L)
+    );
 
     assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
     assertTrue(ex.getReason().toLowerCase().contains("responsável principal"));
   }
 
-  // ✅ Atualização bem-sucedida
+  //Projeto não encontrado
   @Test
-  void deveAtualizarProjetoComSucesso() {
-    Projeto projetoExistente = new Projeto();
-    projetoExistente.setId(projetoId);
-    projetoExistente.setTitulo("Antigo");
+  void deveLancarExcecaoQuandoProjetoNaoEncontrado() {
+    when(projetoRepository.findById(projetoId)).thenReturn(Optional.empty());
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Teste");
+
+    ResponseStatusException ex = assertThrows(
+            ResponseStatusException.class,
+            () -> projetoService.cancelar(projetoId, dto, usuarioId)
+    );
+
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+  }
+
+  // Atualizar projeto com sucesso
+  @Test
+  void atualizarProjeto_quandoProjetoExiste_deveRetornarDTOAtualizado() {
+    Projeto projetoOriginal = new Projeto();
+    projetoOriginal.setId(projetoId);
+    projetoOriginal.setTitulo("Antigo");
 
     ProjetoDTO dto = new ProjetoDTO();
     dto.setTitulo("Novo");
 
-    when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projetoExistente));
-    doAnswer(
-            invocation -> {
-              ProjetoDTO source = invocation.getArgument(0);
-              Projeto destino = invocation.getArgument(1);
-              destino.setTitulo(source.getTitulo());
-              return null;
-            })
-        .when(modelMapper)
-        .map(any(ProjetoDTO.class), any(Projeto.class));
-    when(projetoRepository.save(any(Projeto.class))).thenReturn(projetoExistente);
+    when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projetoOriginal));
+    doAnswer(invocation -> {
+      ProjetoDTO source = invocation.getArgument(0);
+      Projeto destino = invocation.getArgument(1);
+      destino.setTitulo(source.getTitulo());
+      return null;
+    }).when(modelMapper).map(any(ProjetoDTO.class), any(Projeto.class));
+    when(projetoRepository.save(any(Projeto.class))).thenReturn(projetoOriginal);
     when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(dto);
 
     ProjetoDTO atualizado = projetoService.atualizarProjeto(projetoId, dto);
@@ -168,18 +197,48 @@ class ProjetoServiceImplTest {
     assertEquals("Novo", atualizado.getTitulo());
   }
 
-  // ✅ Atualização de projeto inexistente
+  //Projeto não encontrado na atualização
   @Test
-  void deveLancarExcecaoSeProjetoInexistenteNaAtualizacao() {
+  void atualizarProjeto_quandoProjetoNaoExiste_deveLancarEntityNotFoundException() {
     ProjetoDTO dto = new ProjetoDTO();
     dto.setTitulo("Teste");
 
     when(projetoRepository.findById(99L)).thenReturn(Optional.empty());
 
-    EntityNotFoundException ex =
-        assertThrows(
-            EntityNotFoundException.class, () -> projetoService.atualizarProjeto(99L, dto));
+    EntityNotFoundException ex = assertThrows(
+            EntityNotFoundException.class,
+            () -> projetoService.atualizarProjeto(99L, dto)
+    );
 
     assertEquals("Projeto com ID 99 não encontrado.", ex.getMessage());
+  }
+
+  //FindAll
+  @Test
+  void findAll_quandoExistemProjetos_deveRetornarListaDeProjetos() {
+    Projeto projeto1 = new Projeto();
+    projeto1.setId(1L);
+    Projeto projeto2 = new Projeto();
+    projeto2.setId(2L);
+    List<Projeto> lista = List.of(projeto1, projeto2);
+
+    when(projetoRepository.findAll()).thenReturn(lista);
+
+    List<Projeto> resultado = projetoService.findAll();
+
+    assertNotNull(resultado);
+    assertEquals(2, resultado.size());
+    assertEquals(lista, resultado);
+  }
+
+  // Delete
+  @Test
+  void delete_quandoIdFornecido_deveChamarDeleteByIdDoRepositorio() {
+    doNothing().when(projetoRepository).deleteById(projetoId);
+
+    projetoService.delete(projetoId);
+
+    verify(projetoRepository).deleteById(projetoId);
+    verify(projetoRepository, times(1)).deleteById(projetoId);
   }
 }
