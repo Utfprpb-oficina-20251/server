@@ -39,49 +39,43 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
 
-  /**
-   * Cancela um projeto existente, alterando seu status para {@code CANCELADO} e registrando uma
-   * justificativa.
-   *
-   * <p>Somente o responsável principal pelo projeto está autorizado a realizar essa operação.
-   *
-   * @param id o identificador do projeto a ser cancelado
-   * @param dto objeto contendo a justificativa do cancelamento
-   * @param usuarioId identificador do usuário que está tentando realizar o cancelamento
-   * @throws ResponseStatusException se o projeto não for encontrado (404) ou se o usuário não for o
-   *     responsável (403)
-   */
+    /**
+     * Cancela um projeto existente, alterando seu status para {@code CANCELADO} e registrando uma justificativa.
+     *
+     * Apenas servidores (usuários com SIAPE preenchido) que fazem parte da equipe executora podem realizar essa operação.
+     *
+     * @param id o ID do projeto a ser cancelado
+     * @param dto objeto contendo a justificativa do cancelamento
+     * @param usuarioId o ID do usuário que está tentando cancelar o projeto
+     * @throws ResponseStatusException se:
+     *         - o projeto não for encontrado (404),
+     *         - a justificativa estiver vazia ou nula (400),
+     *         - o projeto já estiver cancelado (400),
+     *         - o usuário não for um servidor da equipe executora (403)
+     */
   @Override
   public void cancelar(Long id, CancelamentoProjetoDTO dto, Long usuarioId) {
       if (dto.getJustificativa() == null || dto.getJustificativa().trim().isEmpty()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A justificativa é obrigatória.");
       }
-      Projeto projeto =
-              projetoRepository
-                      .findById(id)
-                      .orElseThrow(
-                              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
-      // Verifica se o projeto já está cancelado
+
+      Projeto projeto = projetoRepository.findById(id)
+              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
+
       if (projeto.getStatus() == StatusProjeto.CANCELADO) {
-          throw new ResponseStatusException(
-                  HttpStatus.BAD_REQUEST, "Projeto já está cancelado");
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projeto já está cancelado");
       }
 
-      // Verifica se existe equipe executora
       if (projeto.getEquipeExecutora() == null || projeto.getEquipeExecutora().isEmpty()) {
-          throw new ResponseStatusException(
-                  HttpStatus.BAD_REQUEST, "Projeto não possui equipe executora definida");
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projeto não possui equipe executora definida");
       }
-      // Aqui assumimos o primeiro da equipe como responsável principal
-      boolean isResponsavelPrincipal =
-              projeto.getEquipeExecutora().stream()
-                      .findFirst()
-                      .map(u -> u.getId().equals(usuarioId))
-                      .orElse(false);
 
-      if (!isResponsavelPrincipal) {
-          throw new ResponseStatusException(
-                  HttpStatus.FORBIDDEN, "Apenas o responsável principal pode cancelar o projeto.");
+      boolean isServidorNaEquipe = projeto.getEquipeExecutora().stream()
+              .anyMatch(usuario -> usuario.getId().equals(usuarioId) && usuario.getSiape() != null);
+
+      if (!isServidorNaEquipe) {
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                  "Apenas servidores da equipe executora podem cancelar o projeto.");
       }
 
       projeto.setStatus(StatusProjeto.CANCELADO);
