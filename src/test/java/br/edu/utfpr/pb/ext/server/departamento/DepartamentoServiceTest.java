@@ -116,7 +116,7 @@ class DepartamentoServiceTest {
     assertThatThrownBy(() -> service.associarResponsavel(1L, 999L))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Usuário não encontrado com ID: 999");
-  }
+    }
 
   /** Testa se exceção é lançada ao buscar departamento inexistente por ID. */
   @Test

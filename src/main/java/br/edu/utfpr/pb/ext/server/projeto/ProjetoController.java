@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -128,6 +129,17 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     return ResponseEntity.status(HttpStatus.CREATED).body(projetoDTO);
   }
 
+
+  @PreAuthorize("isAuthenticated()")
+  @PatchMapping("/{id}/cancelar")
+  public ResponseEntity<Void> cancelar(
+      @PathVariable Long id,
+      @Valid @RequestBody CancelamentoProjetoDTO dto,
+      @AuthenticationPrincipal Usuario usuario) {
+    projetoService.cancelar(id, dto, usuario.getId());
+    return ResponseEntity.noContent().build();
+  }
+
   @PutMapping("/{id}")
   @PreAuthorize("@securityService.podeEditarProjeto(#id)")
   @Operation(summary = "Atualiza um projeto existente")
@@ -147,4 +159,5 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     ProjetoDTO projetoAtualizado = projetoService.atualizarProjeto(id, dto);
     return ResponseEntity.ok(projetoAtualizado);
   }
+
 }

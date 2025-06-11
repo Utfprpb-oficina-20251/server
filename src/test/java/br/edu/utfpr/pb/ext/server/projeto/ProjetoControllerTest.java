@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class ProjetoControllerTest {
@@ -190,5 +191,128 @@ class ProjetoControllerTest {
     // Verifica que o repositório foi consultado, mas o serviço de save nunca foi chamado
     verify(usuarioRepository, times(1)).findByEmail("membro@utfpr.edu.br");
     verify(projetoService, never()).save(any(Projeto.class));
+  }
+  @Test
+  void cancelarProjeto_deveChamarServicoEretornarNoContent() {
+    // Arrange
+    Long projetoId = 1L;
+    Long usuarioId = 42L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Justificativa válida");
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    // Simula o service, que não retorna nada
+    doNothing().when(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+
+    // Act
+    ResponseEntity<Void> response = projetoController.cancelar(projetoId, dto, usuarioMock);
+
+    // Assert
+    assertNotNull(response);
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    verify(projetoService, times(1)).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+  }
+  @Test
+  void cancelarProjeto_deveLancarExcecao_quandoJustificativaForVazia() {
+    // Arrange
+    Long projetoId = 1L;
+    Long usuarioId = 42L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("   "); // Justificativa inválida
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "A justificativa é obrigatória."))
+            .when(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+
+    // Act & Assert
+    ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> projetoController.cancelar(projetoId, dto, usuarioMock)
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("A justificativa é obrigatória.", exception.getReason());
+    verify(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+  }
+  @Test
+  void cancelarProjeto_deveLancarExcecao_quandoProjetoJaCancelado() {
+    // Arrange
+    Long projetoId = 1L;
+    Long usuarioId = 42L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Cancelamento repetido");
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projeto já está cancelado"))
+            .when(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+
+    // Act & Assert
+    ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> projetoController.cancelar(projetoId, dto, usuarioMock)
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Projeto já está cancelado", exception.getReason());
+    verify(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+  }
+  @Test
+  void cancelarProjeto_deveLancarExcecao_quandoUsuarioNaoForResponsavel() {
+    // Arrange
+    Long projetoId = 1L;
+    Long usuarioId = 999L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Tentativa de usuário não responsável");
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Apenas o responsável principal pode cancelar o projeto."))
+            .when(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+
+    // Act & Assert
+    ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> projetoController.cancelar(projetoId, dto, usuarioMock)
+    );
+
+    assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+    assertEquals("Apenas o responsável principal pode cancelar o projeto.", exception.getReason());
+    verify(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+  }
+  @Test
+  void cancelarProjeto_deveLancarExcecao_quandoProjetoNaoEncontrado() {
+    // Arrange
+    Long projetoId = 999L;
+    Long usuarioId = 42L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Cancelamento de projeto inexistente");
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"))
+            .when(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
+
+    // Act & Assert
+    ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> projetoController.cancelar(projetoId, dto, usuarioMock)
+    );
+
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertEquals("Projeto não encontrado", exception.getReason());
+    verify(projetoService).cancelar(eq(projetoId), eq(dto), eq(usuarioId));
   }
 }
