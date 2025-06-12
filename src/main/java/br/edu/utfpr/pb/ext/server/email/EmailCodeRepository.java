@@ -2,6 +2,8 @@ package br.edu.utfpr.pb.ext.server.email;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Repositório para operações com EmailCode no banco de dados. */
@@ -15,7 +17,7 @@ public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
    * @param type tipo do código de e-mail
    * @return um {@link Optional} com o código mais recente, se encontrado
    */
-  Optional<EmailCode> findTopByEmailAndTypeOrderByGeneratedAtDesc(String email, String type);
+  Optional<EmailCode> findTopByEmailAndTypeOrderByGeneratedAtDesc(String email, TipoCodigo type);
 
   /**
    * Retorna um código de e-mail correspondente ao valor informado, que ainda não expirou e não foi
@@ -36,5 +38,5 @@ public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
    * @param generatedAt data e hora a partir da qual os códigos devem ter sido gerados (exclusivo)
    * @return quantidade de códigos de e-mail que atendem aos critérios especificados
    */
-  Long countByEmailAndTypeAndGeneratedAtAfter(String email, String type, LocalDateTime generatedAt);
+  Long countByEmailAndTypeAndGeneratedAtAfter(String email, TipoCodigo type, LocalDateTime generatedAt);
 }

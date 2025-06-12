@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.email;
 
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -42,8 +43,10 @@ public class EmailCode extends BaseEntity {
   private LocalDateTime expiration;
 
   // Tipo do código: "cadastro", "recuperacao", etc.
-  @NotBlank(message = "O tipo do código é obrigatório.") @Column(nullable = false)
-  private String type;
+  @NotNull(message = "O tipo do código é obrigatório.")
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private TipoCodigo type;
 
   /**
    * Cria uma nova instância de EmailCode com os valores fornecidos e marca o código como não
@@ -56,7 +59,7 @@ public class EmailCode extends BaseEntity {
    * @param type tipo do código (por exemplo, "cadastro" ou "recuperacao")
    */
   public EmailCode(
-      String email, String code, LocalDateTime generatedAt, LocalDateTime expiration, String type) {
+      String email, String code, LocalDateTime generatedAt, LocalDateTime expiration, TipoCodigo type) {
     this.email = email;
     this.code = code;
     this.generatedAt = generatedAt;

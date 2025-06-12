@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.email;
 
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +15,7 @@ public class EmailCodeDto {
 
   @NotBlank(message = "O código é obrigatório.") private String code;
 
-  @NotBlank(message = "O tipo do código é obrigatório.") private String type;
+  @NotBlank(message = "O tipo do código é obrigatório.") private TipoCodigo type;
 
   @NotNull(message = "O status de uso é obrigatório.") private Boolean used;
 
@@ -81,7 +82,7 @@ public class EmailCodeDto {
    *
    * @return o tipo do código
    */
-  public String getType() {
+  public TipoCodigo getType() {
     return type;
   }
 
@@ -90,7 +91,7 @@ public class EmailCodeDto {
    *
    * @param type tipo do código
    */
-  public void setType(String type) {
+  public void setType(TipoCodigo type) {
     this.type = type;
   }
 

@@ -1,6 +1,8 @@
 package br.edu.utfpr.pb.ext.server.email;
 
 import java.time.LocalDateTime;
+
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +32,7 @@ public class EmailCodeValidationService {
    * @return true se o código for válido e marcado como utilizado; false caso contrário
    */
   @Transactional
-  public boolean validateCode(String email, String type, String code) {
+  public boolean validateCode(String email, TipoCodigo type, String code) {
     return repository
         .findTopByEmailAndTypeOrderByGeneratedAtDesc(email, type)
         .filter(ec -> ec.getCode().equals(code))

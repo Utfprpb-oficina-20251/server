@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.email.impl;
 
 import br.edu.utfpr.pb.ext.server.email.EmailCode;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeRepository;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.email.enums.TipoDeNotificacao;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
@@ -58,14 +59,14 @@ public class EmailServiceImpl {
    * gera um código aleatório, envia o e-mail de verificação e salva o código gerado.
    *
    * @param email endereço de e-mail do destinatário
-   * @param type tipo do código de verificação (por exemplo, "cadastro" ou "recuperacao")
+   * @param type tipo do código de verificação
    * @return resposta da API do SendGrid referente ao envio do e-mail
-   * @throws IllegalArgumentException se o tipo for nulo, vazio, se o e-mail for inválido ou se o
+   * @throws IllegalArgumentException se o tipo for nulo, se o e-mail for inválido ou se o
    *     limite diário de envios for excedido
    * @throws IOException se o envio do e-mail falhar
    */
-  public Response generateAndSendCode(String email, String type) throws IOException {
-    if (type == null || type.isBlank()) {
+  public Response generateAndSendCode(String email, TipoCodigo type) throws IOException {
+    if (type == null) {
       throw new IllegalArgumentException("O tipo do código é obrigatório.");
     }
     validarEmail(email);
@@ -102,7 +103,7 @@ public class EmailServiceImpl {
    * @param type tipo de código relacionado ao envio
    * @throws IllegalArgumentException se o limite diário de envio for atingido
    */
-  private void verificarLimiteEnvio(String email, String type) {
+  private void verificarLimiteEnvio(String email, TipoCodigo type) {
     LocalDateTime limiteDiario = LocalDateTime.now().minusHours(24);
     Long codigos = repository.countByEmailAndTypeAndGeneratedAtAfter(email, type, limiteDiario);
     if (codigos > MAX_CODES_PER_DAY) {
@@ -134,7 +135,7 @@ public class EmailServiceImpl {
    * @param code código de verificação gerado
    * @param type tipo do código ou finalidade do envio
    */
-  private void salvarCodigo(String email, String code, String type) {
+  private void salvarCodigo(String email, String code, TipoCodigo type) {
     EmailCode ec = new EmailCode();
     ec.setEmail(email);
     ec.setCode(code);
@@ -156,9 +157,9 @@ public class EmailServiceImpl {
    * @return resposta da API do SendGrid após o envio do e-mail
    * @throws IOException se ocorrer falha ao enviar o e-mail
    */
-  private Response enviarEmailDeVerificacao(String email, String code, String type)
+  private Response enviarEmailDeVerificacao(String email, String code, TipoCodigo type)
       throws IOException {
-    String assunto = "Código de Verificação - " + type;
+    String assunto = "Código de Verificação - " + type.name();
 
     Context context = new Context();
     context.setVariable("otpCode", code);

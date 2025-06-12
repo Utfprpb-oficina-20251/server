@@ -104,7 +104,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.OPTIONS, "/**") // CORS preflight
                     .permitAll()
                     .requestMatchers("/api/departamentos/**")
-                     .permitAll()
+                    .permitAll()
                     .requestMatchers("/error")
                     .permitAll()
                     .anyRequest()
