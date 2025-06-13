@@ -4,6 +4,7 @@ import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.EmailOtpAuthRequestDTO;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationToken;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
@@ -111,7 +112,7 @@ public class AuthService {
       usuarioRepository
           .findByEmail(email)
           .orElseThrow(() -> new EntityNotFoundException(EMAIL_NAO_CADASTRADO));
-      emailService.generateAndSendCode(email, "autenticacao");
+      emailService.generateAndSendCode(email, TipoCodigo.OTP_AUTENTICACAO);
       logger.info("Código de verificação enviado");
     } catch (EntityNotFoundException e) {
       logger.error(EMAIL_NAO_CADASTRADO, e);
