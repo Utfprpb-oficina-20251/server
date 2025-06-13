@@ -15,7 +15,7 @@ public class EmailCodeDto {
 
   @NotBlank(message = "O código é obrigatório.") private String code;
 
-  @NotBlank(message = "O tipo do código é obrigatório.") private TipoCodigo type;
+  @NotNull(message = "O tipo do código é obrigatório.") private TipoCodigo type;
 
   @NotNull(message = "O status de uso é obrigatório.") private Boolean used;
 
