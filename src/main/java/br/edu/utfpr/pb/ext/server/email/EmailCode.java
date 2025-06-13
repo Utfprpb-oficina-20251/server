@@ -43,8 +43,7 @@ public class EmailCode extends BaseEntity {
   private LocalDateTime expiration;
 
   // Tipo do código: "cadastro", "recuperacao", etc.
-  @NotNull(message = "O tipo do código é obrigatório.")
-  @Column(nullable = false)
+  @NotNull(message = "O tipo do código é obrigatório.") @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private TipoCodigo type;
 
@@ -59,7 +58,11 @@ public class EmailCode extends BaseEntity {
    * @param type tipo do código (por exemplo, "cadastro" ou "recuperacao")
    */
   public EmailCode(
-      String email, String code, LocalDateTime generatedAt, LocalDateTime expiration, TipoCodigo type) {
+      String email,
+      String code,
+      LocalDateTime generatedAt,
+      LocalDateTime expiration,
+      TipoCodigo type) {
     this.email = email;
     this.code = code;
     this.generatedAt = generatedAt;

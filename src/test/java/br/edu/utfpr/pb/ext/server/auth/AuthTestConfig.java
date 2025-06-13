@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationToken;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeValidationService;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
@@ -42,7 +43,7 @@ public class AuthTestConfig {
 
     // Mock generateAndSendCode to return a successful response
     Response mockResponse = new Response(202, "Success", null);
-    when(mockEmailService.generateAndSendCode(anyString(), eq("autenticacao")))
+    when(mockEmailService.generateAndSendCode(anyString(), eq(TipoCodigo.OTP_AUTENTICACAO)))
         .thenReturn(mockResponse);
 
     return mockEmailService;
@@ -62,15 +63,14 @@ public class AuthTestConfig {
   @Bean
   @Primary
   public EmailCodeValidationService emailCodeValidationServiceMock() {
-    String autenticacao = "autenticacao";
     String codigoInvalido = "codigo-invalido";
 
     EmailCodeValidationService mockValidationService =
         Mockito.mock(EmailCodeValidationService.class);
 
-    when(mockValidationService.validateCode(TEST_EMAIL, autenticacao, CODIGO_VALIDO))
+    when(mockValidationService.validateCode(TEST_EMAIL, TipoCodigo.OTP_AUTENTICACAO, CODIGO_VALIDO))
         .thenReturn(true);
-    when(mockValidationService.validateCode(anyString(), anyString(), eq(codigoInvalido)))
+    when(mockValidationService.validateCode(anyString(), any(TipoCodigo.class), eq(codigoInvalido)))
         .thenReturn(false);
 
     return mockValidationService;

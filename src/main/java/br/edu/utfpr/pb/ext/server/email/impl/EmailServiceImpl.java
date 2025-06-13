@@ -61,8 +61,8 @@ public class EmailServiceImpl {
    * @param email endereço de e-mail do destinatário
    * @param type tipo do código de verificação
    * @return resposta da API do SendGrid referente ao envio do e-mail
-   * @throws IllegalArgumentException se o tipo for nulo, se o e-mail for inválido ou se o
-   *     limite diário de envios for excedido
+   * @throws IllegalArgumentException se o tipo for nulo, se o e-mail for inválido ou se o limite
+   *     diário de envios for excedido
    * @throws IOException se o envio do e-mail falhar
    */
   public Response generateAndSendCode(String email, TipoCodigo type) throws IOException {

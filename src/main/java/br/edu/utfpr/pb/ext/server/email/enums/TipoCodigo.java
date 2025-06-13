@@ -4,13 +4,13 @@ import lombok.Getter;
 
 @Getter
 public enum TipoCodigo {
-    OTP_AUTENTICACAO("autenticacao"),
-    OTP_CADASTRO("cadastro"),
-    OTP_RECUPERACAO("recuperacao");
+  OTP_AUTENTICACAO("autenticacao"),
+  OTP_CADASTRO("cadastro"),
+  OTP_RECUPERACAO("recuperacao");
 
-    private final String tipo;
+  private final String tipo;
 
-    TipoCodigo(String tipo) {
-        this.tipo = tipo;
-    }
+  TipoCodigo(String tipo) {
+    this.tipo = tipo;
+  }
 }

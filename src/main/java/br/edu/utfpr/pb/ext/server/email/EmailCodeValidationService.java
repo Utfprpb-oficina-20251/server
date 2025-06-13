@@ -1,8 +1,7 @@
 package br.edu.utfpr.pb.ext.server.email;
 
-import java.time.LocalDateTime;
-
 import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

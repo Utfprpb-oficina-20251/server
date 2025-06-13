@@ -1,9 +1,8 @@
 package br.edu.utfpr.pb.ext.server.email;
 
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import java.time.LocalDateTime;
 import java.util.Optional;
-
-import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Repositório para operações com EmailCode no banco de dados. */
@@ -38,5 +37,6 @@ public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
    * @param generatedAt data e hora a partir da qual os códigos devem ter sido gerados (exclusivo)
    * @return quantidade de códigos de e-mail que atendem aos critérios especificados
    */
-  Long countByEmailAndTypeAndGeneratedAtAfter(String email, TipoCodigo type, LocalDateTime generatedAt);
+  Long countByEmailAndTypeAndGeneratedAtAfter(
+      String email, TipoCodigo type, LocalDateTime generatedAt);
 }

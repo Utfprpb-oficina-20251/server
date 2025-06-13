@@ -50,7 +50,8 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
     String code = authToken.getCredentials().toString();
 
     // Validate the OTP code for the "autenticacao" type
-    boolean isValid = emailCodeValidationService.validateCode(email, TipoCodigo.OTP_AUTENTICACAO, code);
+    boolean isValid =
+        emailCodeValidationService.validateCode(email, TipoCodigo.OTP_AUTENTICACAO, code);
 
     if (!isValid) {
       throw new BadCredentialsException("Código de verificação inválido ou expirado");
