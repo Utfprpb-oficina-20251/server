@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.auth.otp;
 
 import br.edu.utfpr.pb.ext.server.email.EmailCodeValidationService;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
 
-  public static final String AUTENTICACAO = "autenticacao";
   private final EmailCodeValidationService emailCodeValidationService;
   private final UsuarioRepository usuarioRepository;
 
@@ -50,7 +50,7 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
     String code = authToken.getCredentials().toString();
 
     // Validate the OTP code for the "autenticacao" type
-    boolean isValid = emailCodeValidationService.validateCode(email, AUTENTICACAO, code);
+    boolean isValid = emailCodeValidationService.validateCode(email, TipoCodigo.OTP_AUTENTICACAO, code);
 
     if (!isValid) {
       throw new BadCredentialsException("Código de verificação inválido ou expirado");

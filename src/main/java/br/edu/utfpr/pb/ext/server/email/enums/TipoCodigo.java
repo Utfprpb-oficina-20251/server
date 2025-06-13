@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum TipoCodigo {
+    OTP_AUTENTICACAO("autenticacao"),
     OTP_CADASTRO("cadastro"),
     OTP_RECUPERACAO("recuperacao");
 
