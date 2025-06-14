@@ -4,12 +4,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import br.edu.utfpr.pb.ext.server.email.EmailCode;
+import br.edu.utfpr.pb.ext.server.email.EmailCode;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeRepository;
 import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoDeNotificacao;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-
 /**
  * Testes unitários para EmailServiceImpl, garantindo que a geração e envio de código funcione
  * corretamente em diferentes cenários.
