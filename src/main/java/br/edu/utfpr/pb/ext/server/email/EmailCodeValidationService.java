@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.email;
 
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,17 +21,16 @@ public class EmailCodeValidationService {
   }
 
   /**
-   * Valida se o código fornecido para um e-mail e tipo é o mais recente, corresponde ao valor
-   * esperado, não foi utilizado e está dentro do prazo de validade. Se todas as condições forem
-   * atendidas, marca o código como utilizado e salva a alteração.
+   * Valida se o código informado para um e-mail e tipo é o mais recente, corresponde ao valor esperado, não foi utilizado e está dentro do prazo de validade.
+   * Se todas as condições forem atendidas, marca o código como utilizado e salva a alteração.
    *
    * @param email endereço de e-mail ao qual o código está associado
-   * @param type tipo do código (exemplo: cadastro, recuperação)
-   * @param code código informado para validação
+   * @param type tipo do código (por exemplo, cadastro ou recuperação)
+   * @param code código a ser validado
    * @return true se o código for válido e marcado como utilizado; false caso contrário
    */
   @Transactional
-  public boolean validateCode(String email, String type, String code) {
+  public boolean validateCode(String email, TipoCodigo type, String code) {
     return repository
         .findTopByEmailAndTypeOrderByGeneratedAtDesc(email, type)
         .filter(ec -> ec.getCode().equals(code))

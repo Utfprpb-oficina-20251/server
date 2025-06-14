@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import br.edu.utfpr.pb.ext.server.email.EmailCode;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeRepository;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import java.io.IOException;
@@ -37,7 +38,7 @@ class EmailServiceImplTest {
   @InjectMocks private EmailServiceImpl emailService;
 
   private String email = "teste@utfpr.edu.br";
-  private String tipo = "cadastro";
+  private TipoCodigo tipo = TipoCodigo.OTP_CADASTRO;
 
   /** Teste para verificar envio com sucesso. */
   @Test
@@ -69,7 +70,7 @@ class EmailServiceImplTest {
   /** Teste para validar que o limite de envio diário é respeitado. */
   @Test
   void testGenerateAndSendCode_MaxDailyLimitReached() {
-    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), eq(tipo), any()))
         .thenReturn(MAX_DAILY_LIMIT_MAIS_UM);
 
     IllegalArgumentException ex =
@@ -82,8 +83,11 @@ class EmailServiceImplTest {
   @Test
   @DisplayName("Valida que o serviço gera erro ao ultrapassar o limite curto de envios")
   void generateAndSendCode_WhenLimiteCurtoFoiUltrapassado_ReturnErroLimiteCurto() {
-    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
-        .thenReturn(MAX_SHORT_PERIOD_MAIS_UM);
+    when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), eq(tipo), any()))
+        .thenReturn(
+            0L,
+            MAX_SHORT_PERIOD_MAIS_UM); // Primeira chamada para limite diário, segunda para limite
+    // curto
 
     IllegalArgumentException ex =
         assertThrows(
@@ -93,9 +97,12 @@ class EmailServiceImplTest {
 
   @Test
   void generateAndSendCode_WhenSendGridResponseIsNull_ReturnIllegalArgumentException() {
-
     when(emailCodeRepository.countByEmailAndTypeAndGeneratedAtAfter(any(), any(), any()))
         .thenReturn(0L);
+    when(springTemplateEngine.process(anyString(), any()))
+        .thenThrow(
+            new RuntimeException("Erro ao tentar enviar e-mail, tente novamente mais tarde"));
+
     IOException ex =
         assertThrows(IOException.class, () -> emailService.generateAndSendCode(email, tipo));
     assertEquals(

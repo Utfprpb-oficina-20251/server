@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.email;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,9 +32,9 @@ class EmailControllerTest {
   @Test
   void testEnviar_Success() throws IOException {
     String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
+    String tipo = "OTP_CADASTRO";
 
-    when(emailService.generateAndSendCode(email, tipo)).thenReturn(null);
+    when(emailService.generateAndSendCode(email, TipoCodigo.OTP_CADASTRO)).thenReturn(null);
 
     ResponseEntity<?> response = controller.enviar(email, tipo);
 
@@ -45,10 +46,10 @@ class EmailControllerTest {
   @Test
   void testValidar_Success() {
     String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
+    String tipo = "OTP_CADASTRO";
     String codigo = "ABC123";
 
-    when(validationService.validateCode(email, tipo, codigo)).thenReturn(true);
+    when(validationService.validateCode(email, TipoCodigo.OTP_CADASTRO, codigo)).thenReturn(true);
 
     ResponseEntity<Boolean> response = controller.validar(email, tipo, codigo);
 
@@ -60,10 +61,10 @@ class EmailControllerTest {
   @Test
   void testValidar_CodigoInvalido() {
     String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
+    String tipo = "OTP_CADASTRO";
     String codigo = "XYZ999";
 
-    when(validationService.validateCode(email, tipo, codigo)).thenReturn(false);
+    when(validationService.validateCode(email, TipoCodigo.OTP_CADASTRO, codigo)).thenReturn(false);
 
     ResponseEntity<Boolean> response = controller.validar(email, tipo, codigo);
 
@@ -75,9 +76,9 @@ class EmailControllerTest {
   @Test
   void testEnviar_IllegalArgumentException() throws IOException {
     String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
+    String tipo = "OTP_CADASTRO";
 
-    when(emailService.generateAndSendCode(email, tipo))
+    when(emailService.generateAndSendCode(eq(email), any(TipoCodigo.class)))
         .thenThrow(new IllegalArgumentException("Limite atingido"));
 
     IllegalArgumentException ex =
@@ -92,9 +93,9 @@ class EmailControllerTest {
   @Test
   void testEnviar_IOException() throws IOException {
     String email = "teste@utfpr.edu.br";
-    String tipo = "cadastro";
+    String tipo = "OTP_CADASTRO";
 
-    when(emailService.generateAndSendCode(email, tipo))
+    when(emailService.generateAndSendCode(eq(email), any(TipoCodigo.class)))
         .thenThrow(new IOException("Erro na API SendGrid"));
 
     IOException ex = assertThrows(IOException.class, () -> controller.enviar(email, tipo));
@@ -108,7 +109,7 @@ class EmailControllerTest {
   @Test
   void testEnviar_EmailInvalido() {
     String email = "email-invalido";
-    String tipo = "cadastro";
+    String tipo = "OTP_CADASTRO";
 
     IllegalArgumentException ex =
         assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
@@ -135,7 +136,7 @@ class EmailControllerTest {
   /** Teste para e-mail nulo. */
   @Test
   void testEnviar_EmailNulo() {
-    String tipo = "cadastro";
+    String tipo = "OTP_CADASTRO"; // Alterado para corresponder ao nome do enum
 
     IllegalArgumentException ex =
         assertThrows(IllegalArgumentException.class, () -> controller.enviar(null, tipo));
@@ -156,5 +157,19 @@ class EmailControllerTest {
     ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Tipo de código não informado"));
+  }
+
+  /** Teste para tipo inválido. */
+  @Test
+  void testEnviar_TipoInvalido() {
+    String email = "teste@utfpr.edu.br";
+    String tipo = "TIPO_INEXISTENTE";
+
+    IllegalArgumentException ex =
+        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
+
+    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Tipo de código inválido"));
   }
 }
