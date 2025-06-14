@@ -33,10 +33,10 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
   }
 
   /**
-   * Autentica um usuário utilizando um código OTP enviado por e-mail.
+   * Realiza a autenticação de um usuário utilizando um código OTP enviado por e-mail.
    *
-   * <p>Valida o código OTP fornecido para o e-mail informado e, se válido, recupera os detalhes do
-   * usuário. Retorna um token de autenticação autenticado com as autoridades do usuário.
+   * Valida o código OTP fornecido para o e-mail informado e, caso seja válido, recupera os detalhes do usuário.
+   * Retorna um token de autenticação autenticado com as permissões do usuário.
    *
    * @param authentication objeto contendo o e-mail e o código OTP.
    * @return token de autenticação autenticado com os detalhes e permissões do usuário.

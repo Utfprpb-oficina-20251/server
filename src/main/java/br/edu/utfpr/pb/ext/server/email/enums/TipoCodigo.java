@@ -10,6 +10,11 @@ public enum TipoCodigo {
 
   private final String tipo;
 
+  /**
+   * Inicializa a constante do enum com o valor de tipo associado.
+   *
+   * @param tipo valor de string que representa o tipo do código
+   */
   TipoCodigo(String tipo) {
     this.tipo = tipo;
   }
