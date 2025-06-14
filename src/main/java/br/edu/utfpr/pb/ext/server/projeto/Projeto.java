@@ -34,6 +34,10 @@ public class Projeto extends BaseEntity {
 
   private String restricaoPublico;
 
+  @ManyToOne
+  @JoinColumn(name = "responsavel_id")
+  private Usuario responsavel;
+
   @ManyToMany
   @JoinTable(
       name = "tb_equipe_servidor",
