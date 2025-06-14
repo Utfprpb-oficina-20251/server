@@ -29,11 +29,11 @@ public class AuthTestConfig {
   public static final String CODIGO_VALIDO = "123456";
 
   /**
-   * Fornece um mock de EmailServiceImpl para testes, simulando o envio bem-sucedido de código de
-   * autenticação por e-mail.
+   * Cria um mock de EmailServiceImpl que simula o envio bem-sucedido de código de autenticação por e-mail.
    *
-   * @return uma instância mockada de EmailServiceImpl que retorna uma resposta de sucesso ao chamar
-   *     generateAndSendCode com o contexto "autenticacao"
+   * O mock retorna sempre uma resposta de sucesso (HTTP 202) ao chamar generateAndSendCode com qualquer e-mail e o tipo de código OTP_AUTENTICACAO.
+   *
+   * @return instância mockada de EmailServiceImpl para uso em testes
    * @throws IOException se ocorrer um erro de E/S durante a criação do mock
    */
   @Bean
@@ -50,15 +50,11 @@ public class AuthTestConfig {
   }
 
   /**
-   * Fornece um mock de EmailCodeValidationService para testes, simulando a validação de códigos de
-   * autenticação por e-mail.
+   * Cria um mock de EmailCodeValidationService para testes de validação de código OTP por e-mail.
    *
-   * <p>O mock retorna {@code true} apenas quando o e-mail, o contexto e o código correspondem aos
-   * valores de teste válidos; para qualquer código inválido, retorna {@code false},
-   * independentemente do e-mail ou contexto.
+   * O mock retorna {@code true} apenas quando o e-mail, o tipo de código e o código fornecidos correspondem aos valores de teste válidos; para qualquer código inválido, retorna {@code false}, independentemente dos demais parâmetros.
    *
-   * @return mock de EmailCodeValidationService com comportamento previsível para cenários de teste
-   *     de autenticação por e-mail
+   * @return um mock de EmailCodeValidationService com respostas controladas para cenários de autenticação por e-mail em testes
    */
   @Bean
   @Primary

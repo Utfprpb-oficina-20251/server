@@ -98,11 +98,10 @@ public class AuthService {
   }
 
   /**
-   * Solicita o envio de um código OTP para o email informado, caso o usuário esteja cadastrado.
+   * Envia um código OTP para o email informado, caso o usuário esteja cadastrado.
    *
    * @param email endereço de email do usuário que receberá o código OTP
-   * @throws ResponseStatusException com status 404 se o email não estiver cadastrado, ou 500 em
-   *     caso de falha no envio do código
+   * @throws ResponseStatusException com status 404 se o email não estiver cadastrado, ou 500 em caso de falha no envio do código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public void solicitarCodigoOtp(String email) {
