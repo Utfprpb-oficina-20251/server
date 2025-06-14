@@ -4,6 +4,7 @@ import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.EmailOtpAuthRequestDTO;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationToken;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
@@ -97,11 +98,10 @@ public class AuthService {
   }
 
   /**
-   * Solicita o envio de um código OTP para o email informado, caso o usuário esteja cadastrado.
+   * Envia um código OTP para o email informado, caso o usuário esteja cadastrado.
    *
    * @param email endereço de email do usuário que receberá o código OTP
-   * @throws ResponseStatusException com status 404 se o email não estiver cadastrado, ou 500 em
-   *     caso de falha no envio do código
+   * @throws ResponseStatusException com status 404 se o email não estiver cadastrado, ou 500 em caso de falha no envio do código
    */
   @Operation(summary = "Solicita um código OTP para autenticação via email")
   public void solicitarCodigoOtp(String email) {
@@ -111,7 +111,7 @@ public class AuthService {
       usuarioRepository
           .findByEmail(email)
           .orElseThrow(() -> new EntityNotFoundException(EMAIL_NAO_CADASTRADO));
-      emailService.generateAndSendCode(email, "autenticacao");
+      emailService.generateAndSendCode(email, TipoCodigo.OTP_AUTENTICACAO);
       logger.info("Código de verificação enviado");
     } catch (EntityNotFoundException e) {
       logger.error(EMAIL_NAO_CADASTRADO, e);
