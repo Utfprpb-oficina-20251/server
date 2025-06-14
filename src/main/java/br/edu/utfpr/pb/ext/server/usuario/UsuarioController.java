@@ -177,6 +177,6 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
         new RespostaLoginDTO(
             token,
             expiration,
-            new UsuarioLoginDTO(salvo.getEmail(), salvo.getAuthoritiesStrings())));
+            new UsuarioLoginDTO(salvo.getEmail(), salvo.getNome(), salvo.getAuthoritiesStrings())));
   }
 }

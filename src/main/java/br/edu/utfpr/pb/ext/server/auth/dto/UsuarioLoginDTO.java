@@ -14,5 +14,6 @@ import lombok.Data;
     description = "Objeto de informação do usuário para ser carregado no contexto do frontend")
 public class UsuarioLoginDTO {
   private String email;
+  private String nome;
   private Set<String> authorities;
 }

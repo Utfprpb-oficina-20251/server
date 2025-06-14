@@ -93,7 +93,8 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(authRequestDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.token").exists())
-        .andExpect(jsonPath("$.expiresIn").exists());
+        .andExpect(jsonPath("$.expiresIn").exists())
+        .andExpect(jsonPath("$.user.nome").value("testuser")); // Assert only first name
   }
 
   @Test
@@ -130,6 +131,7 @@ class AuthControllerTest {
         .andExpect(jsonPath("$.user").exists())
         .andExpect(jsonPath("$.user.email").exists())
         .andExpect(jsonPath("$.user.email").value(email))
+        .andExpect(jsonPath("$.user.nome").value("testuser"))
         .andExpect(jsonPath("$.user.authorities").exists())
         .andExpect(jsonPath("$.user.authorities[0]").exists())
         .andExpect(jsonPath("$.user.authorities[0]").value("ROLE_ALUNO"));
