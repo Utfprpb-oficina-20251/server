@@ -116,10 +116,8 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
 
   /****
    * Cria um novo usuário com perfil de aluno e retorna uma resposta de login com token JWT e tempo de expiração.
-   *
    * Retorna HTTP 200 com o token de autenticação e tempo de expiração caso a criação seja bem-sucedida.
    * Retorna HTTP 400 se a autoridade "ROLE_ALUNO" não for encontrada.
-   *
    * @param usuarioAlunoRequestDTO dados do usuário aluno a ser criado
    * @return resposta HTTP 200 com token e expiração, ou HTTP 400 se a autoridade não existir
    */
@@ -167,7 +165,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
             content =
                 @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = UsuarioServidorResponseDTO.class)))
+                    schema = @Schema(implementation = UsuarioProjetoDTO.class)))
       })
   @GetMapping("/executores")
   public ResponseEntity<List<UsuarioProjetoDTO>> getAllUsers() {
