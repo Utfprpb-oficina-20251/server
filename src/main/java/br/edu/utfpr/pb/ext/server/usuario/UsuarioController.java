@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -155,9 +154,6 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   @GetMapping("/meu-perfil")
   public ResponseEntity<UsuarioLogadoInfoDTO> getMeuPerfil() {
     Usuario usuario = usuarioService.obterUsuarioLogado();
-    if (usuario == null) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
     UsuarioLogadoInfoDTO responseDTO = modelMapper.map(usuario, UsuarioLogadoInfoDTO.class);
     return ResponseEntity.ok(responseDTO);
   }
