@@ -105,6 +105,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/departamentos/**")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/usuarios/executores")
+                    .hasRole("SERVIDOR")
                     .requestMatchers("/error")
                     .permitAll()
                     .anyRequest()
