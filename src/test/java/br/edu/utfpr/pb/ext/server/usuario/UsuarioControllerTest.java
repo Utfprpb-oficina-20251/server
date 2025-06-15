@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
+import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioLogadoInfoDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import org.junit.jupiter.api.BeforeEach;
@@ -168,6 +169,46 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
     assertEquals(400, response.getStatusCode().value());
+  }
+
+  @Test
+  void getMeuPerfil_whenUserIsAuthenticated_receiveUserProfile() {
+    UsuarioServidorRequestDTO request = createUsuarioServidorRequestDTO();
+    ResponseEntity<RespostaLoginDTO> loginResponse =
+        testRestTemplate.postForEntity(API_USERS, request, RespostaLoginDTO.class);
+
+    assertEquals(200, loginResponse.getStatusCode().value());
+    assertNotNull(loginResponse.getBody());
+    assertNotNull(loginResponse.getBody().getToken());
+
+    String token = loginResponse.getBody().getToken();
+
+    testRestTemplate
+        .getRestTemplate()
+        .getInterceptors()
+        .add(
+            (httpRequest, bytes, execution) -> {
+              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+              return execution.execute(httpRequest, bytes);
+            });
+
+    ResponseEntity<UsuarioLogadoInfoDTO> response =
+        testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(request.getEmail(), response.getBody().getEmail());
+    assertEquals(request.getNome(), response.getBody().getNome());
+  }
+
+  @Test
+  void getMeuPerfil_whenUserIsUnauthenticated_receiveUnauthorized() {
+    testRestTemplate.getRestTemplate().getInterceptors().clear();
+
+    ResponseEntity<Object> response =
+        testRestTemplate.getForEntity("/api/usuarios/meu-perfil", Object.class);
+
+    assertEquals(403, response.getStatusCode().value());
   }
 
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {

@@ -52,14 +52,17 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Gera e envia um código de verificação para o e-mail informado, registrando o código no banco de dados.
+   * Gera e envia um código de verificação para o e-mail informado, registrando o código no banco de
+   * dados.
    *
-   * Valida o tipo e o formato do e-mail, verifica limites de envio, gera um código aleatório, envia o e-mail de verificação e armazena o código gerado.
+   * <p>Valida o tipo e o formato do e-mail, verifica limites de envio, gera um código aleatório,
+   * envia o e-mail de verificação e armazena o código gerado.
    *
    * @param email endereço de e-mail do destinatário
    * @param type tipo do código de verificação
    * @return resposta da API do SendGrid referente ao envio do e-mail
-   * @throws IllegalArgumentException se o tipo for nulo, se o e-mail for inválido ou se os limites de envio forem excedidos
+   * @throws IllegalArgumentException se o tipo for nulo, se o e-mail for inválido ou se os limites
+   *     de envio forem excedidos
    * @throws IOException se o envio do e-mail falhar
    */
   public Response generateAndSendCode(String email, TipoCodigo type) throws IOException {
@@ -90,9 +93,11 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Verifica se o envio de códigos para o e-mail e tipo especificados excede os limites diário e de curto prazo.
+   * Verifica se o envio de códigos para o e-mail e tipo especificados excede os limites diário e de
+   * curto prazo.
    *
-   * Lança uma exceção se o número de códigos enviados nas últimas 24 horas ou nos últimos minutos ultrapassar o permitido.
+   * <p>Lança uma exceção se o número de códigos enviados nas últimas 24 horas ou nos últimos
+   * minutos ultrapassar o permitido.
    *
    * @param email endereço de e-mail a ser verificado
    * @param type tipo de código relacionado ao envio
@@ -123,7 +128,8 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Registra um código de verificação de e-mail no banco de dados com informações de validade e status de uso.
+   * Registra um código de verificação de e-mail no banco de dados com informações de validade e
+   * status de uso.
    *
    * @param email endereço de e-mail ao qual o código está vinculado
    * @param code código de verificação gerado
@@ -141,9 +147,11 @@ public class EmailServiceImpl {
   }
 
   /**
-   * Envia um e-mail de verificação com um código e informações de validade para o destinatário informado.
+   * Envia um e-mail de verificação com um código e informações de validade para o destinatário
+   * informado.
    *
-   * O e-mail utiliza um template HTML e inclui o código de verificação e o tempo de expiração em minutos.
+   * <p>O e-mail utiliza um template HTML e inclui o código de verificação e o tempo de expiração em
+   * minutos.
    *
    * @param email endereço de e-mail do destinatário
    * @param code código de verificação a ser enviado

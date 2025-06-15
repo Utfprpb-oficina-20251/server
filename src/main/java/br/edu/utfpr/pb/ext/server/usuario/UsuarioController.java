@@ -8,6 +8,7 @@ import br.edu.utfpr.pb.ext.server.generics.ICrudService;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
 import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
+import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioLogadoInfoDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +23,7 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -147,6 +149,13 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     Set<Authority> authorities = new HashSet<>();
     Authority alunoAuthority = authorityRepository.findByAuthority("ROLE_ALUNO").orElse(null);
     return getRespostaLoginDTOResponseEntity(usuario, authorities, alunoAuthority);
+  }
+
+  @GetMapping("/meu-perfil")
+  public ResponseEntity<UsuarioLogadoInfoDTO> getMeuPerfil() {
+    Usuario usuario = usuarioService.obterUsuarioLogado();
+    UsuarioLogadoInfoDTO responseDTO = modelMapper.map(usuario, UsuarioLogadoInfoDTO.class);
+    return ResponseEntity.ok(responseDTO);
   }
 
   /**
