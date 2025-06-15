@@ -6,8 +6,10 @@ import br.edu.utfpr.pb.ext.server.sugestaoprojeto.dto.SugestaoDeProjetoDTO;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,5 +78,22 @@ public class SugestaoDeProjetoController
    */
   private SugestaoDeProjetoDTO convertToResponseDTO(SugestaoDeProjeto sugestaoDeProjeto) {
     return getModelMapper().map(sugestaoDeProjeto, SugestaoDeProjetoDTO.class);
+  }
+
+  /**
+   * Cria uma nova sugestão de projeto e retorna mensagem de sucesso para toast.
+   *
+   * @param sugestaoDTO dados da sugestão a ser criada
+   * @return resposta padronizada com mensagem de sucesso
+   */
+  @Override
+  @PostMapping
+  @Operation(summary = "Cria uma nova sugestão de projeto")
+  public ResponseEntity<SugestaoDeProjetoDTO> create(
+      @RequestBody @Valid SugestaoDeProjetoDTO sugestaoDTO) {
+    SugestaoDeProjeto sugestaoSalva = getService().save(convertToEntity(sugestaoDTO));
+    SugestaoDeProjetoDTO sugestaoSalvaDTO =
+        getModelMapper().map(sugestaoSalva, SugestaoDeProjetoDTO.class);
+    return ResponseEntity.status(HttpStatus.CREATED).body(sugestaoSalvaDTO);
   }
 }
