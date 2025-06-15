@@ -9,12 +9,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
 
   /**
- * Busca o código de e-mail mais recente para o e-mail e tipo informados, considerando a data de geração em ordem decrescente.
- *
- * @param email endereço de e-mail a ser consultado
- * @param type tipo do código de e-mail
- * @return um {@link Optional} contendo o código mais recente, se existir
- */
+   * Busca o código de e-mail mais recente para o e-mail e tipo informados, considerando a data de
+   * geração em ordem decrescente.
+   *
+   * @param email endereço de e-mail a ser consultado
+   * @param type tipo do código de e-mail
+   * @return um {@link Optional} contendo o código mais recente, se existir
+   */
   Optional<EmailCode> findTopByEmailAndTypeOrderByGeneratedAtDesc(String email, TipoCodigo type);
 
   /**
@@ -28,13 +29,15 @@ public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
   Optional<EmailCode> findByCodeAndExpirationAfterAndUsedFalse(String code, LocalDateTime now);
 
   /**
-       * Conta a quantidade de códigos de e-mail de um determinado tipo associados a um endereço, gerados estritamente após a data e hora especificadas.
-       *
-       * @param email endereço de e-mail a ser consultado
-       * @param type tipo do código de e-mail
-       * @param generatedAt data e hora limite exclusiva para considerar os códigos gerados posteriormente
-       * @return número de códigos de e-mail encontrados conforme os critérios
-       */
+   * Conta a quantidade de códigos de e-mail de um determinado tipo associados a um endereço,
+   * gerados estritamente após a data e hora especificadas.
+   *
+   * @param email endereço de e-mail a ser consultado
+   * @param type tipo do código de e-mail
+   * @param generatedAt data e hora limite exclusiva para considerar os códigos gerados
+   *     posteriormente
+   * @return número de códigos de e-mail encontrados conforme os critérios
+   */
   Long countByEmailAndTypeAndGeneratedAtAfter(
       String email, TipoCodigo type, LocalDateTime generatedAt);
 }
