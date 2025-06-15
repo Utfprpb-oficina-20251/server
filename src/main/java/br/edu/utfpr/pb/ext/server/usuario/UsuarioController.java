@@ -7,10 +7,7 @@ import br.edu.utfpr.pb.ext.server.generics.CrudController;
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
 import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
-import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
-import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioLogadoInfoDTO;
-import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
-import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorResponseDTO;
+import br.edu.utfpr.pb.ext.server.usuario.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
@@ -118,10 +116,8 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
 
   /****
    * Cria um novo usuário com perfil de aluno e retorna uma resposta de login com token JWT e tempo de expiração.
-   *
    * Retorna HTTP 200 com o token de autenticação e tempo de expiração caso a criação seja bem-sucedida.
    * Retorna HTTP 400 se a autoridade "ROLE_ALUNO" não for encontrada.
-   *
    * @param usuarioAlunoRequestDTO dados do usuário aluno a ser criado
    * @return resposta HTTP 200 com token e expiração, ou HTTP 400 se a autoridade não existir
    */
@@ -156,6 +152,29 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     Usuario usuario = usuarioService.obterUsuarioLogado();
     UsuarioLogadoInfoDTO responseDTO = modelMapper.map(usuario, UsuarioLogadoInfoDTO.class);
     return ResponseEntity.ok(responseDTO);
+  }
+
+  @Operation(
+      summary = "Get all users",
+      description = "Returns a list of all registered users in the system")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Users retrieved successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UsuarioProjetoDTO.class)))
+      })
+  @GetMapping("/executores")
+  public ResponseEntity<List<UsuarioProjetoDTO>> getAllUsers() {
+    List<Usuario> usuarios = usuarioService.findAll();
+    List<UsuarioProjetoDTO> responseList =
+        usuarios.stream()
+            .map(usuario -> modelMapper.map(usuario, UsuarioProjetoDTO.class))
+            .toList();
+    return ResponseEntity.ok(responseList);
   }
 
   /**

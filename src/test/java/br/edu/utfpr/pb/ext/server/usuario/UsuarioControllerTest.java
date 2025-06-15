@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioLogadoInfoDTO;
+import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import org.junit.jupiter.api.BeforeEach;
@@ -209,6 +210,58 @@ class UsuarioControllerTest {
         testRestTemplate.getForEntity("/api/usuarios/meu-perfil", Object.class);
 
     assertEquals(403, response.getStatusCode().value());
+  }
+
+  @Test
+  void getAllUsers_whenUnauthenticated_receiveForbidden() {
+    // Ensure no authentication headers are present
+    testRestTemplate.getRestTemplate().getInterceptors().clear();
+
+    ResponseEntity<Object> response =
+        testRestTemplate.getForEntity("/api/usuarios/executores", Object.class);
+
+    assertEquals(403, response.getStatusCode().value());
+  }
+
+  @Test
+  void getAllUsers_whenAuthenticated_receiveListOfUsers() {
+    // Create a user and authenticate
+    UsuarioServidorRequestDTO request = createUsuarioServidorRequestDTO();
+    ResponseEntity<RespostaLoginDTO> loginResponse =
+        testRestTemplate.postForEntity(API_USERS, request, RespostaLoginDTO.class);
+
+    String token = loginResponse.getBody().getToken();
+
+    // Add authentication header for subsequent requests
+    testRestTemplate
+        .getRestTemplate()
+        .getInterceptors()
+        .add(
+            (httpRequest, bytes, execution) -> {
+              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+              return execution.execute(httpRequest, bytes);
+            });
+
+    // Call the endpoint
+    ResponseEntity<UsuarioProjetoDTO[]> response =
+        testRestTemplate.getForEntity("/api/usuarios/executores", UsuarioProjetoDTO[].class);
+
+    // Verify response
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().length);
+
+    // Verify user data
+    boolean foundFirstUser = false;
+
+    for (UsuarioProjetoDTO user : response.getBody()) {
+      if (user.getEmail().equals(request.getEmail())) {
+        foundFirstUser = true;
+        assertEquals(request.getNome(), user.getNome());
+      }
+    }
+
+    assertTrue(foundFirstUser);
   }
 
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {
