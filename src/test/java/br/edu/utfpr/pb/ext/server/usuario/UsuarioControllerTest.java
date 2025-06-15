@@ -201,6 +201,16 @@ class UsuarioControllerTest {
     assertEquals(request.getNome(), response.getBody().getNome());
   }
 
+  @Test
+  void getMeuPerfil_whenUserIsUnauthenticated_receiveUnauthorized() {
+    testRestTemplate.getRestTemplate().getInterceptors().clear();
+
+    ResponseEntity<Object> response =
+        testRestTemplate.getForEntity("/api/usuarios/meu-perfil", Object.class);
+
+    assertEquals(403, response.getStatusCode().value());
+  }
+
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {
     UsuarioServidorRequestDTO request = new UsuarioServidorRequestDTO();
     request.setNome("teste");
