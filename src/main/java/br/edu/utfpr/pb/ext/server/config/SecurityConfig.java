@@ -99,6 +99,7 @@ public class SecurityConfig {
                     .access(isSwaggerEnabled())
                     .requestMatchers(HttpMethod.POST, "/api/usuarios/**")
                     .permitAll()
+                     .requestMatchers(HttpMethod.GET, "/api/cursos/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/projeto/**")
                     .hasRole("SERVIDOR")
                     .requestMatchers(HttpMethod.OPTIONS, "/**") // CORS preflight
