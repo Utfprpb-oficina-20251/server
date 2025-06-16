@@ -7,12 +7,13 @@ import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoServi
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/sugestao")
@@ -102,7 +103,11 @@ public class SugestaoDeProjetoController
     SugestaoDeProjeto sugestaoSalva = getService().save(entidade);
     SugestaoDeProjetoDTO sugestaoSalvaDTO =
         getModelMapper().map(sugestaoSalva, SugestaoDeProjetoDTO.class);
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(sugestaoSalvaDTO);
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(sugestaoSalvaDTO.getId())
+            .toUri();
+    return ResponseEntity.created(location).body(sugestaoSalvaDTO);
   }
 }
