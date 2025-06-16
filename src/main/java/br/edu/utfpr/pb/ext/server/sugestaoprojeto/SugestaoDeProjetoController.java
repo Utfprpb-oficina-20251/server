@@ -7,6 +7,7 @@ import br.edu.utfpr.pb.ext.server.sugestaoprojeto.service.SugestaoDeProjetoServi
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -81,19 +82,27 @@ public class SugestaoDeProjetoController
   }
 
   /**
-   * Cria uma nova sugestão de projeto e retorna mensagem de sucesso para toast.
+   * Cria uma nova sugestão de projeto e retorna os dados da sugestão criada.
    *
    * @param sugestaoDTO dados da sugestão a ser criada
-   * @return resposta padronizada com mensagem de sucesso
+   * @return DTO da sugestão salva com status e data de criação preenchidos
    */
   @Override
   @PostMapping
   @Operation(summary = "Cria uma nova sugestão de projeto")
   public ResponseEntity<SugestaoDeProjetoDTO> create(
       @RequestBody @Valid SugestaoDeProjetoDTO sugestaoDTO) {
-    SugestaoDeProjeto sugestaoSalva = getService().save(convertToEntity(sugestaoDTO));
+
+    SugestaoDeProjeto entidade = convertToEntity(sugestaoDTO);
+
+    // Garantir que a sugestão sempre comece com status AGUARDANDO e data de criação atual
+    entidade.setStatus(StatusSugestao.AGUARDANDO);
+    entidade.setDataCriacao(LocalDateTime.now());
+
+    SugestaoDeProjeto sugestaoSalva = getService().save(entidade);
     SugestaoDeProjetoDTO sugestaoSalvaDTO =
         getModelMapper().map(sugestaoSalva, SugestaoDeProjetoDTO.class);
+
     return ResponseEntity.status(HttpStatus.CREATED).body(sugestaoSalvaDTO);
   }
 }
