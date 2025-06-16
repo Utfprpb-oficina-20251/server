@@ -6,11 +6,11 @@ import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -95,14 +95,15 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
 
     // 3. Mapeia a lista de entidades para uma lista de DTOs usando o ModelMapper
     return projetosEncontrados.stream()
-            .map(projeto -> modelMapper.map(projeto, ProjetoDTO.class))
-            .collect(Collectors.toList());
+        .map(projeto -> modelMapper.map(projeto, ProjetoDTO.class))
+        .collect(Collectors.toList());
   }
 
   // --- NOVO MÉTODO PRIVADO PARA A LÓGICA DA CONSULTA ---
   /**
-   * Cria um objeto Specification dinamicamente com base nos filtros fornecidos.
-   * A lógica que estaria na classe ProjetoSpecification agora vive aqui.
+   * Cria um objeto Specification dinamicamente com base nos filtros fornecidos. A lógica que
+   * estaria na classe ProjetoSpecification agora vive aqui.
+   *
    * @param filtros DTO com os critérios de busca.
    * @return Um objeto Specification<Projeto> pronto para ser usado na consulta.
    */
@@ -111,7 +112,10 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
       List<Predicate> predicates = new ArrayList<>();
 
       if (filtros.titulo() != null && !filtros.titulo().isEmpty()) {
-        predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("titulo")), "%" + filtros.titulo().toLowerCase() + "%"));
+        predicates.add(
+            criteriaBuilder.like(
+                criteriaBuilder.lower(root.get("titulo")),
+                "%" + filtros.titulo().toLowerCase() + "%"));
       }
 
       if (filtros.status() != null) {
@@ -120,23 +124,30 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
 
       if (filtros.dataInicioDe() != null) {
         predicates.add(
-                criteriaBuilder.greaterThanOrEqualTo(root.get("dataInicio"), filtros.dataInicioDe().atStartOfDay())
-        );      }
+            criteriaBuilder.greaterThanOrEqualTo(
+                root.get("dataInicio"), filtros.dataInicioDe().atStartOfDay()));
+      }
       if (filtros.dataInicioAte() != null) {
-        predicates.add(criteriaBuilder.lessThan(root.get("dataInicio"), filtros.dataInicioAte().atStartOfDay()));
+        predicates.add(
+            criteriaBuilder.lessThanOrEqualTo(
+                root.get("dataInicio"), filtros.dataInicioAte().atStartOfDay()));
       }
 
       if (filtros.idResponsavel() != null) {
-        predicates.add(criteriaBuilder.equal(root.join("responsavel").get("id"), filtros.idResponsavel()));
+        predicates.add(
+            criteriaBuilder.equal(root.join("responsavel").get("id"), filtros.idResponsavel()));
       }
 
       if (filtros.idMembroEquipe() != null) {
-        predicates.add(criteriaBuilder.equal(root.join("equipeExecutora").get("id"), filtros.idMembroEquipe()));
-
+        predicates.add(
+            criteriaBuilder.equal(
+                root.join("equipeExecutora").get("id"), filtros.idMembroEquipe()));
       }
 
       if (filtros.idCurso() != null) {
-        predicates.add(criteriaBuilder.equal(root.join("responsavel").join("curso").get("id"), filtros.idCurso()));
+        predicates.add(
+            criteriaBuilder.equal(
+                root.join("responsavel").join("curso").get("id"), filtros.idCurso()));
       }
 
       query.distinct(true);
