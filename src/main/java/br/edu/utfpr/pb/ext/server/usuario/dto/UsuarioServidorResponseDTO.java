@@ -1,6 +1,5 @@
 package br.edu.utfpr.pb.ext.server.usuario.dto;
 
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import lombok.Data;
 
 @Data
@@ -16,5 +15,5 @@ public class UsuarioServidorResponseDTO {
 
   private String enderecoCompleto;
 
-  private Departamentos departamento;
+  private Long departamentoId;
 }

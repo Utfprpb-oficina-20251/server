@@ -1,9 +1,9 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
+import br.edu.utfpr.pb.ext.server.departamento.Departamento;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -42,7 +42,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   @JoinColumn(name = "curso_id")
   private Curso curso;
 
-  private Departamentos departamento;
+  @ManyToOne
+  @JoinColumn(name = "departamento_id")
+  private Departamento departamento;
 
   @Column(name = "ativo")
   private boolean ativo;

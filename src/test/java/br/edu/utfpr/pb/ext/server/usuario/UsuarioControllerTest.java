@@ -7,7 +7,6 @@ import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioLogadoInfoDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -270,7 +269,7 @@ class UsuarioControllerTest {
     request.setCpf("29212492002");
     request.setSiape("1234567");
     request.setEmail("batata@utfpr.edu.br");
-    request.setDepartamento(Departamentos.DAINF);
+    request.setDepartamentoId(1L);
     return request;
   }
 

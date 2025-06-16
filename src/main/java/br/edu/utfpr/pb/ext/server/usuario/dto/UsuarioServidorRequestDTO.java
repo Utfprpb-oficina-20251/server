@@ -1,6 +1,5 @@
 package br.edu.utfpr.pb.ext.server.usuario.dto;
 
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import br.edu.utfpr.pb.ext.server.usuario.validation.annotation.UniqueCpf;
 import br.edu.utfpr.pb.ext.server.usuario.validation.annotation.UniqueSiape;
 import jakarta.validation.constraints.*;
@@ -32,5 +31,5 @@ public class UsuarioServidorRequestDTO {
 
   @Size(min = 3, max = 100) private String enderecoCompleto;
 
-  @NotNull private Departamentos departamento;
+  @NotNull private Long departamentoId;
 }
