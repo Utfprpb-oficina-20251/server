@@ -194,96 +194,52 @@ class ProjetoControllerTest {
   }
 
   @Test
-  void buscarMeusProjetos_quandoUsuarioTemProjetos_retornaOkComListaDeProjetos() {
-    // Arrange (Organização) 🕵️‍♂️
-    // 1. Cria um usuário simulando o usuário logado
-    Usuario usuarioLogado = new Usuario();
-    usuarioLogado.setId(1L);
-
-    // 2. Cria a lista de projetos DTO que o serviço deve retornar
-    List<ProjetoDTO> listaProjetosDTO = List.of(new ProjetoDTO(), new ProjetoDTO());
-
-    // 3. Simula o comportamento do serviço: quando 'buscarProjetosPorFiltro' for chamado,
-    //    retorna a lista criada acima. Usamos 'any' para o filtro, pois a lógica de criação
-    //    do filtro está dentro do controller, e queremos apenas garantir que o serviço seja chamado.
-    when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
-            .thenReturn(listaProjetosDTO);
-
-    // Act (Ação) 🚀
-    // 4. Executa o método do controller que estamos testando
-    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarMeusProjetos(usuarioLogado);
-
-    // Assert (Verificação) ✅
-    // 5. Verifica se a resposta não é nula e o status HTTP é 200 (OK)
-    assertNotNull(response);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-
-    // 6. Verifica se o corpo da resposta não é nulo e contém o número esperado de projetos
-    assertNotNull(response.getBody());
-    assertEquals(2, response.getBody().size());
-
-    // 7. Garante que o método do serviço foi chamado exatamente uma vez
-    verify(projetoService, times(1)).buscarProjetosPorFiltro(any(FiltroProjetoDTO.class));
-  }
-
-  @Test
   void buscarMeusProjetos_quandoUsuarioNaoTemProjetos_retornaOkComListaVazia() {
-    // Arrange (Organização) 🕵️‍♂️
-    // 1. Cria um usuário simulando o usuário logado
+    // Arrange (Organização) 🕵️
     Usuario usuarioLogado = new Usuario();
     usuarioLogado.setId(2L);
 
-    // 2. Simula o serviço retornando uma lista vazia
-    when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
-            .thenReturn(Collections.emptyList());
+    FiltroProjetoDTO filtroEspecifico =
+        new FiltroProjetoDTO(null, null, null, null, 2L, null, null);
+    when(projetoService.buscarProjetosPorFiltro(eq(filtroEspecifico)))
+        .thenReturn(Collections.emptyList());
 
     // Act (Ação) 🚀
-    // 3. Executa o método do controller
     ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarMeusProjetos(usuarioLogado);
 
     // Assert (Verificação) ✅
-    // 4. Verifica se a resposta e o status HTTP estão corretos
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
 
-    // 5. Verifica se o corpo da resposta não é nulo e se a lista está vazia
     assertNotNull(response.getBody());
     assertTrue(response.getBody().isEmpty());
 
-    // 6. Garante que o serviço foi chamado
-    verify(projetoService, times(1)).buscarProjetosPorFiltro(any(FiltroProjetoDTO.class));
+    verify(projetoService, times(1)).buscarProjetosPorFiltro(eq(filtroEspecifico));
   }
 
   @Test
   void buscarProjetos_semFiltros_retornaOkComListaDeProjetos() {
-    // Arrange (Organização) 🕵️‍♂️
-    // 1. Cria um objeto de filtro vazio, simulando uma busca geral.
-    FiltroProjetoDTO filtros = new FiltroProjetoDTO(null, null, null, null, null, null,null);
-
-    // 2. Cria a lista de projetos que esperamos que o serviço retorne.
+    // Arrange
+    FiltroProjetoDTO filtroVazio = new FiltroProjetoDTO(null, null, null, null, null, null, null);
     List<ProjetoDTO> listaEsperada = List.of(new ProjetoDTO(), new ProjetoDTO());
+    when(projetoService.buscarProjetosPorFiltro(eq(filtroVazio))).thenReturn(listaEsperada);
 
-    // 3. Configura o mock do serviço: quando 'buscarProjetosPorFiltro' for chamado com qualquer
-    //    filtro, deve retornar a lista que preparamos.
-    when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class))).thenReturn(listaEsperada);
+    // Act
+    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtroVazio);
 
-    // Act (Ação) 🚀
-    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtros);
-
-    // Assert (Verificação) ✅
+    // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
-
     assertNotNull(response.getBody());
     assertEquals(2, response.getBody().size());
 
-    verify(projetoService).buscarProjetosPorFiltro(any(FiltroProjetoDTO.class));
+    verify(projetoService).buscarProjetosPorFiltro(eq(filtroVazio));
   }
 
   @Test
   void buscarProjetos_comFiltroUnicoDeTitulo_retornaOkComListaFiltrada() {
     // Arrange 🕵️‍♂️
     // 1. Cria um filtro específico, apenas com o título.
-    FiltroProjetoDTO filtros = new FiltroProjetoDTO("Robótica", null, null, null, null, null,null);
+    FiltroProjetoDTO filtros = new FiltroProjetoDTO("Robótica", null, null, null, null, null, null);
 
     // 2. A lista esperada para este filtro específico.
     List<ProjetoDTO> listaFiltrada = List.of(new ProjetoDTO());
@@ -307,7 +263,8 @@ class ProjetoControllerTest {
   void buscarProjetos_comFiltrosCombinados_retornaOkComListaFiltrada() {
     // Arrange 🕵️‍♂️
     // 1. Cria um filtro combinando status e ID de um membro da equipe.
-    FiltroProjetoDTO filtros = new FiltroProjetoDTO(null, StatusProjeto.EM_ANDAMENTO, null, null, 10L, null,null);
+    FiltroProjetoDTO filtros =
+        new FiltroProjetoDTO(null, StatusProjeto.EM_ANDAMENTO, null, null, 10L, null, null);
     List<ProjetoDTO> listaFiltrada = List.of(new ProjetoDTO());
     when(projetoService.buscarProjetosPorFiltro(filtros)).thenReturn(listaFiltrada);
 
@@ -323,27 +280,21 @@ class ProjetoControllerTest {
 
   @Test
   void buscarProjetos_quandoNenhumProjetoEncontrado_retornaOkComListaVazia() {
-    // Arrange (Organização) 🕵️‍♂️
-    // 1. Cria um filtro que, neste cenário, não encontrará nenhum resultado.
-    FiltroProjetoDTO filtros = new FiltroProjetoDTO("Projeto Inexistente", null, null, null, null, null,null);
+    // Arrange
+    FiltroProjetoDTO filtroInexistente =
+        new FiltroProjetoDTO("Projeto Inexistente", null, null, null, null, null, null);
 
-    // 2. Configura o mock do serviço para retornar uma lista vazia.
-    //    Isso simula o "caso de falha" de uma busca: nenhum resultado encontrado.
-    when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
-            .thenReturn(Collections.emptyList());
+    when(projetoService.buscarProjetosPorFiltro(eq(filtroInexistente)))
+        .thenReturn(Collections.emptyList());
 
-    // Act (Ação) 🚀
-    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtros);
+    // Act
+    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtroInexistente);
 
-    // Assert (Verificação) ✅
-    // 5. O status ainda deve ser OK, pois a busca foi executada com sucesso.
+    // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
-
-    // 6. O corpo da resposta não deve ser nulo, mas a lista dentro dele deve estar vazia.
     assertNotNull(response.getBody());
     assertTrue(response.getBody().isEmpty());
 
-    // 7. Garante que o serviço foi chamado.
-    verify(projetoService).buscarProjetosPorFiltro(any(FiltroProjetoDTO.class));
+    verify(projetoService).buscarProjetosPorFiltro(eq(filtroInexistente));
   }
 }
