@@ -84,12 +84,14 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
   @Override
-  public List<ProjetoDTO> buscarProjetosPorFiltro(FiltroProjetoDTO filtros) {
+  @Transactional(readOnly = true)
+  public List<ProjetoDTO> buscarProjetosPorFiltro(
+      @NotNull FiltroProjetoDTO filtros /*, Pageable pageable */) {
     // 1. Chama o método privado para criar a Specification com base nos filtros
     Specification<Projeto> spec = criarSpecificationComFiltros(filtros);
 
     // 2. Executa a busca no repositório com a Specification
-    List<Projeto> projetosEncontrados = projetoRepository.findAll(spec);
+    List<Projeto> projetosEncontrados = projetoRepository.findAll(spec /*, pageable */);
 
     // 3. Mapeia a lista de entidades para uma lista de DTOs usando o ModelMapper
     return projetosEncontrados.stream()
