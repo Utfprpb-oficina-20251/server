@@ -4,8 +4,6 @@ import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 
@@ -139,7 +137,7 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
         predicates.add(criteriaBuilder.equal(root.join("responsavel").join("curso").get("id"), filtros.idCurso()));
       }
 
-      query.distinct(true); // Evita resultados duplicados por causa dos joins
+      query.distinct(true);
       return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     };
   }
