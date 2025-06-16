@@ -25,7 +25,8 @@ public class EmailController {
   private final EmailCodeValidationService validationService;
 
   /**
-   * Cria uma instância do controlador de e-mail com os serviços necessários para envio e validação de códigos.
+   * Cria uma instância do controlador de e-mail com os serviços necessários para envio e validação
+   * de códigos.
    */
   public EmailController(
       EmailServiceImpl emailService, EmailCodeValidationService validationService) {
@@ -36,10 +37,12 @@ public class EmailController {
   /**
    * Envia um código de verificação para o e-mail informado, de acordo com o tipo especificado.
    *
-   * Valida o formato do e-mail e o tipo de código antes de gerar e enviar o código de verificação.
+   * <p>Valida o formato do e-mail e o tipo de código antes de gerar e enviar o código de
+   * verificação.
    *
    * @param email endereço de e-mail do destinatário
-   * @param type tipo de código de verificação (deve corresponder a um valor válido do enum TipoCodigo)
+   * @param type tipo de código de verificação (deve corresponder a um valor válido do enum
+   *     TipoCodigo)
    * @return resposta contendo mensagem de sucesso, e-mail e tipo de código enviado
    * @throws IllegalArgumentException se o e-mail ou o tipo forem inválidos
    * @throws IOException se ocorrer erro ao enviar o e-mail
@@ -88,7 +91,8 @@ public class EmailController {
   }
 
   /**
-   * Manipula exceções do tipo IllegalArgumentException lançadas pelos endpoints, retornando uma resposta HTTP 400 com a mensagem de erro.
+   * Manipula exceções do tipo IllegalArgumentException lançadas pelos endpoints, retornando uma
+   * resposta HTTP 400 com a mensagem de erro.
    *
    * @param e exceção IllegalArgumentException capturada
    * @return resposta HTTP 400 contendo a mensagem de erro no corpo
@@ -111,10 +115,12 @@ public class EmailController {
   }
 
   /**
-   * Valida se o endereço de e-mail fornecido não é nulo, não está em branco e segue o formato padrão de e-mail.
+   * Valida se o endereço de e-mail fornecido não é nulo, não está em branco e segue o formato
+   * padrão de e-mail.
    *
    * @param email endereço de e-mail a ser validado
-   * @throws IllegalArgumentException se o e-mail for nulo, estiver em branco ou não corresponder ao formato válido
+   * @throws IllegalArgumentException se o e-mail for nulo, estiver em branco ou não corresponder ao
+   *     formato válido
    */
   private void validarEmail(String email) {
     if (email == null || email.isBlank() || !email.matches("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
@@ -139,7 +145,8 @@ public class EmailController {
    *
    * @param type valor em string representando o tipo de código
    * @return o valor correspondente do enum {@link TipoCodigo}
-   * @throws IllegalArgumentException se o parâmetro for nulo, vazio ou não corresponder a um valor válido do enum
+   * @throws IllegalArgumentException se o parâmetro for nulo, vazio ou não corresponder a um valor
+   *     válido do enum
    */
   private TipoCodigo converterParaTipoCodigo(String type) {
     if (type == null || type.isBlank()) {

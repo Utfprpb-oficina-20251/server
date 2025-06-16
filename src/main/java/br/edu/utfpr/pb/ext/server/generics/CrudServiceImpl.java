@@ -54,14 +54,14 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Salva uma entidade, aplicando ganchos de pré e pós-processamento.
    *
-   * <p>Executa o método {@code preSave} antes de persistir a entidade e {@code postsave} após a
-   * persistência. Lança uma exceção se a entidade fornecida for nula.
+   * Executa o método {@code preSave} antes de persistir a entidade e {@code postsave} após a persistência.
    *
    * @param entity entidade a ser salva
    * @return a entidade salva, possivelmente modificada pelos ganchos de pré ou pós-processamento
    * @throws IllegalArgumentException se a entidade fornecida for nula
    */
   @Override
+  @Transactional
   public T save(T entity) {
     if (entity == null) {
       throw new IllegalArgumentException("O conteúdo a ser salvo não pode ser vazio.");
@@ -99,23 +99,25 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Persiste a entidade e garante que as alterações sejam imediatamente gravadas no banco de dados.
+   * Salva a entidade e força a sincronização imediata das alterações com o banco de dados.
    *
    * @param entity entidade a ser salva e sincronizada
-   * @return a entidade após persistência e flush
+   * @return a entidade persistida após o flush
    */
   @Override
+  @Transactional
   public T saveAndFlush(T entity) {
     return getRepository().saveAndFlush(entity);
   }
 
   /**
-   * Salva todas as entidades fornecidas por um Iterable em lote.
+   * Salva em lote todas as entidades fornecidas.
    *
-   * @param iterable coleção de entidades a serem persistidas
-   * @return um Iterable contendo as entidades salvas
+   * @param iterable coleção de entidades a serem salvas
+   * @return Iterable contendo as entidades persistidas
    */
   @Override
+  @Transactional
   public Iterable<T> save(Iterable<T> iterable) {
     return getRepository().saveAll(iterable);
   }
@@ -164,27 +166,34 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Remove a entidade identificada pelo valor fornecido.
+   * Remove a entidade correspondente ao identificador fornecido.
    *
    * @param i identificador da entidade a ser removida
    */
   @Override
+  @Transactional
   public void delete(I i) {
     getRepository().deleteById(i);
   }
 
   /**
-   * Remove todas as entidades presentes na coleção fornecida do repositório.
+   * Remove todas as entidades fornecidas da base de dados.
    *
    * @param iterable coleção de entidades a serem removidas
    */
   @Override
+  @Transactional
   public void delete(Iterable<? extends T> iterable) {
     getRepository().deleteAll(iterable);
   }
 
-  /** Remove todas as entidades do repositório de forma permanente. */
+  /**
+   * Exclui permanentemente todas as entidades do repositório.
+   *
+   * Esta operação remove todos os registros da entidade correspondente no banco de dados.
+   */
   @Override
+  @Transactional
   public void deleteAll() {
     getRepository().deleteAll();
   }

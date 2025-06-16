@@ -13,7 +13,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Curso extends BaseEntity {
-
   @NotNull private String nome;
   @NotNull private String codigo;
 }

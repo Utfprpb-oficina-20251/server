@@ -48,7 +48,8 @@ public class EmailCode extends BaseEntity {
   private TipoCodigo type;
 
   /**
-   * Instancia um novo código de validação de e-mail com os dados fornecidos, marcando-o como não utilizado.
+   * Instancia um novo código de validação de e-mail com os dados fornecidos, marcando-o como não
+   * utilizado.
    *
    * @param email endereço de e-mail do destinatário
    * @param code código de validação gerado
