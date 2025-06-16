@@ -4,8 +4,17 @@ import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -64,6 +73,7 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   @Override
   @Transactional
   public ProjetoDTO atualizarProjeto(Long id, ProjetoDTO dto) {
+
     Projeto projeto =
         this.projetoRepository
             .findById(id)
@@ -73,5 +83,64 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     Projeto projetoAtualizado = this.save(projeto);
 
     return modelMapper.map(projetoAtualizado, ProjetoDTO.class);
+  }
+
+  @Override
+  public List<ProjetoDTO> buscarProjetosPorFiltro(FiltroProjetoDTO filtros) {
+    // 1. Chama o método privado para criar a Specification com base nos filtros
+    Specification<Projeto> spec = criarSpecificationComFiltros(filtros);
+
+    // 2. Executa a busca no repositório com a Specification
+    List<Projeto> projetosEncontrados = projetoRepository.findAll(spec);
+
+    // 3. Mapeia a lista de entidades para uma lista de DTOs usando o ModelMapper
+    return projetosEncontrados.stream()
+            .map(projeto -> modelMapper.map(projeto, ProjetoDTO.class))
+            .collect(Collectors.toList());
+  }
+
+  // --- NOVO MÉTODO PRIVADO PARA A LÓGICA DA CONSULTA ---
+  /**
+   * Cria um objeto Specification dinamicamente com base nos filtros fornecidos.
+   * A lógica que estaria na classe ProjetoSpecification agora vive aqui.
+   * @param filtros DTO com os critérios de busca.
+   * @return Um objeto Specification<Projeto> pronto para ser usado na consulta.
+   */
+  private Specification<Projeto> criarSpecificationComFiltros(FiltroProjetoDTO filtros) {
+    return (root, query, criteriaBuilder) -> {
+      List<Predicate> predicates = new ArrayList<>();
+
+      if (filtros.titulo() != null && !filtros.titulo().isEmpty()) {
+        predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("titulo")), "%" + filtros.titulo().toLowerCase() + "%"));
+      }
+
+      if (filtros.status() != null) {
+        predicates.add(criteriaBuilder.equal(root.get("status"), filtros.status()));
+      }
+
+      if (filtros.dataInicioDe() != null) {
+        predicates.add(
+                criteriaBuilder.greaterThanOrEqualTo(root.get("dataInicio"), filtros.dataInicioDe().atStartOfDay())
+        );      }
+      if (filtros.dataInicioAte() != null) {
+        predicates.add(criteriaBuilder.lessThan(root.get("dataInicio"), filtros.dataInicioAte().atStartOfDay()));
+      }
+
+      if (filtros.idResponsavel() != null) {
+        predicates.add(criteriaBuilder.equal(root.join("responsavel").get("id"), filtros.idResponsavel()));
+      }
+
+      if (filtros.idMembroEquipe() != null) {
+        predicates.add(criteriaBuilder.equal(root.join("equipeExecutora").get("id"), filtros.idMembroEquipe()));
+
+      }
+
+      if (filtros.idCurso() != null) {
+        predicates.add(criteriaBuilder.equal(root.join("responsavel").join("curso").get("id"), filtros.idCurso()));
+      }
+
+      query.distinct(true); // Evita resultados duplicados por causa dos joins
+      return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+    };
   }
 }
