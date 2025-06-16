@@ -264,6 +264,129 @@ class UsuarioControllerTest {
     assertTrue(foundFirstUser);
   }
 
+  @Test
+  void updateMeuPerfil_whenUserIsAuthenticated_receiveUpdatedProfile() {
+    UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
+    ResponseEntity<RespostaLoginDTO> loginResponse =
+        testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
+
+    String token = loginResponse.getBody().getToken();
+
+    testRestTemplate
+        .getRestTemplate()
+        .getInterceptors()
+        .add(
+            (httpRequest, bytes, execution) -> {
+              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+              return execution.execute(httpRequest, bytes);
+            });
+
+    ResponseEntity<UsuarioLogadoInfoDTO> currentProfile =
+        testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
+
+    UsuarioLogadoInfoDTO updateRequest = currentProfile.getBody();
+    updateRequest.setNome("Nome Atualizado");
+    updateRequest.setDepartamento(Departamentos.DACOC);
+
+    // Update profile
+    ResponseEntity<UsuarioLogadoInfoDTO> response =
+        testRestTemplate.exchange(
+            "/api/usuarios/meu-perfil",
+            org.springframework.http.HttpMethod.PUT,
+            new org.springframework.http.HttpEntity<>(updateRequest),
+            UsuarioLogadoInfoDTO.class);
+
+    // Verify response
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals("Nome Atualizado", response.getBody().getNome());
+    assertEquals(Departamentos.DACOC, response.getBody().getDepartamento());
+  }
+
+  @Test
+  void updateMeuPerfil_whenUserIsUnauthenticated_receiveForbidden() {
+    testRestTemplate.getRestTemplate().getInterceptors().clear();
+
+    UsuarioLogadoInfoDTO updateRequest = new UsuarioLogadoInfoDTO();
+    updateRequest.setNome("Nome Qualquer");
+
+    ResponseEntity<Object> response =
+        testRestTemplate.exchange(
+            "/api/usuarios/meu-perfil",
+            org.springframework.http.HttpMethod.PUT,
+            new org.springframework.http.HttpEntity<>(updateRequest),
+            Object.class);
+
+    assertEquals(405, response.getStatusCode().value());
+  }
+
+  @Test
+  void updateMeuPerfil_whenNameIsNull_receiveBadRequest() {
+    UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
+    ResponseEntity<RespostaLoginDTO> loginResponse =
+        testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
+
+    String token = loginResponse.getBody().getToken();
+
+    testRestTemplate
+        .getRestTemplate()
+        .getInterceptors()
+        .add(
+            (httpRequest, bytes, execution) -> {
+              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+              return execution.execute(httpRequest, bytes);
+            });
+
+    UsuarioLogadoInfoDTO updateRequest = new UsuarioLogadoInfoDTO();
+    updateRequest.setNome(null);
+
+    ResponseEntity<Object> response =
+        testRestTemplate.exchange(
+            "/api/usuarios/meu-perfil",
+            org.springframework.http.HttpMethod.PUT,
+            new org.springframework.http.HttpEntity<>(updateRequest),
+            Object.class);
+
+    assertEquals(400, response.getStatusCode().value());
+  }
+
+  @Test
+  void updateMeuPerfil_verifyPersistence_afterUpdate() {
+    UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
+    ResponseEntity<RespostaLoginDTO> loginResponse =
+        testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
+
+    String token = loginResponse.getBody().getToken();
+
+    testRestTemplate
+        .getRestTemplate()
+        .getInterceptors()
+        .add(
+            (httpRequest, bytes, execution) -> {
+              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+              return execution.execute(httpRequest, bytes);
+            });
+
+    ResponseEntity<UsuarioLogadoInfoDTO> currentProfile =
+        testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
+
+    UsuarioLogadoInfoDTO updateRequest = currentProfile.getBody();
+    updateRequest.setNome("Novo Nome");
+
+    testRestTemplate.exchange(
+        "/api/usuarios/meu-perfil",
+        org.springframework.http.HttpMethod.PUT,
+        new org.springframework.http.HttpEntity<>(updateRequest),
+        UsuarioLogadoInfoDTO.class);
+
+    ResponseEntity<UsuarioLogadoInfoDTO> afterUpdate =
+        testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
+
+    assertEquals(200, afterUpdate.getStatusCode().value());
+    assertNotNull(afterUpdate.getBody());
+    assertEquals("Novo Nome", afterUpdate.getBody().getNome());
+  }
+
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {
     UsuarioServidorRequestDTO request = new UsuarioServidorRequestDTO();
     request.setNome("teste");
