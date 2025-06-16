@@ -130,7 +130,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   }
 
 
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("hasRole('SERVIDOR')")
   @PatchMapping("/{id}/cancelar")
   public ResponseEntity<Void> cancelar(
       @PathVariable Long id,
