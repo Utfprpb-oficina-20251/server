@@ -62,6 +62,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    * @throws IllegalArgumentException se a entidade fornecida for nula
    */
   @Override
+  @Transactional
   public T save(T entity) {
     if (entity == null) {
       throw new IllegalArgumentException("O conteúdo a ser salvo não pode ser vazio.");
@@ -105,6 +106,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    * @return a entidade após persistência e flush
    */
   @Override
+  @Transactional
   public T saveAndFlush(T entity) {
     return getRepository().saveAndFlush(entity);
   }
@@ -116,6 +118,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    * @return um Iterable contendo as entidades salvas
    */
   @Override
+  @Transactional
   public Iterable<T> save(Iterable<T> iterable) {
     return getRepository().saveAll(iterable);
   }
@@ -169,6 +172,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    * @param i identificador da entidade a ser removida
    */
   @Override
+  @Transactional
   public void delete(I i) {
     getRepository().deleteById(i);
   }
@@ -179,12 +183,14 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
    * @param iterable coleção de entidades a serem removidas
    */
   @Override
+  @Transactional
   public void delete(Iterable<? extends T> iterable) {
     getRepository().deleteAll(iterable);
   }
 
   /** Remove todas as entidades do repositório de forma permanente. */
   @Override
+  @Transactional
   public void deleteAll() {
     getRepository().deleteAll();
   }
