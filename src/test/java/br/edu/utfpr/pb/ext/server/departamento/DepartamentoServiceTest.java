@@ -44,7 +44,7 @@ class DepartamentoServiceTest {
     List<Departamento> result = service.findAll();
 
     assertThat(result).hasSize(2);
-    assertThat(result.get(0).getSigla()).isEqualTo("DAINF");
+    assertThat(result.getFirst().getSigla()).isEqualTo("DAINF");
   }
 
   /** Testa se o método findOne() retorna corretamente um departamento pelo ID. */
@@ -116,7 +116,7 @@ class DepartamentoServiceTest {
     assertThatThrownBy(() -> service.associarResponsavel(1L, 999L))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Usuário não encontrado com ID: 999");
-    }
+  }
 
   /** Testa se exceção é lançada ao buscar departamento inexistente por ID. */
   @Test

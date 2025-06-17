@@ -8,7 +8,6 @@ import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,10 +70,10 @@ class ProjetoServiceImplTest {
     CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
     dto.setJustificativa(null);
 
-    ResponseStatusException ex = assertThrows(
+    ResponseStatusException ex =
+        assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, servidorId)
-    );
+            () -> projetoService.cancelar(projetoId, dto, servidorId));
 
     assertEquals(400, ex.getStatusCode().value());
   }
@@ -85,10 +84,10 @@ class ProjetoServiceImplTest {
     CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
     dto.setJustificativa("   ");
 
-    ResponseStatusException ex = assertThrows(
+    ResponseStatusException ex =
+        assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, servidorId)
-    );
+            () -> projetoService.cancelar(projetoId, dto, servidorId));
 
     assertEquals(400, ex.getStatusCode().value());
   }
@@ -101,10 +100,10 @@ class ProjetoServiceImplTest {
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.empty());
 
-    ResponseStatusException ex = assertThrows(
+    ResponseStatusException ex =
+        assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, servidorId)
-    );
+            () -> projetoService.cancelar(projetoId, dto, servidorId));
 
     assertEquals(404, ex.getStatusCode().value());
   }
@@ -122,10 +121,10 @@ class ProjetoServiceImplTest {
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
-    ResponseStatusException ex = assertThrows(
+    ResponseStatusException ex =
+        assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, servidorId)
-    );
+            () -> projetoService.cancelar(projetoId, dto, servidorId));
 
     assertEquals(400, ex.getStatusCode().value());
   }
@@ -143,10 +142,10 @@ class ProjetoServiceImplTest {
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
-    ResponseStatusException ex = assertThrows(
+    ResponseStatusException ex =
+        assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, servidorId)
-    );
+            () -> projetoService.cancelar(projetoId, dto, servidorId));
 
     assertEquals(400, ex.getStatusCode().value());
   }
@@ -164,10 +163,10 @@ class ProjetoServiceImplTest {
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
-    ResponseStatusException ex = assertThrows(
+    ResponseStatusException ex =
+        assertThrows(
             ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, servidorId)
-    );
+            () -> projetoService.cancelar(projetoId, dto, servidorId));
 
     assertEquals(400, ex.getStatusCode().value());
   }
@@ -185,10 +184,9 @@ class ProjetoServiceImplTest {
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
-    ResponseStatusException ex = assertThrows(
-            ResponseStatusException.class,
-            () -> projetoService.cancelar(projetoId, dto, alunoId)
-    );
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> projetoService.cancelar(projetoId, dto, alunoId));
 
     assertEquals(403, ex.getStatusCode().value());
   }
@@ -203,12 +201,15 @@ class ProjetoServiceImplTest {
     dto.setTitulo("Novo Título");
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
-    doAnswer(invocation -> {
-      ProjetoDTO source = invocation.getArgument(0);
-      Projeto destino = invocation.getArgument(1);
-      destino.setTitulo(source.getTitulo());
-      return null;
-    }).when(modelMapper).map(any(ProjetoDTO.class), any(Projeto.class));
+    doAnswer(
+            invocation -> {
+              ProjetoDTO source = invocation.getArgument(0);
+              Projeto destino = invocation.getArgument(1);
+              destino.setTitulo(source.getTitulo());
+              return null;
+            })
+        .when(modelMapper)
+        .map(any(ProjetoDTO.class), any(Projeto.class));
     when(projetoRepository.save(any(Projeto.class))).thenReturn(projeto);
     when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(dto);
 
@@ -226,10 +227,9 @@ class ProjetoServiceImplTest {
 
     when(projetoRepository.findById(99L)).thenReturn(Optional.empty());
 
-    EntityNotFoundException ex = assertThrows(
-            EntityNotFoundException.class,
-            () -> projetoService.atualizarProjeto(99L, dto)
-    );
+    EntityNotFoundException ex =
+        assertThrows(
+            EntityNotFoundException.class, () -> projetoService.atualizarProjeto(99L, dto));
 
     assertEquals("Projeto com ID 99 não encontrado.", ex.getMessage());
   }

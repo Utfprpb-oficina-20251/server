@@ -19,8 +19,8 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -129,7 +129,6 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     return ResponseEntity.status(HttpStatus.CREATED).body(projetoDTO);
   }
 
-
   @PreAuthorize("hasRole('SERVIDOR')")
   @PatchMapping("/{id}/cancelar")
   public ResponseEntity<Void> cancelar(
@@ -154,10 +153,10 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
             description = "Acesso negado. Usuário não autorizado a editar este projeto"),
         @ApiResponse(responseCode = "404", description = "Projeto não encontrado")
       })
+  @Override
   public ResponseEntity<ProjetoDTO> update(
       @PathVariable Long id, @Valid @RequestBody ProjetoDTO dto) {
     ProjetoDTO projetoAtualizado = projetoService.atualizarProjeto(id, dto);
     return ResponseEntity.ok(projetoAtualizado);
   }
-
 }
