@@ -46,4 +46,8 @@ public class Projeto extends BaseEntity {
   private List<Usuario> equipeExecutora;
 
   @NotNull private StatusProjeto status;
+
+  private Long cargaHoraria;
+
+  private Long qtdeVagas;
 }
