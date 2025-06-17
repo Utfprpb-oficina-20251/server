@@ -265,6 +265,49 @@ class UsuarioControllerTest {
   }
 
   @Test
+  void getAllProfessors_whenUnauthenticated_receiveForbidden() {
+    testRestTemplate.getRestTemplate().getInterceptors().clear();
+
+    ResponseEntity<Object> response =
+        testRestTemplate.getForEntity("/api/usuarios/professores", Object.class);
+
+    assertEquals(403, response.getStatusCode().value());
+  }
+
+  @Test
+  void getAllProfessors_whenAuthenticated_receiveOnlyUsersWithUtfprEmail() {
+    UsuarioServidorRequestDTO utfprUser = createUsuarioServidorRequestDTO();
+    ResponseEntity<RespostaLoginDTO> loginResponse =
+        testRestTemplate.postForEntity(API_USERS, utfprUser, RespostaLoginDTO.class);
+
+    String token = loginResponse.getBody().getToken();
+
+    testRestTemplate
+        .getRestTemplate()
+        .getInterceptors()
+        .add(
+            (httpRequest, bytes, execution) -> {
+              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+              return execution.execute(httpRequest, bytes);
+            });
+
+    ResponseEntity<UsuarioProjetoDTO[]> response =
+        testRestTemplate.getForEntity("/api/usuarios/professores", UsuarioProjetoDTO[].class);
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+
+    for (UsuarioProjetoDTO user : response.getBody()) {
+      assertTrue(
+          user.getEmail().endsWith("@utfpr.edu.br"),
+          "Only users with @utfpr.edu.br emails should be returned");
+    }
+
+    assertEquals(1, response.getBody().length);
+    assertEquals(utfprUser.getEmail(), response.getBody()[0].getEmail());
+  }
+
+  @Test
   void updateMeuPerfil_whenUserIsAuthenticated_receiveUpdatedProfile() {
     UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =

@@ -173,6 +173,32 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return ResponseEntity.ok(responseList);
   }
 
+  @Operation(
+      summary = "Get all professors",
+      description = "Returns a list of all users with emails ending with @utfpr.edu.br")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Professors retrieved successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UsuarioProjetoDTO.class)))
+      })
+  @GetMapping("/professores")
+  public ResponseEntity<List<UsuarioProjetoDTO>> getAllProfessors() {
+    List<Usuario> usuarios = usuarioService.findAll();
+    List<UsuarioProjetoDTO> responseList =
+        usuarios.stream()
+            .filter(
+                usuario ->
+                    usuario.getEmail() != null && usuario.getEmail().endsWith("@utfpr.edu.br"))
+            .map(usuario -> modelMapper.map(usuario, UsuarioProjetoDTO.class))
+            .toList();
+    return ResponseEntity.ok(responseList);
+  }
+
   @PutMapping("/meu-perfil")
   public ResponseEntity<UsuarioLogadoInfoDTO> updateProfile(
       @Valid @RequestBody UsuarioLogadoInfoDTO usuarioDTO) {
