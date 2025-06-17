@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -37,4 +38,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
    * @return um Optional contendo o usuário correspondente, caso exista
    */
   Optional<Usuario> findByRegistroAcademico(String ra);
+
+  /**
+   * Busca todos os usuários cujo e-mail termina com o domínio especificado.
+   *
+   * @param dominioEmail domínio do e-mail (por exemplo, "@utfpr.edu.br")
+   * @return @return lista de usuários que atendem ao critério; lista vazia se nenhum encontrado
+   */
+  List<Usuario> findAllByEmailEndingWith(String dominioEmail);
 }
