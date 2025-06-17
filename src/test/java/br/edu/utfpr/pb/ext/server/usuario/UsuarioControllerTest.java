@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -265,6 +266,49 @@ class UsuarioControllerTest {
   }
 
   @Test
+  void getAllProfessors_whenUnauthenticated_receiveForbidden() {
+    testRestTemplate.getRestTemplate().getInterceptors().clear();
+
+    ResponseEntity<Object> response =
+        testRestTemplate.getForEntity("/api/usuarios/professores", Object.class);
+
+    assertEquals(403, response.getStatusCode().value());
+  }
+
+  @Test
+  void getAllProfessors_whenAuthenticated_receiveOnlyUsersWithUtfprEmail() {
+    UsuarioServidorRequestDTO utfprUser = createUsuarioServidorRequestDTO();
+    ResponseEntity<RespostaLoginDTO> loginResponse =
+        testRestTemplate.postForEntity(API_USERS, utfprUser, RespostaLoginDTO.class);
+
+    String token = loginResponse.getBody().getToken();
+
+    testRestTemplate
+        .getRestTemplate()
+        .getInterceptors()
+        .add(
+            (httpRequest, bytes, execution) -> {
+              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+              return execution.execute(httpRequest, bytes);
+            });
+
+    ResponseEntity<UsuarioProjetoDTO[]> response =
+        testRestTemplate.getForEntity("/api/usuarios/professores", UsuarioProjetoDTO[].class);
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+
+    for (UsuarioProjetoDTO user : response.getBody()) {
+      assertTrue(
+          user.getEmail().endsWith("@utfpr.edu.br"),
+          "Only users with @utfpr.edu.br emails should be returned");
+    }
+
+    assertEquals(1, response.getBody().length);
+    assertEquals(utfprUser.getEmail(), response.getBody()[0].getEmail());
+  }
+
+  @Test
   void updateMeuPerfil_whenUserIsAuthenticated_receiveUpdatedProfile() {
     UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =
@@ -304,7 +348,7 @@ class UsuarioControllerTest {
   }
 
   @Test
-  void updateMeuPerfil_whenUserIsUnauthenticated_receiveMethodNotAllowed() {
+  void updateMeuPerfil_whenUserIsUnauthenticated_receiveForbidden() {
     testRestTemplate.getRestTemplate().getInterceptors().clear();
 
     UsuarioLogadoInfoDTO updateRequest = new UsuarioLogadoInfoDTO();
@@ -317,7 +361,7 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    assertEquals(405, response.getStatusCode().value());
+    assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
   }
 
   @Test

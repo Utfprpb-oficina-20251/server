@@ -2,7 +2,7 @@ package br.edu.utfpr.pb.ext.server.auth.otp;
 
 import br.edu.utfpr.pb.ext.server.email.EmailCodeValidationService;
 import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
-import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
+import br.edu.utfpr.pb.ext.server.usuario.IUsuarioService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
 
   private final EmailCodeValidationService emailCodeValidationService;
-  private final UsuarioRepository usuarioRepository;
+  private final IUsuarioService detailsService;
 
   /**
    * Cria uma instância do provedor de autenticação OTP por e-mail com os serviços de validação de
@@ -24,12 +24,12 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
    *
    * @param emailCodeValidationService serviço responsável por validar códigos OTP enviados por
    *     e-mail
-   * @param usuarioRepository repositório utilizado para buscar informações de usuários pelo e-mail
+   * @param detailsService serviço responsável por carregar detalhes do usuário
    */
   public EmailOtpAuthenticationProvider(
-      EmailCodeValidationService emailCodeValidationService, UsuarioRepository usuarioRepository) {
+      EmailCodeValidationService emailCodeValidationService, IUsuarioService detailsService) {
     this.emailCodeValidationService = emailCodeValidationService;
-    this.usuarioRepository = usuarioRepository;
+    this.detailsService = detailsService;
   }
 
   /**
@@ -49,7 +49,6 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
     String email = authToken.getPrincipal().toString();
     String code = authToken.getCredentials().toString();
 
-    // Validate the OTP code for the "autenticacao" type
     boolean isValid =
         emailCodeValidationService.validateCode(email, TipoCodigo.OTP_AUTENTICACAO, code);
 
@@ -57,13 +56,8 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
       throw new BadCredentialsException("Código de verificação inválido ou expirado");
     }
 
-    // Find the user by email
-    UserDetails userDetails =
-        usuarioRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
-
-    // Create an authentication token with the user's authorities
+    UserDetails userDetails = detailsService.loadUserByUsername(email);
+    detailsService.ativarUsuario(email);
     return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
   }
 

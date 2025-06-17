@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class ProjetoControllerTest {
@@ -157,17 +158,17 @@ class ProjetoControllerTest {
   }
 
   @Test
-  void create_deveRetornarNotAcceptable_quandoEquipeExecutoraEVazia() {
+  void create_deveLancarResponseStatusException_quandoEquipeExecutoraEVazia() {
     // Arrange
     projetoDTOEntrada.setEquipeExecutora(new ArrayList<>()); // Lista de e-mails vazia
 
-    // Act
-    ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);
+    // Act + Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class, () -> projetoController.create(projetoDTOEntrada));
 
-    // Assert
-    assertNotNull(response);
-    assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
-    assertNull(response.getBody());
+    assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatusCode());
+    assertEquals("A equipe executora não pode estar vazia.", exception.getReason());
 
     // Verifica que os serviços principais nunca foram chamados
     verify(usuarioRepository, never()).findByEmail(anyString());
@@ -175,22 +176,161 @@ class ProjetoControllerTest {
   }
 
   @Test
-  void create_deveRetornarNotAcceptable_quandoEmailNaoExiste() {
+  void create_deveLancarResponseStatusException_quandoEmailNaoExiste() {
     // Arrange
-    // Configura o mock para retornar um Optional vazio, simulando um usuário não encontrado
     when(usuarioRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-    // Act
-    ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);
+    // Act + Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class, () -> projetoController.create(projetoDTOEntrada));
 
-    // Assert
-    assertNotNull(response);
-    assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
-    assertNull(response.getBody());
+    assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatusCode());
+    assertNotNull(exception.getReason());
+    assertTrue(
+        exception
+            .getReason()
+            .contains("Usuário com e-mail")); // Pode verificar o início da mensagem
 
     // Verifica que o repositório foi consultado, mas o serviço de save nunca foi chamado
     verify(usuarioRepository, times(1)).findByEmail("membro@utfpr.edu.br");
     verify(projetoService, never()).save(any(Projeto.class));
+  }
+
+  @Test
+  void cancelarProjeto_deveChamarServicoEretornarNoContent() {
+    // Arrange
+    Long projetoId = 1L;
+    Long usuarioId = 42L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Justificativa válida");
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    // Simula o service, que não retorna nada
+    doNothing().when(projetoService).cancelar(projetoId, dto, usuarioId);
+
+    // Act
+    ResponseEntity<Void> response = projetoController.cancelar(projetoId, dto, usuarioMock);
+
+    // Assert
+    assertNotNull(response);
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    verify(projetoService, times(1)).cancelar(projetoId, dto, usuarioId);
+  }
+
+  @Test
+  void cancelarProjeto_deveLancarExcecao_quandoJustificativaForVazia() {
+    // Arrange
+    Long projetoId = 1L;
+    Long usuarioId = 42L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("   "); // Justificativa inválida
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "A justificativa é obrigatória."))
+        .when(projetoService)
+        .cancelar(projetoId, dto, usuarioId);
+
+    // Act & Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> projetoController.cancelar(projetoId, dto, usuarioMock));
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("A justificativa é obrigatória.", exception.getReason());
+    verify(projetoService).cancelar(projetoId, dto, usuarioId);
+  }
+
+  @Test
+  void cancelarProjeto_deveLancarExcecao_quandoProjetoJaCancelado() {
+    // Arrange
+    Long projetoId = 1L;
+    Long usuarioId = 42L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Cancelamento repetido");
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projeto já está cancelado"))
+        .when(projetoService)
+        .cancelar(projetoId, dto, usuarioId);
+
+    // Act & Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> projetoController.cancelar(projetoId, dto, usuarioMock));
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Projeto já está cancelado", exception.getReason());
+    verify(projetoService).cancelar(projetoId, dto, usuarioId);
+  }
+
+  @Test
+  void cancelarProjeto_deveLancarExcecao_quandoUsuarioNaoForResponsavel() {
+    // Arrange
+    Long projetoId = 1L;
+    Long usuarioId = 999L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Tentativa de usuário não responsável");
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    doThrow(
+            new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Usuário não pertence à equipe executora ou não possui SIAPE."))
+        .when(projetoService)
+        .cancelar(projetoId, dto, usuarioId);
+
+    // Act & Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> projetoController.cancelar(projetoId, dto, usuarioMock));
+
+    assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+    assertEquals(
+        "Usuário não pertence à equipe executora ou não possui SIAPE.", exception.getReason());
+    verify(projetoService).cancelar(projetoId, dto, usuarioId);
+  }
+
+  @Test
+  void cancelarProjeto_deveLancarExcecao_quandoProjetoNaoEncontrado() {
+    // Arrange
+    Long projetoId = 999L;
+    Long usuarioId = 42L;
+
+    CancelamentoProjetoDTO dto = new CancelamentoProjetoDTO();
+    dto.setJustificativa("Cancelamento de projeto inexistente");
+
+    Usuario usuarioMock = new Usuario();
+    usuarioMock.setId(usuarioId);
+
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"))
+        .when(projetoService)
+        .cancelar(projetoId, dto, usuarioId);
+
+    // Act & Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> projetoController.cancelar(projetoId, dto, usuarioMock));
+
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertEquals("Projeto não encontrado", exception.getReason());
+    verify(projetoService).cancelar(projetoId, dto, usuarioId);
   }
 
   @Test
@@ -202,8 +342,8 @@ class ProjetoControllerTest {
     FiltroProjetoDTO filtroEspecifico =
         new FiltroProjetoDTO(null, null, null, null, 2L, null, null);
 
-   when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
-       .thenReturn(Collections.emptyList());
+    when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
+        .thenReturn(Collections.emptyList());
 
     // Act (Ação) 🚀
     ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarMeusProjetos(usuarioLogado);
@@ -216,6 +356,7 @@ class ProjetoControllerTest {
     assertTrue(response.getBody().isEmpty());
     verify(projetoService, times(1)).buscarProjetosPorFiltro(any(FiltroProjetoDTO.class));
   }
+
   @Test
   void buscarProjetos_semFiltros_retornaOkComListaDeProjetos() {
     // Arrange

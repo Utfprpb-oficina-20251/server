@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("projeto")
@@ -106,13 +107,15 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     List<String> emails =
         dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmail).toList();
     if (emails.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+      throw new ResponseStatusException(
+          HttpStatus.NOT_ACCEPTABLE, "A equipe executora não pode estar vazia.");
     }
     ArrayList<Optional<Usuario>> usuarios = new ArrayList<>();
     for (String email : emails) {
       Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
       if (usuario.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+        throw new ResponseStatusException(
+            HttpStatus.NOT_ACCEPTABLE, "Usuário com e-mail " + email + " não encontrado.");
       }
       usuarios.add(usuario);
     }
@@ -131,6 +134,16 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     return ResponseEntity.status(HttpStatus.CREATED).body(projetoDTO);
   }
 
+  @PreAuthorize("hasRole('SERVIDOR')")
+  @PatchMapping("/{id}/cancelar")
+  public ResponseEntity<Void> cancelar(
+      @PathVariable Long id,
+      @Valid @RequestBody CancelamentoProjetoDTO dto,
+      @AuthenticationPrincipal Usuario usuario) {
+    projetoService.cancelar(id, dto, usuario.getId());
+    return ResponseEntity.noContent().build();
+  }
+
   @PutMapping("/{id}")
   @PreAuthorize("@securityService.podeEditarProjeto(#id)")
   @Operation(summary = "Atualiza um projeto existente")
@@ -145,6 +158,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
             description = "Acesso negado. Usuário não autorizado a editar este projeto"),
         @ApiResponse(responseCode = "404", description = "Projeto não encontrado")
       })
+  @Override
   public ResponseEntity<ProjetoDTO> update(
       @PathVariable Long id, @Valid @RequestBody ProjetoDTO dto) {
     ProjetoDTO projetoAtualizado = projetoService.atualizarProjeto(id, dto);
@@ -171,8 +185,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   })
   @GetMapping("/buscar")
   public ResponseEntity<List<ProjetoDTO>> buscarProjetos(
-      @Valid
-      @ParameterObject FiltroProjetoDTO filtros) {
+      @Valid @ParameterObject FiltroProjetoDTO filtros) {
     List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtros);
     return ResponseEntity.ok(projetos);
   }
