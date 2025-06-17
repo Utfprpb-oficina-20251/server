@@ -40,10 +40,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
   Optional<Usuario> findByRegistroAcademico(String ra);
 
   /**
-   * Busca um usuário cujo e-mail termina com o domínio especificado.
+   * Busca todos os usuários cujo e-mail termina com o domínio especificado.
    *
    * @param dominioEmail domínio do e-mail (por exemplo, "@utfpr.edu.br")
-   * @return um Optional contendo o usuário correspondente, ou vazio se não encontrado
+   * @return @return lista de usuários que atendem ao critério; lista vazia se nenhum encontrado
    */
   List<Usuario> findAllByEmailEndingWith(String dominioEmail);
 }
