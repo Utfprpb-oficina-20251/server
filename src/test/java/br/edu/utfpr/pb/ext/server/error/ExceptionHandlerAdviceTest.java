@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.error;
 
+import static br.edu.utfpr.pb.ext.server.error.ExceptionHandlerAdvice.REQUISICAO_INVALIDA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,7 +29,6 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class ExceptionHandlerAdviceTest {
   public static final String VALIDATION_ERROR = "Validation Error";
-  public static final String REQUISICAO_INVALIDA = "Requisição inválida.";
 
   @Mock private HttpServletRequest request;
   @InjectMocks private ExceptionHandlerAdvice exceptionHandlerAdvice;
@@ -189,6 +189,7 @@ class ExceptionHandlerAdviceTest {
 
     ResponseEntity<ApiError> response =
         exceptionHandlerAdvice.handleResponseStatusException(ex, request);
+    assertThat(response.getBody()).isNotNull();
     ApiError apiError = response.getBody();
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -249,6 +250,7 @@ class ExceptionHandlerAdviceTest {
 
     ResponseEntity<ApiError> response =
         exceptionHandlerAdvice.handleHttpMessageNotReadableException(ex, request);
+    assertThat(response.getBody()).isNotNull();
     ApiError apiError = response.getBody();
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -266,6 +268,7 @@ class ExceptionHandlerAdviceTest {
 
     ResponseEntity<ApiError> response =
         exceptionHandlerAdvice.handleHttpMessageNotReadableException(ex, request);
+    assertThat(response.getBody()).isNotNull();
     ApiError apiError = response.getBody();
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
