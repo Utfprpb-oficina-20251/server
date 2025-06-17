@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class ProjetoControllerTest {
@@ -156,17 +157,17 @@ class ProjetoControllerTest {
   }
 
   @Test
-  void create_deveRetornarNotAcceptable_quandoEquipeExecutoraEVazia() {
+  void create_deveLancarResponseStatusException_quandoEquipeExecutoraEVazia() {
     // Arrange
     projetoDTOEntrada.setEquipeExecutora(new ArrayList<>()); // Lista de e-mails vazia
 
-    // Act
-    ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);
+    // Act + Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class, () -> projetoController.create(projetoDTOEntrada));
 
-    // Assert
-    assertNotNull(response);
-    assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
-    assertNull(response.getBody());
+    assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatusCode());
+    assertEquals("A equipe executora não pode estar vazia.", exception.getReason());
 
     // Verifica que os serviços principais nunca foram chamados
     verify(usuarioRepository, never()).findByEmail(anyString());
@@ -174,18 +175,20 @@ class ProjetoControllerTest {
   }
 
   @Test
-  void create_deveRetornarNotAcceptable_quandoEmailNaoExiste() {
+  void create_deveLancarResponseStatusException_quandoEmailNaoExiste() {
     // Arrange
-    // Configura o mock para retornar um Optional vazio, simulando um usuário não encontrado
     when(usuarioRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-    // Act
-    ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);
+    // Act + Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class, () -> projetoController.create(projetoDTOEntrada));
 
-    // Assert
-    assertNotNull(response);
-    assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
-    assertNull(response.getBody());
+    assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatusCode());
+    assertTrue(
+        exception
+            .getReason()
+            .contains("Usuário com e-mail")); // Pode verificar o início da mensagem
 
     // Verifica que o repositório foi consultado, mas o serviço de save nunca foi chamado
     verify(usuarioRepository, times(1)).findByEmail("membro@utfpr.edu.br");
