@@ -288,7 +288,8 @@ class ProjetoControllerTest {
 
     doThrow(
             new ResponseStatusException(
-                HttpStatus.FORBIDDEN, "Apenas o responsável principal pode cancelar o projeto."))
+                HttpStatus.FORBIDDEN,
+                "Usuário não pertence à equipe executora ou não possui SIAPE."))
         .when(projetoService)
         .cancelar(projetoId, dto, usuarioId);
 
@@ -299,7 +300,8 @@ class ProjetoControllerTest {
             () -> projetoController.cancelar(projetoId, dto, usuarioMock));
 
     assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
-    assertEquals("Apenas o responsável principal pode cancelar o projeto.", exception.getReason());
+    assertEquals(
+        "Usuário não pertence à equipe executora ou não possui SIAPE.", exception.getReason());
     verify(projetoService).cancelar(projetoId, dto, usuarioId);
   }
 
