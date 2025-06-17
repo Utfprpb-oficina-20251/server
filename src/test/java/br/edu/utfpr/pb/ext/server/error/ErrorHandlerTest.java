@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
-import jdk.jfr.Description;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,7 +40,7 @@ class ErrorHandlerTest {
   }
 
   @Test
-  @Description("Erro deve retornar todos os parâmetros quando existentes")
+  @DisplayName("Erro deve retornar todos os parâmetros quando existentes")
   void handleError_WhenAllParametersExist_ShouldReturnApiErrorWithAttributes() {
     ApiError result = errorHandler.handleError(webRequest);
 
@@ -50,7 +50,7 @@ class ErrorHandlerTest {
   }
 
   @Test
-  @Description(
+  @DisplayName(
       "Erro deve retornar parâmetros quando proveniente de método não seguro (POST/PUT/DELETE)")
   void handleUnsafeError_WhenAllParametersExist_ShouldReturnApiErrorWithAttributes() {
     ApiError result = errorHandler.handleUnsafeError(webRequest);
@@ -60,7 +60,7 @@ class ErrorHandlerTest {
   }
 
   @Test
-  @Description("Erro deve retornar o status 500 quando não houver status no atributo")
+  @DisplayName("Erro deve retornar o status 500 quando não houver status no atributo")
   void handleError_WhenStatusDoesNotExistOnAttributes_ShouldReturnApiErrorWithDefaultStatusCode() {
     attributes.remove("status");
     ApiError result = errorHandler.handleError(webRequest);
@@ -68,7 +68,7 @@ class ErrorHandlerTest {
   }
 
   @Test
-  @Description("Erro deve ser retornado no caso do campo path estar nulo")
+  @DisplayName("Erro deve ser retornado no caso do campo path estar nulo")
   void handleError_whenPathDoesNotExist_ShouldReturnApiErrorWithAttributes() {
     attributes.remove("path");
     ApiError result = errorHandler.handleError(webRequest);
@@ -76,7 +76,7 @@ class ErrorHandlerTest {
   }
 
   @Test
-  @Description("Erro deve ser retornado no caso do campo mensagem estar nulo")
+  @DisplayName("Erro deve ser retornado no caso do campo mensagem estar nulo")
   void handleError_WhenMessageNotExist_ShouldReturnApiErrorWithAttributes() {
     attributes.remove("message");
     ApiError result = errorHandler.handleError(webRequest);
