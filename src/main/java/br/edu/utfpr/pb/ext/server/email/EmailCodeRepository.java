@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.email;
 
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,14 +9,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
 
   /**
-   * Retorna o código de e-mail mais recente para o e-mail e tipo especificados, ordenado pela data
-   * de geração decrescente.
+   * Busca o código de e-mail mais recente para o e-mail e tipo informados, considerando a data de
+   * geração em ordem decrescente.
    *
-   * @param email endereço de e-mail a ser pesquisado
+   * @param email endereço de e-mail a ser consultado
    * @param type tipo do código de e-mail
-   * @return um {@link Optional} com o código mais recente, se encontrado
+   * @return um {@link Optional} contendo o código mais recente, se existir
    */
-  Optional<EmailCode> findTopByEmailAndTypeOrderByGeneratedAtDesc(String email, String type);
+  Optional<EmailCode> findTopByEmailAndTypeOrderByGeneratedAtDesc(String email, TipoCodigo type);
 
   /**
    * Retorna um código de e-mail correspondente ao valor informado, que ainda não expirou e não foi
@@ -28,13 +29,15 @@ public interface EmailCodeRepository extends JpaRepository<EmailCode, Long> {
   Optional<EmailCode> findByCodeAndExpirationAfterAndUsedFalse(String code, LocalDateTime now);
 
   /**
-   * Conta quantos códigos de e-mail existem para um endereço e tipo específicos, gerados após a
-   * data e hora informadas.
+   * Conta a quantidade de códigos de e-mail de um determinado tipo associados a um endereço,
+   * gerados estritamente após a data e hora especificadas.
    *
-   * @param email endereço de e-mail a ser considerado
+   * @param email endereço de e-mail a ser consultado
    * @param type tipo do código de e-mail
-   * @param generatedAt data e hora a partir da qual os códigos devem ter sido gerados (exclusivo)
-   * @return quantidade de códigos de e-mail que atendem aos critérios especificados
+   * @param generatedAt data e hora limite exclusiva para considerar os códigos gerados
+   *     posteriormente
+   * @return número de códigos de e-mail encontrados conforme os critérios
    */
-  Long countByEmailAndTypeAndGeneratedAtAfter(String email, String type, LocalDateTime generatedAt);
+  Long countByEmailAndTypeAndGeneratedAtAfter(
+      String email, TipoCodigo type, LocalDateTime generatedAt);
 }

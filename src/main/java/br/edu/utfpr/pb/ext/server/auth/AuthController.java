@@ -87,6 +87,9 @@ public class AuthController {
       @RequestBody @Valid EmailOtpAuthRequestDTO requestDTO) {
     Usuario usuarioAutenticado = authService.autenticacaoOtp(requestDTO);
     String tokenJwt = jwtService.generateToken(usuarioAutenticado);
+    String nomeCompleto = usuarioAutenticado.getNome();
+    String primeiroNome =
+        (nomeCompleto == null || nomeCompleto.isEmpty()) ? "" : nomeCompleto.split(" ")[0];
 
     RespostaLoginDTO respostaLoginDTO =
         RespostaLoginDTO.builder()
@@ -95,6 +98,7 @@ public class AuthController {
             .user(
                 UsuarioLoginDTO.builder()
                     .email(usuarioAutenticado.getEmail())
+                    .nome(primeiroNome)
                     .authorities(usuarioAutenticado.getAuthoritiesStrings())
                     .build())
             .build();

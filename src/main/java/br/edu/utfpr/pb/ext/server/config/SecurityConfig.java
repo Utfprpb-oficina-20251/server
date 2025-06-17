@@ -67,17 +67,16 @@ public class SecurityConfig {
   }
 
   /**
-   * Define a cadeia de filtros de segurança HTTP da aplicação, configurando autenticação,
-   * autorização, CORS, CSRF e gerenciamento de sessão.
+   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação JWT,
+   * autorização baseada em perfis, CORS, CSRF e gerenciamento de sessão sem estado.
    *
-   * <p>Permite acesso público a endpoints específicos, restringe rotas conforme perfil de usuário,
-   * ambiente e configuração, e exige autenticação para as demais rotas. O gerenciamento de sessão é
-   * stateless e um filtro de autenticação JWT é adicionado antes do filtro padrão de autenticação
-   * por usuário e senha.
+   * <p>Define regras de acesso público e restrito para diferentes endpoints, considerando métodos
+   * HTTP, perfis ativos e configuração do Swagger. Adiciona o filtro de autenticação JWT antes do
+   * filtro padrão de autenticação por usuário e senha.
    *
    * @param http configuração de segurança HTTP do Spring
-   * @param jwtAuthenticationFilter filtro de autenticação JWT a ser inserido na cadeia
-   * @return a cadeia de filtros de segurança configurada
+   * @param jwtAuthenticationFilter filtro de autenticação JWT a ser adicionado à cadeia
+   * @return cadeia de filtros de segurança configurada
    * @throws Exception se ocorrer erro na configuração da segurança
    */
   @Bean
@@ -103,8 +102,16 @@ public class SecurityConfig {
                     .hasRole("SERVIDOR")
                     .requestMatchers(HttpMethod.OPTIONS, "/**") // CORS preflight
                     .permitAll()
-                    .requestMatchers("/api/departamentos/**")
+                    .requestMatchers(HttpMethod.GET, "/api/usuarios/executores")
+                    .hasRole("SERVIDOR")
+                    .requestMatchers(HttpMethod.GET, "/api/departamento/**")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/curso/**")
+                    .permitAll()
+                    .requestMatchers("/api/departamento/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers("/api/curso/**")
+                    .hasRole("ADMIN")
                     .requestMatchers("/error")
                     .permitAll()
                     .anyRequest()

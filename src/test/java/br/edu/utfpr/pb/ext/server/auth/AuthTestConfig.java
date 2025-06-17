@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationToken;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeValidationService;
+import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
@@ -28,11 +29,13 @@ public class AuthTestConfig {
   public static final String CODIGO_VALIDO = "123456";
 
   /**
-   * Fornece um mock de EmailServiceImpl para testes, simulando o envio bem-sucedido de código de
-   * autenticação por e-mail.
+   * Cria um mock de EmailServiceImpl que simula o envio bem-sucedido de código de autenticação por
+   * e-mail.
    *
-   * @return uma instância mockada de EmailServiceImpl que retorna uma resposta de sucesso ao chamar
-   *     generateAndSendCode com o contexto "autenticacao"
+   * <p>O mock retorna sempre uma resposta de sucesso (HTTP 202) ao chamar generateAndSendCode com
+   * qualquer e-mail e o tipo de código OTP_AUTENTICACAO.
+   *
+   * @return instância mockada de EmailServiceImpl para uso em testes
    * @throws IOException se ocorrer um erro de E/S durante a criação do mock
    */
   @Bean
@@ -42,35 +45,33 @@ public class AuthTestConfig {
 
     // Mock generateAndSendCode to return a successful response
     Response mockResponse = new Response(202, "Success", null);
-    when(mockEmailService.generateAndSendCode(anyString(), eq("autenticacao")))
+    when(mockEmailService.generateAndSendCode(anyString(), eq(TipoCodigo.OTP_AUTENTICACAO)))
         .thenReturn(mockResponse);
 
     return mockEmailService;
   }
 
   /**
-   * Fornece um mock de EmailCodeValidationService para testes, simulando a validação de códigos de
-   * autenticação por e-mail.
+   * Cria um mock de EmailCodeValidationService para testes de validação de código OTP por e-mail.
    *
-   * <p>O mock retorna {@code true} apenas quando o e-mail, o contexto e o código correspondem aos
-   * valores de teste válidos; para qualquer código inválido, retorna {@code false},
-   * independentemente do e-mail ou contexto.
+   * <p>O mock retorna {@code true} apenas quando o e-mail, o tipo de código e o código fornecidos
+   * correspondem aos valores de teste válidos; para qualquer código inválido, retorna {@code
+   * false}, independentemente dos demais parâmetros.
    *
-   * @return mock de EmailCodeValidationService com comportamento previsível para cenários de teste
-   *     de autenticação por e-mail
+   * @return um mock de EmailCodeValidationService com respostas controladas para cenários de
+   *     autenticação por e-mail em testes
    */
   @Bean
   @Primary
   public EmailCodeValidationService emailCodeValidationServiceMock() {
-    String autenticacao = "autenticacao";
     String codigoInvalido = "codigo-invalido";
 
     EmailCodeValidationService mockValidationService =
         Mockito.mock(EmailCodeValidationService.class);
 
-    when(mockValidationService.validateCode(TEST_EMAIL, autenticacao, CODIGO_VALIDO))
+    when(mockValidationService.validateCode(TEST_EMAIL, TipoCodigo.OTP_AUTENTICACAO, CODIGO_VALIDO))
         .thenReturn(true);
-    when(mockValidationService.validateCode(anyString(), anyString(), eq(codigoInvalido)))
+    when(mockValidationService.validateCode(anyString(), any(TipoCodigo.class), eq(codigoInvalido)))
         .thenReturn(false);
 
     return mockValidationService;

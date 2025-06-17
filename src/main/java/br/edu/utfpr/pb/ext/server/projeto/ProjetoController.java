@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("projeto")
@@ -104,13 +105,15 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     List<String> emails =
         dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmail).toList();
     if (emails.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+      throw new ResponseStatusException(
+              HttpStatus.NOT_ACCEPTABLE,  "A equipe executora não pode estar vazia.");
     }
     ArrayList<Optional<Usuario>> usuarios = new ArrayList<>();
     for (String email : emails) {
       Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
       if (usuario.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+        throw new ResponseStatusException(
+                HttpStatus.NOT_ACCEPTABLE, "Usuário com e-mail " + email + " não encontrado.");
       }
       usuarios.add(usuario);
     }
