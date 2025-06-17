@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -347,7 +348,7 @@ class UsuarioControllerTest {
   }
 
   @Test
-  void updateMeuPerfil_whenUserIsUnauthenticated_receiveMethodNotAllowed() {
+  void updateMeuPerfil_whenUserIsUnauthenticated_receiveForbidden() {
     testRestTemplate.getRestTemplate().getInterceptors().clear();
 
     UsuarioLogadoInfoDTO updateRequest = new UsuarioLogadoInfoDTO();
@@ -360,7 +361,7 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    assertEquals(405, response.getStatusCode().value());
+    assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
   }
 
   @Test
