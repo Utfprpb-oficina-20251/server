@@ -105,7 +105,10 @@ public class ExceptionHandlerAdvice {
     logger.error("Erro interno do servidor", exception);
     return ApiError.builder()
         .status(500)
-        .message(exception.getMessage() != null ? exception.getMessage() : "Erro interno do servidor. Por favor, tente novamente mais tarde.")
+        .message(
+            exception.getMessage() != null
+                ? exception.getMessage()
+                : "Erro interno do servidor. Por favor, tente novamente mais tarde.")
         .url(request.getServletPath())
         .build();
   }

@@ -222,8 +222,7 @@ class ExceptionHandlerAdviceTest {
     ApiError apiError = exceptionHandlerAdvice.handleException(ex, request);
 
     assertThat(apiError.getStatus()).isEqualTo(500);
-    assertThat(apiError.getMessage())
-        .isEqualTo(ex.getMessage());
+    assertThat(apiError.getMessage()).isEqualTo(ex.getMessage());
     assertThat(apiError.getUrl()).isEqualTo("/url");
     assertThat(apiError.getValidationErrors()).isNull();
   }
