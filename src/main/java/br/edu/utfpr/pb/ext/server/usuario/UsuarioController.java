@@ -31,6 +31,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   private final ModelMapper modelMapper;
   private final JwtService jwtService;
   private final AuthorityRepository authorityRepository;
+  private final UsuarioRepository usuarioRepository;
 
   /**
    * Cria uma instância do controlador de usuários, inicializando os serviços necessários para
@@ -45,12 +46,14 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
       IUsuarioService usuarioService,
       ModelMapper modelMapper,
       JwtService jwtService,
-      AuthorityRepository authorityRepository) {
+      AuthorityRepository authorityRepository,
+      UsuarioRepository usuarioRepository) {
     super(Usuario.class, UsuarioServidorResponseDTO.class);
     this.usuarioService = usuarioService;
     this.modelMapper = modelMapper;
     this.jwtService = jwtService;
     this.authorityRepository = authorityRepository;
+    this.usuarioRepository = usuarioRepository;
   }
 
   /**
@@ -188,12 +191,9 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
       })
   @GetMapping("/professores")
   public ResponseEntity<List<UsuarioProjetoDTO>> getAllProfessors() {
-    List<Usuario> usuarios = usuarioService.findAll();
+    List<Usuario> usuarios = usuarioRepository.findAllByEmailEndingWith("@utfpr.edu.br");
     List<UsuarioProjetoDTO> responseList =
         usuarios.stream()
-            .filter(
-                usuario ->
-                    usuario.getEmail() != null && usuario.getEmail().endsWith("@utfpr.edu.br"))
             .map(usuario -> modelMapper.map(usuario, UsuarioProjetoDTO.class))
             .toList();
     return ResponseEntity.ok(responseList);
