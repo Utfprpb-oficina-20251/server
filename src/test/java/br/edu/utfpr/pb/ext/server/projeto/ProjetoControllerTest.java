@@ -201,10 +201,9 @@ class ProjetoControllerTest {
 
     FiltroProjetoDTO filtroEspecifico =
         new FiltroProjetoDTO(null, null, null, null, 2L, null, null);
--   when(projetoService.buscarProjetosPorFiltro(eq(filtroEspecifico)))
--       .thenReturn(Collections.emptyList());
-+   when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
-+       .thenReturn(Collections.emptyList());
+
+   when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
+       .thenReturn(Collections.emptyList());
 
     // Act (Ação) 🚀
     ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarMeusProjetos(usuarioLogado);
@@ -215,9 +214,7 @@ class ProjetoControllerTest {
 
     assertNotNull(response.getBody());
     assertTrue(response.getBody().isEmpty());
-
--   verify(projetoService, times(1)).buscarProjetosPorFiltro(eq(filtroEspecifico));
-+   verify(projetoService, times(2)).buscarProjetosPorFiltro(any(FiltroProjetoDTO.class));
+    verify(projetoService, times(1)).buscarProjetosPorFiltro(any(FiltroProjetoDTO.class));
   }
   @Test
   void buscarProjetos_semFiltros_retornaOkComListaDeProjetos() {
