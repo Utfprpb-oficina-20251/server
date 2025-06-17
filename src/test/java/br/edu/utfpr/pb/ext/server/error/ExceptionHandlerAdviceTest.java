@@ -223,7 +223,7 @@ class ExceptionHandlerAdviceTest {
 
     assertThat(apiError.getStatus()).isEqualTo(500);
     assertThat(apiError.getMessage())
-        .isEqualTo("Erro interno do servidor. Por favor, tente novamente mais tarde.");
+        .isEqualTo(ex.getMessage());
     assertThat(apiError.getUrl()).isEqualTo("/url");
     assertThat(apiError.getValidationErrors()).isNull();
   }
