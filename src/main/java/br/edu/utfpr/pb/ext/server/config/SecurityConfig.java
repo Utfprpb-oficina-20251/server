@@ -67,9 +67,12 @@ public class SecurityConfig {
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação JWT, autorização baseada em perfis, CORS, CSRF e gerenciamento de sessão sem estado.
+   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação JWT,
+   * autorização baseada em perfis, CORS, CSRF e gerenciamento de sessão sem estado.
    *
-   * Define regras de acesso público e restrito para diferentes endpoints, considerando métodos HTTP, perfis ativos e configuração do Swagger. Adiciona o filtro de autenticação JWT antes do filtro padrão de autenticação por usuário e senha.
+   * <p>Define regras de acesso público e restrito para diferentes endpoints, considerando métodos
+   * HTTP, perfis ativos e configuração do Swagger. Adiciona o filtro de autenticação JWT antes do
+   * filtro padrão de autenticação por usuário e senha.
    *
    * @param http configuração de segurança HTTP do Spring
    * @param jwtAuthenticationFilter filtro de autenticação JWT a ser adicionado à cadeia
@@ -85,7 +88,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers(HttpMethod.GET, "/api/projeto/meusprojetos").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/projeto/meusprojetos")
+                    .authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/projeto/**")
                     .permitAll()
                     .requestMatchers("/api/auth/**")

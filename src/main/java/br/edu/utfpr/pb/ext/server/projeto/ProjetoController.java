@@ -171,8 +171,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   })
   @GetMapping("/buscar")
   public ResponseEntity<List<ProjetoDTO>> buscarProjetos(
-      @Valid
-      @ParameterObject FiltroProjetoDTO filtros) {
+      @Valid @ParameterObject FiltroProjetoDTO filtros) {
     List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtros);
     return ResponseEntity.ok(projetos);
   }
