@@ -1,8 +1,8 @@
 package br.edu.utfpr.pb.ext.server.auth.otp;
 
-import br.edu.utfpr.pb.ext.server.auth.UsuarioDetailsService;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeValidationService;
 import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioServiceImpl;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
 
   private final EmailCodeValidationService emailCodeValidationService;
-  private final UsuarioDetailsService detailsService;
+  private final UsuarioServiceImpl detailsService;
 
   /**
    * Cria uma instância do provedor de autenticação OTP por e-mail com os serviços de validação de
@@ -27,7 +27,7 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
    * @param detailsService serviço responsável por carregar detalhes do usuário
    */
   public EmailOtpAuthenticationProvider(
-      EmailCodeValidationService emailCodeValidationService, UsuarioDetailsService detailsService) {
+      EmailCodeValidationService emailCodeValidationService, UsuarioServiceImpl detailsService) {
     this.emailCodeValidationService = emailCodeValidationService;
     this.detailsService = detailsService;
   }
@@ -49,7 +49,6 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
     String email = authToken.getPrincipal().toString();
     String code = authToken.getCredentials().toString();
 
-    // Validate the OTP code for the "autenticacao" type
     boolean isValid =
         emailCodeValidationService.validateCode(email, TipoCodigo.OTP_AUTENTICACAO, code);
 
@@ -57,10 +56,8 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
       throw new BadCredentialsException("Código de verificação inválido ou expirado");
     }
 
-    // Find the user by email
+    detailsService.ativarUsuario(email);
     UserDetails userDetails = detailsService.loadUserByUsername(email);
-
-    // Create an authentication token with the user's authorities
     return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
   }
 

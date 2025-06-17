@@ -10,6 +10,7 @@ import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationToken;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeValidationService;
 import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
+import br.edu.utfpr.pb.ext.server.usuario.UsuarioServiceImpl;
 import com.sendgrid.Response;
 import java.io.IOException;
 import org.mockito.Mockito;
@@ -83,7 +84,7 @@ public class AuthTestConfig {
   @Bean
   @Primary
   public EmailOtpAuthenticationProvider emailOtpAuthenticationProviderMock(
-      UsuarioDetailsService userDetailsService) {
+      UsuarioServiceImpl userDetailsService) {
     EmailOtpAuthenticationProvider mockProvider =
         Mockito.mock(EmailOtpAuthenticationProvider.class);
 
