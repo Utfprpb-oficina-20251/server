@@ -129,7 +129,7 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
       if (filtros.dataInicioAte() != null) {
         predicates.add(
             criteriaBuilder.lessThanOrEqualTo(
-                root.get("dataInicio"), filtros.dataInicioAte().atStartOfDay()));
+                root.get("dataInicio"), filtros.dataInicioAte().atTime(23, 59, 59)));
       }
 
       if (filtros.idResponsavel() != null) {
