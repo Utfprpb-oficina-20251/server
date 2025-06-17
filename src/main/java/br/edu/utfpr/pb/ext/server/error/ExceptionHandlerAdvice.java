@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
+  public static final Logger logger = org.slf4j.LoggerFactory.getLogger(ExceptionHandlerAdvice.class);
 
   @ExceptionHandler({MethodArgumentNotValidException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -52,6 +54,28 @@ public class ExceptionHandlerAdvice {
     return ApiError.builder()
         .status(403)
         .message("Acesso negado. Você não tem permissão para executar esta ação.")
+        .url(request.getServletPath())
+        .build();
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+   @ResponseStatus(HttpStatus.BAD_REQUEST)
+   public ApiError handleIllegalArgumentException(
+       IllegalArgumentException exception, HttpServletRequest request) {
+    return ApiError.builder()
+         .status(400)
+         .message(exception.getMessage() != null ? exception.getMessage() : "Requisição inválida.")
+         .url(request.getServletPath())
+         .build();
+  }
+
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ApiError handleException(Exception exception, HttpServletRequest request) {
+    logger.error("Erro interno do servidor", exception);
+    return ApiError.builder()
+        .status(500)
+        .message("Erro interno do servidor. Por favor, tente novamente mais tarde.")
         .url(request.getServletPath())
         .build();
   }
