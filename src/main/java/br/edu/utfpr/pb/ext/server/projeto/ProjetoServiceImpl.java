@@ -5,7 +5,6 @@ import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +16,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implements IProjetoService {
@@ -87,7 +87,6 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   @Transactional(readOnly = true)
   public List<ProjetoDTO> buscarProjetosPorFiltro(
       @NotNull FiltroProjetoDTO filtros /*, Pageable pageable */) {
-    // 1. Chama o método privado para criar a Specification com base nos filtros
     Specification<Projeto> spec = criarSpecificationComFiltros(filtros);
 
     // 2. Executa a busca no repositório com a Specification
