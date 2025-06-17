@@ -171,40 +171,42 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   })
   @GetMapping("/buscar")
   public ResponseEntity<List<ProjetoDTO>> buscarProjetos(
-      // @ParameterObject faz o Swagger/Springdoc entender o DTO como uma coleção de parâmetros de
-      // query
+      @Valid
       @ParameterObject FiltroProjetoDTO filtros) {
     List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtros);
     return ResponseEntity.ok(projetos);
   }
+
   @Operation(
-          summary = "Busca os projetos do usuário logado",
-          description = "Retorna uma lista de todos os projetos em que o usuário autenticado faz parte da equipe executora. " +
-                  "A autenticação é necessária para acessar este recurso."
-  )
-  @ApiResponses(value = {
-          @ApiResponse(
-                  responseCode = "200",
-                  description = "Busca realizada com sucesso. Retorna a lista de projetos do usuário, que pode estar vazia.",
-                  content = {
-                          @Content(
-                                  mediaType = "application/json",
-                                  array = @ArraySchema(schema = @Schema(implementation = ProjetoDTO.class))
-                          )
-                  }
-          ),
-          @ApiResponse(
-                  responseCode = "403",
-                  description = "Acesso Negado. Este erro ocorre se o usuário não estiver autenticado.",
-                  content = @Content
-          )
-  })
+      summary = "Busca os projetos do usuário logado",
+      description =
+          "Retorna uma lista de todos os projetos em que o usuário autenticado faz parte da equipe executora. "
+              + "A autenticação é necessária para acessar este recurso.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "Busca realizada com sucesso. Retorna a lista de projetos do usuário, que pode estar vazia.",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  array = @ArraySchema(schema = @Schema(implementation = ProjetoDTO.class)))
+            }),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Acesso Negado. Este erro ocorre se o usuário não estiver autenticado.",
+            content = @Content)
+      })
   @GetMapping("/meusprojetos")
-  public  ResponseEntity<List<ProjetoDTO>> buscarMeusProjetos(@AuthenticationPrincipal Usuario userDetails){
-    FiltroProjetoDTO filtroCordenador = new FiltroProjetoDTO(null,null,null,null,userDetails.getId(),null,null);
-    FiltroProjetoDTO filtroEquipe = new FiltroProjetoDTO(null,null,null,null,null,userDetails.getId(),null);
+  public ResponseEntity<List<ProjetoDTO>> buscarMeusProjetos(
+      @AuthenticationPrincipal Usuario userDetails) {
+    FiltroProjetoDTO filtroCordenador =
+        new FiltroProjetoDTO(null, null, null, null, userDetails.getId(), null, null);
+    FiltroProjetoDTO filtroEquipe =
+        new FiltroProjetoDTO(null, null, null, null, null, userDetails.getId(), null);
     List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtroCordenador);
-    projetos.addAll( projetoService.buscarProjetosPorFiltro(filtroEquipe));
+    projetos.addAll(projetoService.buscarProjetosPorFiltro(filtroEquipe));
     return ResponseEntity.ok(projetos);
   }
 }
