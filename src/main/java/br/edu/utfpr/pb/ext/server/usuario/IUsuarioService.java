@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface IUsuarioService extends ICrudService<Usuario, Long> {
   /**
@@ -16,4 +17,8 @@ public interface IUsuarioService extends ICrudService<Usuario, Long> {
    * @param professor usuário a ser validado como professor
    */
   void validarProfessor(Usuario professor);
+
+  void ativarUsuario(String email);
+
+  UserDetails loadUserByUsername(String email);
 }

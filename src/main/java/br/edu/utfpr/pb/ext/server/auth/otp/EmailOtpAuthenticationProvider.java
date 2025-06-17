@@ -2,7 +2,7 @@ package br.edu.utfpr.pb.ext.server.auth.otp;
 
 import br.edu.utfpr.pb.ext.server.email.EmailCodeValidationService;
 import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
-import br.edu.utfpr.pb.ext.server.usuario.UsuarioServiceImpl;
+import br.edu.utfpr.pb.ext.server.usuario.IUsuarioService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
 
   private final EmailCodeValidationService emailCodeValidationService;
-  private final UsuarioServiceImpl detailsService;
+  private final IUsuarioService detailsService;
 
   /**
    * Cria uma instância do provedor de autenticação OTP por e-mail com os serviços de validação de
@@ -27,7 +27,7 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
    * @param detailsService serviço responsável por carregar detalhes do usuário
    */
   public EmailOtpAuthenticationProvider(
-      EmailCodeValidationService emailCodeValidationService, UsuarioServiceImpl detailsService) {
+      EmailCodeValidationService emailCodeValidationService, IUsuarioService detailsService) {
     this.emailCodeValidationService = emailCodeValidationService;
     this.detailsService = detailsService;
   }
@@ -56,8 +56,8 @@ public class EmailOtpAuthenticationProvider implements AuthenticationProvider {
       throw new BadCredentialsException("Código de verificação inválido ou expirado");
     }
 
-    detailsService.ativarUsuario(email);
     UserDetails userDetails = detailsService.loadUserByUsername(email);
+    detailsService.ativarUsuario(email);
     return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
   }
 
