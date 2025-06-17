@@ -1,6 +1,7 @@
 package br.edu.utfpr.pb.ext.server.error;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -13,8 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -235,6 +238,40 @@ class ExceptionHandlerAdviceTest {
     assertThat(apiError.getStatus()).isEqualTo(500);
     assertThat(apiError.getMessage())
         .isEqualTo("Erro interno do servidor. Por favor, tente novamente mais tarde.");
+    assertThat(apiError.getUrl()).isEqualTo("/url");
+  }
+
+  @Test
+  @DisplayName("Valida se HttpMessageNotReadableException é tratada corretamente")
+  void handleHttpMessageNotReadableException_whenException_ShouldReturnBadRequestError() {
+    String errorMessage = "Mensagem não legível";
+    HttpMessageNotReadableException ex =
+        new HttpMessageNotReadableException(errorMessage, mock(HttpInputMessage.class));
+
+    ResponseEntity<ApiError> response =
+        exceptionHandlerAdvice.handleHttpMessageNotReadableException(ex, request);
+    ApiError apiError = response.getBody();
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(apiError.getStatus()).isEqualTo(400);
+    assertThat(apiError.getMessage()).isEqualTo(errorMessage);
+    assertThat(apiError.getUrl()).isEqualTo("/url");
+    assertThat(apiError.getValidationErrors()).isNull();
+  }
+
+  @Test
+  @DisplayName("Valida se HttpMessageNotReadableException com mensagem nula usa mensagem padrão")
+  void handleHttpMessageNotReadableException_whenNullMessage_ShouldReturnDefaultMessage() {
+    HttpMessageNotReadableException ex =
+        new HttpMessageNotReadableException(null, mock(HttpInputMessage.class));
+
+    ResponseEntity<ApiError> response =
+        exceptionHandlerAdvice.handleHttpMessageNotReadableException(ex, request);
+    ApiError apiError = response.getBody();
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(apiError.getStatus()).isEqualTo(400);
+    assertThat(apiError.getMessage()).isEqualTo(REQUISICAO_INVALIDA);
     assertThat(apiError.getUrl()).isEqualTo("/url");
   }
 }
