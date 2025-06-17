@@ -10,17 +10,16 @@ import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationToken;
 import br.edu.utfpr.pb.ext.server.email.EmailCodeValidationService;
 import br.edu.utfpr.pb.ext.server.email.enums.TipoCodigo;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
-import br.edu.utfpr.pb.ext.server.usuario.Usuario;
-import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import com.sendgrid.Response;
 import java.io.IOException;
-import java.util.Optional;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @TestConfiguration
 public class AuthTestConfig {
@@ -80,20 +79,11 @@ public class AuthTestConfig {
   /**
    * Fornece um mock de {@link EmailOtpAuthenticationProvider} para testes, simulando o fluxo de
    * autenticação OTP por e-mail.
-   *
-   * <p>O mock autentica com sucesso apenas quando o e-mail e o código fornecidos correspondem aos
-   * valores de teste definidos. Caso contrário, lança exceções para simular falhas de autenticação,
-   * como código inválido ou usuário não encontrado.
-   *
-   * @param usuarioRepository repositório utilizado para buscar o usuário pelo e-mail durante a
-   *     autenticação simulada
-   * @return um mock de {@code EmailOtpAuthenticationProvider} com comportamento controlado para
-   *     cenários de teste
    */
   @Bean
   @Primary
   public EmailOtpAuthenticationProvider emailOtpAuthenticationProviderMock(
-      UsuarioRepository usuarioRepository) {
+      UsuarioDetailsService userDetailsService) {
     EmailOtpAuthenticationProvider mockProvider =
         Mockito.mock(EmailOtpAuthenticationProvider.class);
 
@@ -106,19 +96,16 @@ public class AuthTestConfig {
               String code = token.getCredentials().toString();
 
               if (TEST_EMAIL.equals(email) && CODIGO_VALIDO.equals(code)) {
-                Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
-                if (userOpt.isPresent()) {
-                  UserDetails userDetails = userOpt.get();
+                try {
+                  UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                   return new UsernamePasswordAuthenticationToken(
                       userDetails, null, userDetails.getAuthorities());
-                } else {
-                  throw new org.springframework.security.core.userdetails.UsernameNotFoundException(
-                      "Usuário nao encontrado");
+                } catch (UsernameNotFoundException e) {
+                  throw new UsernameNotFoundException("Usuário nao encontrado");
                 }
               }
 
-              throw new org.springframework.security.authentication.BadCredentialsException(
-                  "Código de verificação inválido ou expirado");
+              throw new BadCredentialsException("Código de verificação inválido ou expirado");
             });
 
     return mockProvider;
