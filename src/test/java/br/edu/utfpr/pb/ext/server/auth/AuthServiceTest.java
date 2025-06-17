@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
+import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
@@ -23,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 class AuthServiceTest {
   @Mock UsuarioRepository usuarioRepository;
   @Mock AuthorityRepository authorityRepository;
+  @Mock EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
   @InjectMocks AuthService authService;
 
   @Test

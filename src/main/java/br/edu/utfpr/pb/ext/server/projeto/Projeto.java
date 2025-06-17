@@ -46,4 +46,13 @@ public class Projeto extends BaseEntity {
   private List<Usuario> equipeExecutora;
 
   @NotNull private StatusProjeto status;
+
+  @Column(length = 1000)
+  private String justificativaCancelamento;
+
+  @Column(name = "carga_horaria")
+  private Long cargaHoraria;
+
+  @Column(name = "qtde_vagas")
+  private Long qtdeVagas;
 }

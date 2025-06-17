@@ -7,9 +7,7 @@ import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 /*
@@ -54,7 +52,9 @@ public class ErrorHandler implements ErrorController {
    * @param webRequest a requisição web atual
    * @return um {@link ApiError} com detalhes do erro ocorrido na requisição
    */
-  @PostMapping("/error")
+  @RequestMapping(
+      value = "/error",
+      method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
   @Operation(summary = "Retorna o erro proveniente de métodos HTTP com efeito colateral")
   public ApiError handleUnsafeError(WebRequest webRequest) {
     return buildApiError(webRequest);
