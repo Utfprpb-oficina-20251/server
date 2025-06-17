@@ -203,10 +203,7 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
       @AuthenticationPrincipal Usuario userDetails) {
     FiltroProjetoDTO filtroCordenador =
         new FiltroProjetoDTO(null, null, null, null, userDetails.getId(), null, null);
-    FiltroProjetoDTO filtroEquipe =
-        new FiltroProjetoDTO(null, null, null, null, null, userDetails.getId(), null);
     List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtroCordenador);
-    projetos.addAll(projetoService.buscarProjetosPorFiltro(filtroEquipe));
     return ResponseEntity.ok(projetos);
   }
 }
