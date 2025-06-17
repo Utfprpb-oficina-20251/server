@@ -185,6 +185,7 @@ class ProjetoControllerTest {
             ResponseStatusException.class, () -> projetoController.create(projetoDTOEntrada));
 
     assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatusCode());
+    assertNotNull(exception.getReason());
     assertTrue(
         exception
             .getReason()

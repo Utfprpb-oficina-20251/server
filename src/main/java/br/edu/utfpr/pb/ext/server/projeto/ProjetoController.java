@@ -106,14 +106,14 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
         dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmail).toList();
     if (emails.isEmpty()) {
       throw new ResponseStatusException(
-              HttpStatus.NOT_ACCEPTABLE,  "A equipe executora não pode estar vazia.");
+          HttpStatus.NOT_ACCEPTABLE, "A equipe executora não pode estar vazia.");
     }
     ArrayList<Optional<Usuario>> usuarios = new ArrayList<>();
     for (String email : emails) {
       Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
       if (usuario.isEmpty()) {
         throw new ResponseStatusException(
-                HttpStatus.NOT_ACCEPTABLE, "Usuário com e-mail " + email + " não encontrado.");
+            HttpStatus.NOT_ACCEPTABLE, "Usuário com e-mail " + email + " não encontrado.");
       }
       usuarios.add(usuario);
     }

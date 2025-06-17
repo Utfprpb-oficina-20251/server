@@ -1,16 +1,16 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
+import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
-import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
