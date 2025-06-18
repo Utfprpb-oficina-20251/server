@@ -41,6 +41,10 @@ class ProjetoServiceImplTest {
   private Usuario servidor;
   private Usuario aluno;
 
+
+  private Projeto projetoMock;
+  private ProjetoDTO projetoDTOMock;
+
   @BeforeEach
   void setUp() {
     servidor = new Usuario();
@@ -50,6 +54,15 @@ class ProjetoServiceImplTest {
     aluno = new Usuario();
     aluno.setId(alunoId);
     aluno.setRegistroAcademico("20230123");
+
+
+    projetoMock = new Projeto();
+    projetoMock.setId(1L);
+    projetoMock.setTitulo("Projeto Teste");
+
+    projetoDTOMock = new ProjetoDTO();
+    projetoDTOMock.setId(1L);
+    projetoDTOMock.setTitulo("Projeto Teste");
   }
 
   // Teste feliz: servidor autorizado cancela o projeto
@@ -100,25 +113,6 @@ class ProjetoServiceImplTest {
     assertEquals(400, ex.getStatusCode().value());
   }
 
-  private Projeto projetoMock;
-  private ProjetoDTO projetoDTOMock;
-
-  @BeforeEach
-  void setUp() {
-    // Configuração executada antes de cada teste
-
-    // Criando a entidade Projeto usando o construtor padrão e setters
-    projetoMock = new Projeto();
-    projetoMock.setId(1L);
-    projetoMock.setTitulo("Projeto Teste");
-    // Se precisar de mais algum campo para seus testes, adicione aqui.
-    // Ex: projetoMock.setStatus(StatusProjeto.EM_ANDAMENTO);
-
-    // Criando o DTO da mesma forma
-    projetoDTOMock = new ProjetoDTO();
-    projetoDTOMock.setId(1L);
-    projetoDTOMock.setTitulo("Projeto Teste");
-  }
 
   @Test
   void atualizarProjeto_quandoProjetoExiste_deveRetornarDTOAtualizado() {
