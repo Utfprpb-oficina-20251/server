@@ -25,7 +25,9 @@ public record FiltroProjetoDTO(
             example = "2024-12-31")
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         LocalDate dataInicioAte,
-    @Schema(description = "Filtrar por projetos que possuem um professor coordenador específico (usar o ID do usuário).",
+    @Schema(
+            description =
+                "Filtrar por projetos que possuem um professor coordenador específico (usar o ID do usuário).",
             example = "10")
         Long idResponsavel,
     @Schema(

@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(AuthTestConfig.class)
 class AuthControllerTest {
   public static final String USUARIO_JA_CADASTRADO = "Usuário já cadastrado";
+  public static final String EMAIL_NAO_TEM_DOMINIO_UTFPR =
+      "E-mail deve ser @utfpr.edu.br ou @alunos.utfpr.edu.br";
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
 
@@ -178,7 +180,7 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isConflict())
-        .andExpect(status().reason(USUARIO_JA_CADASTRADO));
+        .andExpect(jsonPath("$.message").value(USUARIO_JA_CADASTRADO));
   }
 
   @Test
@@ -198,7 +200,7 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cadastroDTO)))
         .andExpect(status().isBadRequest())
-        .andExpect(status().reason("E-mail deve ser @utfpr.edu.br ou @alunos.utfpr.edu.br"));
+        .andExpect(jsonPath("$.message").value(EMAIL_NAO_TEM_DOMINIO_UTFPR));
   }
 
   @Test
@@ -228,8 +230,6 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(solicitacaoDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Validation Error"))
-        .andExpect(
-            jsonPath("$.validationErrors.email")
-                .value("E-mail deve ser @utfpr.edu.br ou @alunos.utfpr.edu.br"));
+        .andExpect(jsonPath("$.validationErrors.email").value(EMAIL_NAO_TEM_DOMINIO_UTFPR));
   }
 }

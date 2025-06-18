@@ -37,4 +37,8 @@ public class ProjetoDTO {
   @NotNull private List<UsuarioProjetoDTO> equipeExecutora;
 
   private StatusProjeto status;
+
+  private Long cargaHoraria;
+
+  private Long qtdeVagas;
 }

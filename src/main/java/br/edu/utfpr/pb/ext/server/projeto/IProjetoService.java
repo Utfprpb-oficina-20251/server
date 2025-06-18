@@ -5,6 +5,9 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 public interface IProjetoService extends ICrudService<Projeto, Long> {
+
+  void cancelar(Long id, CancelamentoProjetoDTO dto, Long usuarioId);
+
   ProjetoDTO atualizarProjeto(Long id, @Valid ProjetoDTO dto);
 
   List<ProjetoDTO> buscarProjetosPorFiltro(FiltroProjetoDTO filtros);
