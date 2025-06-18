@@ -7,15 +7,20 @@ import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -27,6 +32,26 @@ class ProjetoServiceImplTest {
   @Mock private ProjetoRepository projetoRepository;
   @Mock private ModelMapper modelMapper;
   @Mock private UsuarioRepository usuarioRepository;
+
+  private Projeto projetoMock;
+  private ProjetoDTO projetoDTOMock;
+
+  @BeforeEach
+  void setUp() {
+    // Configuração executada antes de cada teste
+
+    // Criando a entidade Projeto usando o construtor padrão e setters
+    projetoMock = new Projeto();
+    projetoMock.setId(1L);
+    projetoMock.setTitulo("Projeto Teste");
+    // Se precisar de mais algum campo para seus testes, adicione aqui.
+    // Ex: projetoMock.setStatus(StatusProjeto.EM_ANDAMENTO);
+
+    // Criando o DTO da mesma forma
+    projetoDTOMock = new ProjetoDTO();
+    projetoDTOMock.setId(1L);
+    projetoDTOMock.setTitulo("Projeto Teste");
+  }
 
   @Test
   void atualizarProjeto_quandoProjetoExiste_deveRetornarDTOAtualizado() {
@@ -142,5 +167,131 @@ class ProjetoServiceImplTest {
     verify(usuarioRepository).findByEmail(emailAutenticado);
 
     SecurityContextHolder.clearContext();
+  }
+  @Test
+  void buscarProjetosPorFiltro_quandoFiltroDeTituloInformado_deveChamarRepositorio() {
+    // Arrange
+    FiltroProjetoDTO filtro = new FiltroProjetoDTO("Robótica", null, null, null, null, null, null);
+    List<Projeto> listaResultado = List.of(projetoMock);
+
+    when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
+    when(modelMapper.map(projetoMock, ProjetoDTO.class)).thenReturn(projetoDTOMock);
+
+    // Act
+    List<ProjetoDTO> resultado = projetoService.buscarProjetosPorFiltro(filtro);
+
+    // Assert
+    assertNotNull(resultado);
+    assertFalse(resultado.isEmpty());
+    assertEquals(1, resultado.size());
+    verify(projetoRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  void buscarProjetosPorFiltro_quandoFiltroDeStatusInformado_deveChamarRepositorio() {
+    // Arrange
+    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, StatusProjeto.EM_ANDAMENTO, null, null, null, null, null);
+    List<Projeto> listaResultado = List.of(projetoMock);
+
+    when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTOMock);
+
+    // Act
+    List<ProjetoDTO> resultado = projetoService.buscarProjetosPorFiltro(filtro);
+
+    // Assert
+    assertNotNull(resultado);
+    assertFalse(resultado.isEmpty());
+    verify(projetoRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  void buscarProjetosPorFiltro_quandoFiltroDeDataInicioDeInformado_deveChamarRepositorio() {
+    // Arrange
+    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, LocalDate.now(), null, null, null, null);
+    List<Projeto> listaResultado = List.of(projetoMock);
+
+    when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTOMock);
+
+    // Act
+    List<ProjetoDTO> resultado = projetoService.buscarProjetosPorFiltro(filtro);
+
+    // Assert
+    assertNotNull(resultado);
+    assertFalse(resultado.isEmpty());
+    verify(projetoRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  void buscarProjetosPorFiltro_quandoFiltroDeDataInicioAteInformado_deveChamarRepositorio() {
+    // Arrange
+    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, null, LocalDate.now(), null, null, null);
+    List<Projeto> listaResultado = List.of(projetoMock);
+
+    when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTOMock);
+
+    // Act
+    List<ProjetoDTO> resultado = projetoService.buscarProjetosPorFiltro(filtro);
+
+    // Assert
+    assertNotNull(resultado);
+    assertFalse(resultado.isEmpty());
+    verify(projetoRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  void buscarProjetosPorFiltro_quandoFiltroDeIdResponsavelInformado_deveChamarRepositorio() {
+    // Arrange
+    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, null, null, 1L, null, null);
+    List<Projeto> listaResultado = List.of(projetoMock);
+
+    when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTOMock);
+
+    // Act
+    List<ProjetoDTO> resultado = projetoService.buscarProjetosPorFiltro(filtro);
+
+    // Assert
+    assertNotNull(resultado);
+    assertFalse(resultado.isEmpty());
+    verify(projetoRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  void buscarProjetosPorFiltro_quandoFiltroDeIdMembroEquipeInformado_deveChamarRepositorio() {
+    // Arrange
+    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, null, null, null, 2L, null);
+    List<Projeto> listaResultado = List.of(projetoMock);
+
+    when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTOMock);
+
+    // Act
+    List<ProjetoDTO> resultado = projetoService.buscarProjetosPorFiltro(filtro);
+
+    // Assert
+    assertNotNull(resultado);
+    assertFalse(resultado.isEmpty());
+    verify(projetoRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  void buscarProjetosPorFiltro_quandoFiltroDeIdCursoInformado_deveChamarRepositorio() {
+    // Arrange
+    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, null, null, null, null, 3L);
+    List<Projeto> listaResultado = List.of(projetoMock);
+
+    when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTOMock);
+
+    // Act
+    List<ProjetoDTO> resultado = projetoService.buscarProjetosPorFiltro(filtro);
+
+    // Assert
+    assertNotNull(resultado);
+    assertFalse(resultado.isEmpty());
+    verify(projetoRepository).findAll(any(Specification.class));
   }
 }
