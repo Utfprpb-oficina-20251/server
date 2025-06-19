@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.usuario.dto;
 import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import br.edu.utfpr.pb.ext.server.usuario.validation.annotation.UniqueCpf;
 import br.edu.utfpr.pb.ext.server.usuario.validation.annotation.UniqueSiape;
+import io.micrometer.common.lang.Nullable;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.validator.constraints.br.CPF;
@@ -28,7 +29,9 @@ public class UsuarioServidorRequestDTO {
       message = "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.email}")
   private String email;
 
-  @Size(min = 11, max = 11) private String telefone;
+  @Nullable
+  @Size(min = 10, max = 15, message = "O telefone deve ter entre 10 e 15 caracteres, se informado.")
+  private String telefone;
 
   @Size(min = 3, max = 100) private String enderecoCompleto;
 
