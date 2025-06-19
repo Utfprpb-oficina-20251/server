@@ -29,9 +29,7 @@ public class UsuarioServidorRequestDTO {
       message = "{br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO.email}")
   private String email;
 
-  @Nullable
-  @Size(min = 10, max = 15, message = "O telefone deve ter entre 10 e 15 caracteres, se informado.")
-  private String telefone;
+  @Nullable @Size(min = 10, max = 15, message = "O telefone deve ter entre 10 e 15 caracteres, se informado.") private String telefone;
 
   @Size(min = 3, max = 100) private String enderecoCompleto;
 
