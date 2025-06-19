@@ -127,6 +127,8 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     projeto.setRestricaoPublico(dto.getRestricaoPublico());
     projeto.setEquipeExecutora(usuarios.stream().flatMap(Optional::stream).toList());
     projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
+    projeto.setQtdeVagas(dto.getQtdeVagas());
+    projeto.setCargaHoraria(dto.getCargaHoraria());
     Projeto projetoResponse = projetoService.save(projeto);
     ProjetoDTO projetoDTO = modelMapper.map(projetoResponse, ProjetoDTO.class);
     return ResponseEntity.status(HttpStatus.CREATED).body(projetoDTO);
