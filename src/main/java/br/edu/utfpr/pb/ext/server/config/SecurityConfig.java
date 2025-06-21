@@ -94,7 +94,7 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/usuarios/executores")
                     .hasRole("SERVIDOR")
-                    .requestMatchers(HttpMethod.GET, "/api/minhas-indicacoes")
+                    .requestMatchers(HttpMethod.GET, "/api/sugestao/minhas-indicacoes")
                     .hasRole("SERVIDOR")
                     .requestMatchers(HttpMethod.GET, "/api/departamento/**")
                     .permitAll()
