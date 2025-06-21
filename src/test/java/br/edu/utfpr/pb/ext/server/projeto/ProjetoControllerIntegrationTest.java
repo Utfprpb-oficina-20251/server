@@ -51,11 +51,16 @@ class ProjetoControllerIntegrationTest {
                     .cpf(String.valueOf(System.nanoTime()))
                     .curso(cursoDeTeste)
                     .build());
-
-    testRestTemplate.getRestTemplate().getInterceptors().clear();
   }
 
-  // --- TESTES EXISTENTES E FUNCIONAIS ---
+  @AfterEach
+  void cleanUp(){
+
+    projetoRepository.deleteAll();
+    usuarioRepository.deleteAll();
+    cursoRepository.deleteAll();
+    testRestTemplate.getRestTemplate().getInterceptors().clear();
+  }
 
   @Test
   void buscarProjetos_semFiltros_deveRetornarTodosOsProjetos() {
