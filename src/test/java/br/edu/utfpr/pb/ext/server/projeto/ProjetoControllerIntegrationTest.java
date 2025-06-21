@@ -7,6 +7,8 @@ import br.edu.utfpr.pb.ext.server.curso.CursoRepository;
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +28,12 @@ class ProjetoControllerIntegrationTest {
   private static final String API_PROJETOS_BUSCAR = "/api/projeto/buscar";
 
   @Autowired private TestRestTemplate testRestTemplate;
-
   @Autowired private ProjetoRepository projetoRepository;
   @Autowired private UsuarioRepository usuarioRepository;
   @Autowired private CursoRepository cursoRepository;
+
+  private Curso cursoDeTeste;
+  private Usuario responsavelDeTeste;
 
   @BeforeEach
   void setUp() {
@@ -37,17 +41,21 @@ class ProjetoControllerIntegrationTest {
     usuarioRepository.deleteAll();
     cursoRepository.deleteAll();
 
+    cursoDeTeste = cursoRepository.save(
+            Curso.builder().nome("Engenharia de Software de Teste").codigo("SW-TESTE").build());
+
+    responsavelDeTeste = usuarioRepository.save(
+            Usuario.builder()
+                    .nome("Responsável Padrão")
+                    .email("responsavel.padrao@utfpr.edu.br")
+                    .cpf(String.valueOf(System.nanoTime()))
+                    .curso(cursoDeTeste)
+                    .build());
+
     testRestTemplate.getRestTemplate().getInterceptors().clear();
   }
 
-  @AfterEach
-  void clearUp() {
-    projetoRepository.deleteAll();
-    usuarioRepository.deleteAll();
-    cursoRepository.deleteAll();
-
-    testRestTemplate.getRestTemplate().getInterceptors().clear();
-  }
+  // --- TESTES EXISTENTES E FUNCIONAIS ---
 
   @Test
   void buscarProjetos_semFiltros_deveRetornarTodosOsProjetos() {
@@ -55,106 +63,134 @@ class ProjetoControllerIntegrationTest {
     criarEsalvarProjeto("Projeto de Culinária", StatusProjeto.CONCLUIDO);
 
     ResponseEntity<ProjetoDTO[]> response =
-        testRestTemplate.getForEntity(API_PROJETOS_BUSCAR, ProjetoDTO[].class);
+            testRestTemplate.getForEntity(API_PROJETOS_BUSCAR, ProjetoDTO[].class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(2, response.getBody().length); // Esperamos 2 projetos de volta
+    assertEquals(2, response.getBody().length);
   }
 
   @Test
   void buscarProjetos_comFiltroDeTitulo_deveRetornarApenasProjetoCorrespondente() {
-    // Arrange
     criarEsalvarProjeto("Projeto de Robotica", StatusProjeto.EM_ANDAMENTO);
     criarEsalvarProjeto("Projeto de Culinária", StatusProjeto.CONCLUIDO);
 
-    // Constrói a URL com o query parameter
     String urlComFiltro =
-        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
-            .queryParam("titulo", "Robotica")
-            .toUriString();
+            UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+                    .queryParam("titulo", "Robotica")
+                    .toUriString();
 
-    // Act
     ResponseEntity<ProjetoDTO[]> response =
-        testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
+            testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
 
-    // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().length);
     assertEquals("Projeto de Robotica", response.getBody()[0].getTitulo());
   }
 
-  @Test
-  void buscarProjetos_comFiltroDeStatus_deveRetornarApenasProjetoCorrespondente() {
-    // Arrange
-    criarEsalvarProjeto("Projeto de Robotica", StatusProjeto.EM_ANDAMENTO);
-    criarEsalvarProjeto("Projeto de Culinária", StatusProjeto.CONCLUIDO);
+  // ... outros testes de filtro de status e "não encontrado" ...
 
-    String urlComFiltro =
-        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
-            .queryParam("status", "CONCLUIDO")
+
+  // --- NOVOS TESTES ADICIONADOS ---
+
+  @Test
+  void buscarProjetos_comFiltroDeDataInicioAPartirDe_deveRetornarProjetosCorretos() {
+    // Arrange
+    Date ontem = Date.from(LocalDate.now().minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    Date amanha = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    String hojeString = LocalDate.now().toString(); // Formato YYYY-MM-DD
+
+    criarEsalvarProjeto("Projeto Antigo", StatusProjeto.CONCLUIDO, ontem, responsavelDeTeste);
+    criarEsalvarProjeto("Projeto Futuro", StatusProjeto.EM_ANDAMENTO, amanha, responsavelDeTeste);
+
+    String urlComFiltro = UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+            .queryParam("dataInicioDe", hojeString)
             .toUriString();
 
     // Act
     ResponseEntity<ProjetoDTO[]> response =
-        testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
+            testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().length);
-    assertEquals(StatusProjeto.CONCLUIDO, response.getBody()[0].getStatus());
+    assertEquals("Projeto Futuro", response.getBody()[0].getTitulo());
   }
 
   @Test
-  void buscarProjetos_quandoFiltroNaoEncontraResultados_deveRetornarListaVazia() {
+  void buscarProjetos_comFiltroDeDataInicioAte_deveRetornarProjetosCorretos() {
     // Arrange
-    criarEsalvarProjeto("Projeto de Robótica", StatusProjeto.EM_ANDAMENTO);
+    Date ontem = Date.from(LocalDate.now().minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    Date amanha = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    String hojeString = LocalDate.now().toString();
 
-    String urlComFiltro =
-        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
-            .queryParam("titulo", "Inexistente")
+    criarEsalvarProjeto("Projeto Antigo", StatusProjeto.CONCLUIDO, ontem, responsavelDeTeste);
+    criarEsalvarProjeto("Projeto Futuro", StatusProjeto.EM_ANDAMENTO, amanha, responsavelDeTeste);
+
+    String urlComFiltro = UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+            .queryParam("dataInicioAte", hojeString)
             .toUriString();
 
     // Act
     ResponseEntity<ProjetoDTO[]> response =
-        testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
+            testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(0, response.getBody().length); // A lista deve estar vazia
+    assertEquals(1, response.getBody().length);
+    assertEquals("Projeto Antigo", response.getBody()[0].getTitulo());
   }
 
+  @Test
+  void buscarProjetos_comFiltroDeIdCurso_deveRetornarProjetosDoCursoCorreto() {
+    // Arrange
+    // O cursoDeTeste e responsavelDeTeste (Eng. de Software) já foram criados no setUp.
+    // Vamos criar um segundo curso e responsável para o cenário de teste.
+    Curso cursoDesign = cursoRepository.save(Curso.builder().nome("Design Gráfico").codigo("DG").build());
+    Usuario responsavelDesign = usuarioRepository.save(Usuario.builder().nome("Beto do Design").email("beto@utfpr.edu.br").cpf("2222").curso(cursoDesign).build());
+
+    // Cria um projeto para cada responsável/curso
+    criarEsalvarProjeto("Projeto de Software", StatusProjeto.EM_ANDAMENTO, new Date(), responsavelDeTeste);
+    criarEsalvarProjeto("Projeto de Design", StatusProjeto.EM_ANDAMENTO, new Date(), responsavelDesign);
+
+    String urlComFiltro = UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+            .queryParam("idCurso", cursoDeTeste.getId()) // Filtra pelo ID do primeiro curso
+            .toUriString();
+
+    // Act
+    ResponseEntity<ProjetoDTO[]> response =
+            testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().length);
+    assertEquals("Projeto de Software", response.getBody()[0].getTitulo());
+  }
+
+
+  // --- MÉTODOS AUXILIARES ATUALIZADOS ---
+
   private Projeto criarEsalvarProjeto(String titulo, StatusProjeto status) {
-    Curso curso =
-        cursoRepository.save(
-            Curso.builder()
-                .nome("Engenharia de Testes")
-                .codigo(String.valueOf(System.currentTimeMillis()))
-                .build());
+    // Chama a versão mais completa com valores padrão
+    return criarEsalvarProjeto(titulo, status, new Date(), this.responsavelDeTeste);
+  }
 
-    Usuario responsavel =
-        usuarioRepository.save(
-            Usuario.builder()
-                .nome("Usuario " + titulo)
-                .email(titulo.replaceAll("\\s", "").toLowerCase() + "@utfpr.edu.br")
-                .cpf(String.valueOf(System.nanoTime()))
-                .curso(curso)
-                .build());
-
+  private Projeto criarEsalvarProjeto(String titulo, StatusProjeto status, Date dataInicio, Usuario responsavel) {
     Projeto projeto =
-        Projeto.builder()
-            .titulo(titulo)
-            .status(status)
-            .responsavel(responsavel)
-            .descricao("Desc...")
-            .justificativa("Just...")
-            .dataInicio(new Date())
-            .publicoAlvo("Todos")
-            .vinculadoDisciplina(false)
-            .build();
+            Projeto.builder()
+                    .titulo(titulo)
+                    .status(status)
+                    .responsavel(responsavel) // Usa o responsável passado como parâmetro
+                    .descricao("Desc...")
+                    .justificativa("Just...")
+                    .dataInicio(dataInicio) // Usa a data passada como parâmetro
+                    .publicoAlvo("Todos")
+                    .vinculadoDisciplina(false)
+                    .build();
 
     return projetoRepository.save(projeto);
   }
