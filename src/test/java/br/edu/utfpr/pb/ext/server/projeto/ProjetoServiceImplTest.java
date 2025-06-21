@@ -7,9 +7,8 @@ import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Collections;
-
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +40,6 @@ class ProjetoServiceImplTest {
   private Usuario servidor;
   private Usuario aluno;
 
-
   private Projeto projetoMock;
   private ProjetoDTO projetoDTOMock;
 
@@ -54,7 +52,6 @@ class ProjetoServiceImplTest {
     aluno = new Usuario();
     aluno.setId(alunoId);
     aluno.setRegistroAcademico("20230123");
-
 
     projetoMock = new Projeto();
     projetoMock.setId(1L);
@@ -112,7 +109,6 @@ class ProjetoServiceImplTest {
 
     assertEquals(400, ex.getStatusCode().value());
   }
-
 
   @Test
   void atualizarProjeto_quandoProjetoExiste_deveRetornarDTOAtualizado() {
@@ -370,6 +366,7 @@ class ProjetoServiceImplTest {
 
     SecurityContextHolder.clearContext();
   }
+
   @Test
   void buscarProjetosPorFiltro_quandoFiltroDeTituloInformado_deveChamarRepositorio() {
     // Arrange
@@ -392,7 +389,8 @@ class ProjetoServiceImplTest {
   @Test
   void buscarProjetosPorFiltro_quandoFiltroDeStatusInformado_deveChamarRepositorio() {
     // Arrange
-    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, StatusProjeto.EM_ANDAMENTO, null, null, null, null, null);
+    FiltroProjetoDTO filtro =
+        new FiltroProjetoDTO(null, StatusProjeto.EM_ANDAMENTO, null, null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
@@ -410,7 +408,8 @@ class ProjetoServiceImplTest {
   @Test
   void buscarProjetosPorFiltro_quandoFiltroDeDataInicioDeInformado_deveChamarRepositorio() {
     // Arrange
-    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, LocalDate.now(), null, null, null, null);
+    FiltroProjetoDTO filtro =
+        new FiltroProjetoDTO(null, null, LocalDate.now(), null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
@@ -428,7 +427,8 @@ class ProjetoServiceImplTest {
   @Test
   void buscarProjetosPorFiltro_quandoFiltroDeDataInicioAteInformado_deveChamarRepositorio() {
     // Arrange
-    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, null, LocalDate.now(), null, null, null);
+    FiltroProjetoDTO filtro =
+        new FiltroProjetoDTO(null, null, null, LocalDate.now(), null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
