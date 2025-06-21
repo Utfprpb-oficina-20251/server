@@ -34,6 +34,12 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
     mode: HTML
+minio:
+  url: ${MINIO_URL:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:miniokey}
+  secret-key: ${MINIO_SECRET_KEY:miniosecret}
+  bucket: ${MINIO_BUCKET:utfpr-bucket}
+  secure: ${MINIO_SECURE:false}
 ---
 
 # Testes

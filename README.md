@@ -39,7 +39,15 @@ Url do banco de dados qual a aplicação vai se conectar, opcional para teste
 
 `SENDGRID_API_KEY` Chave de API do SendGrid para envio de e-mails, opcional para desenvolvimento
 
+`MINIO_URL` Url do Minio para envio de arquivos, opcional para desenvolvimento
 
+`MINIO_ACCESS_KEY` Chave de acesso ao Minio para envio de arquivos, opcional para desenvolvimento
+
+`MINIO_SECRET_KEY` Chave de acesso ao Minio para envio de arquivos, opcional para desenvolvimento
+
+`MINIO_BUCKET` Nome do bucket do Minio para envio de arquivos, opcional para desenvolvimento
+
+`MINIO_SECURE` Define se o Minio deve ser utilizado em HTTPS, opcional
 
 ### Exemplo de envfile
 ```.text
@@ -53,4 +61,9 @@ DATABASE_PASSWORD=
 POSTGRES_DB=
 SWAGGER_ENABLED=
 SENDGRID_API_KEY=
+MINIO_URL=
+MINIO_ACCESS_KEY=
+MINIO_SECRET_KEY=
+MINIO_BUCKET=
+MINIO_SECURE=
 ```
