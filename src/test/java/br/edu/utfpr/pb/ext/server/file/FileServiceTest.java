@@ -41,7 +41,7 @@ class FileServiceTest {
   private static final byte[] TEST_BYTES = TEST_CONTENT.getBytes(StandardCharsets.UTF_8);
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() {
     when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     when(minioConfig.isSecure()).thenReturn(false);
 
@@ -189,7 +189,7 @@ class FileServiceTest {
 
     @NotNull @Override
     public java.util.Iterator<Result<T>> iterator() {
-      return new java.util.Iterator<Result<T>>() {
+      return new java.util.Iterator<>() {
         private boolean hasNext = true;
 
         @Override
