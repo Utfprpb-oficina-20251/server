@@ -26,10 +26,12 @@ public class MinioConfig {
   private String bucket;
 
   /**
-   * Cria e fornece um bean {@link MinioClient} configurado com as propriedades definidas para o Minio.
+   * Cria e fornece um bean {@link MinioClient} configurado com as propriedades definidas para o
+   * Minio.
    *
    * @return uma instância configurada de {@link MinioClient}
-   * @throws IllegalArgumentException se a URL, a access key ou a secret key do Minio não estiverem definidas ou estiverem vazias
+   * @throws IllegalArgumentException se a URL, a access key ou a secret key do Minio não estiverem
+   *     definidas ou estiverem vazias
    */
   @Bean
   public MinioClient minioClient() {
@@ -44,7 +46,8 @@ public class MinioConfig {
   }
 
   /**
-   * Cria e registra um bean MinioInitializer para inicializar recursos do Minio, exceto no perfil "test".
+   * Cria e registra um bean MinioInitializer para inicializar recursos do Minio, exceto no perfil
+   * "test".
    *
    * @param minioClient instância configurada do MinioClient.
    * @return instância de MinioInitializer configurada com o MinioClient e esta configuração.

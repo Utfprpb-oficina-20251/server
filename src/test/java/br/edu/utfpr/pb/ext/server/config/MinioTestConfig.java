@@ -10,7 +10,8 @@ public class MinioTestConfig {
   /**
    * Fornece um bean de teste que retorna uma instância mockada de MinioClient.
    *
-   * Permite a injeção de um MinioClient simulado em testes, evitando a necessidade de conexão com um servidor Minio real.
+   * <p>Permite a injeção de um MinioClient simulado em testes, evitando a necessidade de conexão
+   * com um servidor Minio real.
    *
    * @return instância mockada de MinioClient para uso em testes
    */

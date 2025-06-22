@@ -38,7 +38,8 @@ public class FileService {
           MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.APPLICATION_PDF_VALUE);
 
   /**
-   * Cria uma instância do serviço de arquivos utilizando o cliente MinIO, configurações e serviço de usuário.
+   * Cria uma instância do serviço de arquivos utilizando o cliente MinIO, configurações e serviço
+   * de usuário.
    *
    * @throws FileException se ocorrer um erro durante a inicialização do serviço.
    */
@@ -53,10 +54,13 @@ public class FileService {
   /**
    * Armazena um arquivo enviado no armazenamento MinIO após validação.
    *
-   * Valida o arquivo quanto ao tamanho, tipo de conteúdo permitido e segurança do nome. Gera um nome único para o arquivo, realiza o upload para o bucket configurado e retorna um objeto com informações sobre o arquivo armazenado.
+   * <p>Valida o arquivo quanto ao tamanho, tipo de conteúdo permitido e segurança do nome. Gera um
+   * nome único para o arquivo, realiza o upload para o bucket configurado e retorna um objeto com
+   * informações sobre o arquivo armazenado.
    *
    * @param file Arquivo a ser enviado.
-   * @return Informações do arquivo armazenado, incluindo nome, tipo, tamanho, URL de acesso e data de upload.
+   * @return Informações do arquivo armazenado, incluindo nome, tipo, tamanho, URL de acesso e data
+   *     de upload.
    * @throws IllegalArgumentException se o arquivo estiver vazio ou inválido.
    * @throws FileException em caso de falha no armazenamento do arquivo.
    */
@@ -96,7 +100,8 @@ public class FileService {
    *
    * @param filename Nome do arquivo a ser recuperado.
    * @return Recurso contendo o conteúdo do arquivo solicitado.
-   * @throws FileException Se o nome do arquivo for inválido ou ocorrer erro ao acessar o armazenamento.
+   * @throws FileException Se o nome do arquivo for inválido ou ocorrer erro ao acessar o
+   *     armazenamento.
    */
   @Timed(value = "file.download", description = "Tempo de download de arquivo")
   public Resource loadFileAsResource(String filename) {
@@ -157,7 +162,8 @@ public class FileService {
   /**
    * Lista todos os arquivos presentes no bucket configurado do MinIO.
    *
-   * @return Lista de objetos FileInfoDTO contendo metadados de cada arquivo, incluindo nome, tipo de conteúdo, tamanho, URL e data de modificação.
+   * @return Lista de objetos FileInfoDTO contendo metadados de cada arquivo, incluindo nome, tipo
+   *     de conteúdo, tamanho, URL e data de modificação.
    * @throws FileException se ocorrer um erro ao acessar ou listar os arquivos no armazenamento.
    */
   public List<FileInfoDTO> listFiles() {
@@ -190,7 +196,7 @@ public class FileService {
   /**
    * Exclui um arquivo do armazenamento de forma assíncrona.
    *
-   * Requer que o usuário possua o papel de ADMIN.
+   * <p>Requer que o usuário possua o papel de ADMIN.
    *
    * @param filename nome do arquivo a ser excluído.
    * @return um CompletableFuture concluído quando a exclusão for finalizada.
@@ -220,7 +226,8 @@ public class FileService {
   /**
    * Obtém o content type de um arquivo armazenado no MinIO.
    *
-   * Caso o content type não esteja disponível ou ocorra um erro, retorna "application/octet-stream".
+   * <p>Caso o content type não esteja disponível ou ocorra um erro, retorna
+   * "application/octet-stream".
    *
    * @param filename nome do arquivo no bucket do MinIO
    * @return o content type do arquivo ou "application/octet-stream" se indisponível
@@ -240,7 +247,8 @@ public class FileService {
   }
 
   /**
-   * Gera e retorna a URL de acesso ao arquivo armazenado no MinIO, com o nome do arquivo devidamente codificado para uso em URLs.
+   * Gera e retorna a URL de acesso ao arquivo armazenado no MinIO, com o nome do arquivo
+   * devidamente codificado para uso em URLs.
    *
    * @param filename Nome do arquivo a ser acessado.
    * @return URL completa para acessar o arquivo no bucket configurado do MinIO.
@@ -253,12 +261,14 @@ public class FileService {
   }
 
   /**
-   * Valida um arquivo enviado, garantindo que não seja nulo ou vazio, que o tipo de conteúdo seja permitido,
-   * que o tamanho não exceda o limite máximo e que o nome não contenha sequências de diretório inválidas.
+   * Valida um arquivo enviado, garantindo que não seja nulo ou vazio, que o tipo de conteúdo seja
+   * permitido, que o tamanho não exceda o limite máximo e que o nome não contenha sequências de
+   * diretório inválidas.
    *
    * @param file Arquivo a ser validado.
    * @throws IllegalArgumentException se o arquivo for nulo ou vazio.
-   * @throws FileException se o tipo de conteúdo não for permitido, o tamanho exceder o limite ou o nome for inválido.
+   * @throws FileException se o tipo de conteúdo não for permitido, o tamanho exceder o limite ou o
+   *     nome for inválido.
    */
   private void validateFile(MultipartFile file) {
     if (file == null || file.isEmpty()) {

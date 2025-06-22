@@ -22,7 +22,9 @@ public class FileController {
   /**
    * Realiza o upload de um arquivo para o servidor.
    *
-   * Aceita arquivos nos formatos JPEG, PNG e PDF. Retorna informações sobre o arquivo armazenado em caso de sucesso. Retorna HTTP 400 se nenhum arquivo for enviado ou se o arquivo estiver vazio.
+   * <p>Aceita arquivos nos formatos JPEG, PNG e PDF. Retorna informações sobre o arquivo armazenado
+   * em caso de sucesso. Retorna HTTP 400 se nenhum arquivo for enviado ou se o arquivo estiver
+   * vazio.
    *
    * @param file arquivo a ser enviado.
    * @return informações do arquivo armazenado.
@@ -43,7 +45,8 @@ public class FileController {
   /**
    * Recupera um arquivo armazenado no servidor pelo nome do arquivo.
    *
-   * Retorna o arquivo solicitado como recurso, definindo o tipo de conteúdo conforme o arquivo. Se o parâmetro `download` for verdadeiro, o arquivo será enviado como anexo para download.
+   * <p>Retorna o arquivo solicitado como recurso, definindo o tipo de conteúdo conforme o arquivo.
+   * Se o parâmetro `download` for verdadeiro, o arquivo será enviado como anexo para download.
    *
    * @param filename Nome do arquivo, incluindo extensão, no formato UUID.extensão.
    * @param download Se verdadeiro, força o download do arquivo em vez de exibi-lo inline.
