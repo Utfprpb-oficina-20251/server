@@ -7,7 +7,6 @@ import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioLogadoInfoDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioServidorRequestDTO;
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -330,7 +329,7 @@ class UsuarioControllerTest {
 
     UsuarioLogadoInfoDTO updateRequest = currentProfile.getBody();
     updateRequest.setNome("Nome Atualizado");
-    updateRequest.setDepartamento(Departamentos.DACOC);
+    updateRequest.setDepartamentoId(1L);
 
     // Update profile
     ResponseEntity<UsuarioLogadoInfoDTO> response =
@@ -344,7 +343,7 @@ class UsuarioControllerTest {
     assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals("Nome Atualizado", response.getBody().getNome());
-    assertEquals(Departamentos.DACOC, response.getBody().getDepartamento());
+    assertEquals(1L, response.getBody().getDepartamentoId());
   }
 
   @Test
@@ -491,12 +490,12 @@ class UsuarioControllerTest {
     ResponseEntity<UsuarioLogadoInfoDTO> currentProfile =
         testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
 
-    Departamentos originalDepartamento = currentProfile.getBody().getDepartamento();
-    assertNotNull(originalDepartamento, "Original department should not be null");
+    Long originalDepartamentoId = currentProfile.getBody().getDepartamentoId();
+    assertNotNull(originalDepartamentoId, "Original department should not be null");
 
     UsuarioLogadoInfoDTO updateRequest = currentProfile.getBody();
     updateRequest.setNome("Nome Atualizado");
-    updateRequest.setDepartamento(null);
+    updateRequest.setDepartamentoId(null);
 
     ResponseEntity<UsuarioLogadoInfoDTO> response =
         testRestTemplate.exchange(
@@ -507,12 +506,11 @@ class UsuarioControllerTest {
 
     assertEquals(200, response.getStatusCode().value());
     assertEquals("Nome Atualizado", response.getBody().getNome());
-
     assertNotNull(
-        response.getBody().getDepartamento(), "Department should not be null after update");
+        response.getBody().getDepartamentoId(), "Department should not be null after update");
     assertEquals(
-        originalDepartamento,
-        response.getBody().getDepartamento(),
+        originalDepartamentoId,
+        response.getBody().getDepartamentoId(),
         "Department should remain unchanged when null is provided");
   }
 
@@ -522,7 +520,7 @@ class UsuarioControllerTest {
     request.setCpf("29212492002");
     request.setSiape("1234567");
     request.setEmail("batata@utfpr.edu.br");
-    request.setDepartamento(Departamentos.DAINF);
+    request.setDepartamentoId(1L);
     return request;
   }
 

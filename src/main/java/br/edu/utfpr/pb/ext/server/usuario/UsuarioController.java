@@ -3,6 +3,8 @@ package br.edu.utfpr.pb.ext.server.usuario;
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.UsuarioLoginDTO;
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtService;
+import br.edu.utfpr.pb.ext.server.departamento.Departamento;
+import br.edu.utfpr.pb.ext.server.departamento.DepartamentoRepository;
 import br.edu.utfpr.pb.ext.server.generics.CrudController;
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
@@ -32,6 +34,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   private final JwtService jwtService;
   private final AuthorityRepository authorityRepository;
   private final UsuarioRepository usuarioRepository;
+  private final DepartamentoRepository departamentoRepository;
 
   /**
    * Cria uma instância do controlador de usuários, inicializando os serviços necessários para
@@ -47,13 +50,15 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
       ModelMapper modelMapper,
       JwtService jwtService,
       AuthorityRepository authorityRepository,
-      UsuarioRepository usuarioRepository) {
+      UsuarioRepository usuarioRepository,
+      DepartamentoRepository departamentoRepository) {
     super(Usuario.class, UsuarioServidorResponseDTO.class);
     this.usuarioService = usuarioService;
     this.modelMapper = modelMapper;
     this.jwtService = jwtService;
     this.authorityRepository = authorityRepository;
     this.usuarioRepository = usuarioRepository;
+    this.departamentoRepository = departamentoRepository;
   }
 
   /**
@@ -150,6 +155,11 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   public ResponseEntity<UsuarioLogadoInfoDTO> getMeuPerfil() {
     Usuario usuario = usuarioService.obterUsuarioLogado();
     UsuarioLogadoInfoDTO responseDTO = modelMapper.map(usuario, UsuarioLogadoInfoDTO.class);
+
+    if (usuario.getDepartamento() != null) {
+      responseDTO.setDepartamentoId(usuario.getDepartamento().getId());
+    }
+
     return ResponseEntity.ok(responseDTO);
   }
 
@@ -206,15 +216,28 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     Usuario currentUser = usuarioService.obterUsuarioLogado();
 
     currentUser.setNome(usuarioDTO.getNome());
+
     if (usuarioDTO.getCurso() != null) {
       currentUser.setCurso(usuarioDTO.getCurso());
     }
-    if (usuarioDTO.getDepartamento() != null) {
-      currentUser.setDepartamento(usuarioDTO.getDepartamento());
+
+    if (usuarioDTO.getDepartamentoId() != null) {
+      Departamento departamento =
+          departamentoRepository
+              .findById(usuarioDTO.getDepartamentoId())
+              .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
+      currentUser.setDepartamento(departamento);
     }
+    // Se departamentoId vier null, não altera o departamento atual.
+
     Usuario updatedUser = usuarioService.save(currentUser);
 
     UsuarioLogadoInfoDTO responseDTO = modelMapper.map(updatedUser, UsuarioLogadoInfoDTO.class);
+
+    if (updatedUser.getDepartamento() != null) {
+      responseDTO.setDepartamentoId(updatedUser.getDepartamento().getId());
+    }
+
     return ResponseEntity.ok(responseDTO);
   }
 

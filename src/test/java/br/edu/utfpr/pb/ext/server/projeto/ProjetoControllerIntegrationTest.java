@@ -41,20 +41,22 @@ class ProjetoControllerIntegrationTest {
     usuarioRepository.deleteAll();
     cursoRepository.deleteAll();
 
-    cursoDeTeste = cursoRepository.save(
+    cursoDeTeste =
+        cursoRepository.save(
             Curso.builder().nome("Engenharia de Software de Teste").codigo("SW-TESTE").build());
 
-    responsavelDeTeste = usuarioRepository.save(
+    responsavelDeTeste =
+        usuarioRepository.save(
             Usuario.builder()
-                    .nome("Responsável Padrão")
-                    .email("responsavel.padrao@utfpr.edu.br")
-                    .cpf(String.valueOf(System.nanoTime()))
-                    .curso(cursoDeTeste)
-                    .build());
+                .nome("Responsável Padrão")
+                .email("responsavel.padrao@utfpr.edu.br")
+                .cpf(String.valueOf(System.nanoTime()))
+                .curso(cursoDeTeste)
+                .build());
   }
 
   @AfterEach
-  void cleanUp(){
+  void cleanUp() {
 
     projetoRepository.deleteAll();
     usuarioRepository.deleteAll();
@@ -68,7 +70,7 @@ class ProjetoControllerIntegrationTest {
     criarEsalvarProjeto("Projeto de Culinária", StatusProjeto.CONCLUIDO);
 
     ResponseEntity<ProjetoDTO[]> response =
-            testRestTemplate.getForEntity(API_PROJETOS_BUSCAR, ProjetoDTO[].class);
+        testRestTemplate.getForEntity(API_PROJETOS_BUSCAR, ProjetoDTO[].class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -81,12 +83,12 @@ class ProjetoControllerIntegrationTest {
     criarEsalvarProjeto("Projeto de Culinária", StatusProjeto.CONCLUIDO);
 
     String urlComFiltro =
-            UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
-                    .queryParam("titulo", "Robotica")
-                    .toUriString();
+        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+            .queryParam("titulo", "Robotica")
+            .toUriString();
 
     ResponseEntity<ProjetoDTO[]> response =
-            testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
+        testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -96,26 +98,28 @@ class ProjetoControllerIntegrationTest {
 
   // ... outros testes de filtro de status e "não encontrado" ...
 
-
   // --- NOVOS TESTES ADICIONADOS ---
 
   @Test
   void buscarProjetos_comFiltroDeDataInicioAPartirDe_deveRetornarProjetosCorretos() {
     // Arrange
-    Date ontem = Date.from(LocalDate.now().minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-    Date amanha = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    Date ontem =
+        Date.from(LocalDate.now().minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    Date amanha =
+        Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
     String hojeString = LocalDate.now().toString(); // Formato YYYY-MM-DD
 
     criarEsalvarProjeto("Projeto Antigo", StatusProjeto.CONCLUIDO, ontem, responsavelDeTeste);
     criarEsalvarProjeto("Projeto Futuro", StatusProjeto.EM_ANDAMENTO, amanha, responsavelDeTeste);
 
-    String urlComFiltro = UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+    String urlComFiltro =
+        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
             .queryParam("dataInicioDe", hojeString)
             .toUriString();
 
     // Act
     ResponseEntity<ProjetoDTO[]> response =
-            testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
+        testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -127,20 +131,23 @@ class ProjetoControllerIntegrationTest {
   @Test
   void buscarProjetos_comFiltroDeDataInicioAte_deveRetornarProjetosCorretos() {
     // Arrange
-    Date ontem = Date.from(LocalDate.now().minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-    Date amanha = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    Date ontem =
+        Date.from(LocalDate.now().minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    Date amanha =
+        Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
     String hojeString = LocalDate.now().toString();
 
     criarEsalvarProjeto("Projeto Antigo", StatusProjeto.CONCLUIDO, ontem, responsavelDeTeste);
     criarEsalvarProjeto("Projeto Futuro", StatusProjeto.EM_ANDAMENTO, amanha, responsavelDeTeste);
 
-    String urlComFiltro = UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+    String urlComFiltro =
+        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
             .queryParam("dataInicioAte", hojeString)
             .toUriString();
 
     // Act
     ResponseEntity<ProjetoDTO[]> response =
-            testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
+        testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -154,20 +161,31 @@ class ProjetoControllerIntegrationTest {
     // Arrange
     // O cursoDeTeste e responsavelDeTeste (Eng. de Software) já foram criados no setUp.
     // Vamos criar um segundo curso e responsável para o cenário de teste.
-    Curso cursoDesign = cursoRepository.save(Curso.builder().nome("Design Gráfico").codigo("DG").build());
-    Usuario responsavelDesign = usuarioRepository.save(Usuario.builder().nome("Beto do Design").email("beto@utfpr.edu.br").cpf("2222").curso(cursoDesign).build());
+    Curso cursoDesign =
+        cursoRepository.save(Curso.builder().nome("Design Gráfico").codigo("DG").build());
+    Usuario responsavelDesign =
+        usuarioRepository.save(
+            Usuario.builder()
+                .nome("Beto do Design")
+                .email("beto@utfpr.edu.br")
+                .cpf("2222")
+                .curso(cursoDesign)
+                .build());
 
     // Cria um projeto para cada responsável/curso
-    criarEsalvarProjeto("Projeto de Software", StatusProjeto.EM_ANDAMENTO, new Date(), responsavelDeTeste);
-    criarEsalvarProjeto("Projeto de Design", StatusProjeto.EM_ANDAMENTO, new Date(), responsavelDesign);
+    criarEsalvarProjeto(
+        "Projeto de Software", StatusProjeto.EM_ANDAMENTO, new Date(), responsavelDeTeste);
+    criarEsalvarProjeto(
+        "Projeto de Design", StatusProjeto.EM_ANDAMENTO, new Date(), responsavelDesign);
 
-    String urlComFiltro = UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+    String urlComFiltro =
+        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
             .queryParam("idCurso", cursoDeTeste.getId()) // Filtra pelo ID do primeiro curso
             .toUriString();
 
     // Act
     ResponseEntity<ProjetoDTO[]> response =
-            testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
+        testRestTemplate.getForEntity(urlComFiltro, ProjetoDTO[].class);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -176,7 +194,6 @@ class ProjetoControllerIntegrationTest {
     assertEquals("Projeto de Software", response.getBody()[0].getTitulo());
   }
 
-
   // --- MÉTODOS AUXILIARES ATUALIZADOS ---
 
   private Projeto criarEsalvarProjeto(String titulo, StatusProjeto status) {
@@ -184,18 +201,19 @@ class ProjetoControllerIntegrationTest {
     return criarEsalvarProjeto(titulo, status, new Date(), this.responsavelDeTeste);
   }
 
-  private Projeto criarEsalvarProjeto(String titulo, StatusProjeto status, Date dataInicio, Usuario responsavel) {
+  private Projeto criarEsalvarProjeto(
+      String titulo, StatusProjeto status, Date dataInicio, Usuario responsavel) {
     Projeto projeto =
-            Projeto.builder()
-                    .titulo(titulo)
-                    .status(status)
-                    .responsavel(responsavel) // Usa o responsável passado como parâmetro
-                    .descricao("Desc...")
-                    .justificativa("Just...")
-                    .dataInicio(dataInicio) // Usa a data passada como parâmetro
-                    .publicoAlvo("Todos")
-                    .vinculadoDisciplina(false)
-                    .build();
+        Projeto.builder()
+            .titulo(titulo)
+            .status(status)
+            .responsavel(responsavel) // Usa o responsável passado como parâmetro
+            .descricao("Desc...")
+            .justificativa("Just...")
+            .dataInicio(dataInicio) // Usa a data passada como parâmetro
+            .publicoAlvo("Todos")
+            .vinculadoDisciplina(false)
+            .build();
 
     return projetoRepository.save(projeto);
   }

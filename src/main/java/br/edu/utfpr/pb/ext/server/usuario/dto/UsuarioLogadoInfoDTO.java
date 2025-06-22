@@ -1,7 +1,6 @@
 package br.edu.utfpr.pb.ext.server.usuario.dto;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -25,7 +24,7 @@ public class UsuarioLogadoInfoDTO {
   @NotBlank(message = "Email é obrigatório") @Email(message = "Email inválido") private String email;
 
   private String telefone;
-  private Departamentos departamento;
+  private Long departamentoId;
   private Curso curso;
   private String enderecoCompleto;
 }
