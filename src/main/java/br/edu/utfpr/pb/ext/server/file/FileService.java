@@ -37,6 +37,11 @@ public class FileService {
       Set.of(
           MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.APPLICATION_PDF_VALUE);
 
+  /**
+   * Cria uma instância do serviço de arquivos utilizando o cliente MinIO, configurações e serviço de usuário.
+   *
+   * @throws FileException se ocorrer um erro durante a inicialização do serviço.
+   */
   public FileService(
       MinioClient minioClient, MinioConfig minioConfig, IUsuarioService iusuarioService)
       throws FileException {
@@ -45,6 +50,16 @@ public class FileService {
     this.iusuarioService = iusuarioService;
   }
 
+  /**
+   * Armazena um arquivo enviado no armazenamento MinIO após validação.
+   *
+   * Valida o arquivo quanto ao tamanho, tipo de conteúdo permitido e segurança do nome. Gera um nome único para o arquivo, realiza o upload para o bucket configurado e retorna um objeto com informações sobre o arquivo armazenado.
+   *
+   * @param file Arquivo a ser enviado.
+   * @return Informações do arquivo armazenado, incluindo nome, tipo, tamanho, URL de acesso e data de upload.
+   * @throws IllegalArgumentException se o arquivo estiver vazio ou inválido.
+   * @throws FileException em caso de falha no armazenamento do arquivo.
+   */
   @Timed(value = "file.upload", description = "Tempo de upload de arquivo")
   @PreAuthorize("isAuthenticated()")
   public FileInfoDTO store(MultipartFile file) {
@@ -76,6 +91,13 @@ public class FileService {
     }
   }
 
+  /**
+   * Recupera um arquivo armazenado no MinIO como um recurso Spring.
+   *
+   * @param filename Nome do arquivo a ser recuperado.
+   * @return Recurso contendo o conteúdo do arquivo solicitado.
+   * @throws FileException Se o nome do arquivo for inválido ou ocorrer erro ao acessar o armazenamento.
+   */
   @Timed(value = "file.download", description = "Tempo de download de arquivo")
   public Resource loadFileAsResource(String filename) {
     try {
@@ -106,6 +128,12 @@ public class FileService {
     }
   }
 
+  /**
+   * Exclui um arquivo do bucket configurado no MinIO.
+   *
+   * @param filename nome do arquivo a ser excluído.
+   * @throws FileException se o nome for nulo, vazio ou ocorrer erro durante a exclusão.
+   */
   @PreAuthorize("hasRole('ADMIN')")
   public void deleteFile(String filename) {
     log.info(
@@ -126,6 +154,12 @@ public class FileService {
     }
   }
 
+  /**
+   * Lista todos os arquivos presentes no bucket configurado do MinIO.
+   *
+   * @return Lista de objetos FileInfoDTO contendo metadados de cada arquivo, incluindo nome, tipo de conteúdo, tamanho, URL e data de modificação.
+   * @throws FileException se ocorrer um erro ao acessar ou listar os arquivos no armazenamento.
+   */
   public List<FileInfoDTO> listFiles() {
     List<FileInfoDTO> files = new ArrayList<>();
     try {
@@ -153,6 +187,14 @@ public class FileService {
     }
   }
 
+  /**
+   * Exclui um arquivo do armazenamento de forma assíncrona.
+   *
+   * Requer que o usuário possua o papel de ADMIN.
+   *
+   * @param filename nome do arquivo a ser excluído.
+   * @return um CompletableFuture concluído quando a exclusão for finalizada.
+   */
   @Async
   @PreAuthorize("hasRole('ADMIN')")
   public CompletableFuture<Void> asyncDelete(String filename) {
@@ -160,6 +202,12 @@ public class FileService {
     return CompletableFuture.completedFuture(null);
   }
 
+  /**
+   * Gera um nome de arquivo único baseado em UUID, preservando a extensão do arquivo original.
+   *
+   * @param originalFilename nome original do arquivo, incluindo a extensão.
+   * @return nome de arquivo único com a mesma extensão do arquivo original.
+   */
   private String generateUniqueFilename(String originalFilename) {
     String extension = "";
     int dotIndex = originalFilename.lastIndexOf('.');
@@ -169,6 +217,14 @@ public class FileService {
     return UUID.randomUUID() + extension;
   }
 
+  /**
+   * Obtém o content type de um arquivo armazenado no MinIO.
+   *
+   * Caso o content type não esteja disponível ou ocorra um erro, retorna "application/octet-stream".
+   *
+   * @param filename nome do arquivo no bucket do MinIO
+   * @return o content type do arquivo ou "application/octet-stream" se indisponível
+   */
   private String getContentType(String filename) {
     try {
       String contentType =
@@ -183,6 +239,12 @@ public class FileService {
     }
   }
 
+  /**
+   * Gera e retorna a URL de acesso ao arquivo armazenado no MinIO, com o nome do arquivo devidamente codificado para uso em URLs.
+   *
+   * @param filename Nome do arquivo a ser acessado.
+   * @return URL completa para acessar o arquivo no bucket configurado do MinIO.
+   */
   @NotNull String getUrl(String filename) {
     String encodedFilename =
         URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
@@ -190,6 +252,14 @@ public class FileService {
         "%s/%s/%s", minioConfig.getUrl(), minioConfig.getBucket(), encodedFilename);
   }
 
+  /**
+   * Valida um arquivo enviado, garantindo que não seja nulo ou vazio, que o tipo de conteúdo seja permitido,
+   * que o tamanho não exceda o limite máximo e que o nome não contenha sequências de diretório inválidas.
+   *
+   * @param file Arquivo a ser validado.
+   * @throws IllegalArgumentException se o arquivo for nulo ou vazio.
+   * @throws FileException se o tipo de conteúdo não for permitido, o tamanho exceder o limite ou o nome for inválido.
+   */
   private void validateFile(MultipartFile file) {
     if (file == null || file.isEmpty()) {
       log.error(ARQUIVO_VAZIO);
@@ -216,6 +286,12 @@ public class FileService {
     }
   }
 
+  /**
+   * Converte o tamanho em bytes para uma string legível com unidade apropriada (B, kB, MB, etc.).
+   *
+   * @param bytes quantidade de bytes a ser formatada
+   * @return representação legível do tamanho do arquivo com unidade
+   */
   private String formatFileSize(long bytes) {
     if (bytes < 1024) {
       return String.format("%d B", bytes);

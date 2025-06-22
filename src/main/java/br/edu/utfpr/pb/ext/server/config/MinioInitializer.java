@@ -15,6 +15,12 @@ public class MinioInitializer {
   private final MinioClient minioClient;
   private final MinioConfig minioConfig;
 
+  /**
+   * Inicializa o bucket do MinIO ao iniciar a aplicação.
+   *
+   * Verifica se o bucket especificado existe; caso não exista, cria o bucket e define uma política de acesso público de leitura para todos os objetos nele contidos.
+   * Em caso de erro durante o processo, lança uma FileException encapsulando a exceção original.
+   */
   @PostConstruct
   public void initializeBucket() {
     try {
