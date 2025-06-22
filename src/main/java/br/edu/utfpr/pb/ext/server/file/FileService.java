@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -37,9 +36,6 @@ public class FileService {
   private static final Set<String> ALLOWED_CONTENT_TYPES =
       Set.of(
           MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.APPLICATION_PDF_VALUE);
-
-  @Value("${spring.profiles.active:''}")
-  private String activeProfile;
 
   public FileService(
       MinioClient minioClient, MinioConfig minioConfig, IUsuarioService iusuarioService)
