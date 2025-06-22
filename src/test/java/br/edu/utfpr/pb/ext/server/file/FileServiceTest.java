@@ -11,15 +11,17 @@ import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import io.minio.*;
 import io.minio.messages.Item;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -120,39 +122,51 @@ class FileServiceTest {
   }
 
   @Test
-  void listFiles_ReturnsFileList() {
+  void listFiles_WithPagination_ReturnsPaginatedFileList() {
+    // Arrange
     when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
-    // Arrange
-    Item item = mock(Item.class);
-    when(item.objectName()).thenReturn(TEST_FILENAME);
-    when(item.size()).thenReturn(1024L);
-    Result<Item> result = new Result<>(item);
-    when(minioClient.listObjects(any(ListObjectsArgs.class)))
-        .thenReturn(new MockResultIterator<>(result));
+    ZonedDateTime now = ZonedDateTime.now();
+
+    Item item1 = mock(Item.class);
+    when(item1.objectName()).thenReturn("file1.jpg");
+    when(item1.size()).thenReturn(1024L);
+    when(item1.lastModified()).thenReturn(now);
+
+    Item item2 = mock(Item.class);
+    when(item2.objectName()).thenReturn("file2.jpg");
+    when(item2.size()).thenReturn(2048L);
+    when(item2.lastModified()).thenReturn(now);
+
+    Item item3 = mock(Item.class);
+    when(item3.objectName()).thenReturn("file3.jpg");
+    when(item3.size()).thenReturn(3072L);
+    when(item3.lastModified()).thenReturn(now);
+
+    List<Result<Item>> results =
+        List.of(new Result<>(item1), new Result<>(item2), new Result<>(item3));
+    when(minioClient.listObjects(any(ListObjectsArgs.class))).thenAnswer(invocation -> results);
+    Pageable pageable = PageRequest.of(0, 2);
 
     // Act
-    List<FileInfoDTO> files = fileService.listFiles();
+    Page<FileInfoDTO> page = fileService.listFiles(pageable);
 
     // Assert
-    assertFalse(files.isEmpty());
-    assertEquals(TEST_FILENAME, files.getFirst().getFileName());
-  }
+    assertNotNull(page);
+    assertEquals(3, page.getTotalElements());
+    assertEquals(2, page.getContent().size());
+    assertEquals(2, page.getTotalPages());
+    assertEquals(0, page.getNumber());
+    assertEquals(2, page.getSize());
 
-  @Test
-  void asyncDelete_ValidFilename_CompletesSuccessfully() throws Exception {
-    // Arrange
-    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
-    when(usuarioService.obterUsuarioLogado())
-        .thenReturn(Usuario.builder().nome("Test User").build());
-    doNothing().when(minioClient).removeObject(any(RemoveObjectArgs.class));
+    List<FileInfoDTO> files = page.getContent();
+    assertEquals("file1.jpg", files.get(0).getFileName());
+    assertEquals("file2.jpg", files.get(1).getFileName());
 
-    // Act
-    CompletableFuture<Void> future = fileService.asyncDelete(TEST_FILENAME);
-
-    // Assert
-    future.get(); // Wait for completion
-    verify(minioClient).removeObject(any(RemoveObjectArgs.class));
+    pageable = PageRequest.of(1, 2);
+    page = fileService.listFiles(pageable);
+    assertEquals(1, page.getContent().size());
+    assertEquals("file3.jpg", page.getContent().getFirst().getFileName());
   }
 
   @Test
@@ -187,30 +201,5 @@ class FileServiceTest {
     // Assert
     assertTrue(url.contains("test%20file.jpg"));
     assertTrue(url.startsWith("http://localhost:9000/test-bucket/"));
-  }
-
-  // Helper class for mocking MinIO results
-  private record MockResultIterator<T>(Result<T> result) implements Iterable<Result<T>> {
-
-    @NotNull @Override
-    public java.util.Iterator<Result<T>> iterator() {
-      return new java.util.Iterator<>() {
-        private boolean hasNext = true;
-
-        @Override
-        public boolean hasNext() {
-          return hasNext;
-        }
-
-        @Override
-        public Result<T> next() {
-          if (!hasNext) {
-            throw new IllegalStateException("No more elements");
-          }
-          hasNext = false;
-          return result;
-        }
-      };
-    }
   }
 }

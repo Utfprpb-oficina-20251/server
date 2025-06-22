@@ -11,13 +11,13 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -162,50 +162,42 @@ public class FileService {
   /**
    * Lista todos os arquivos presentes no bucket configurado do MinIO.
    *
-   * @return Lista de objetos FileInfoDTO contendo metadados de cada arquivo, incluindo nome, tipo
-   *     de conteúdo, tamanho, URL e data de modificação.
+   * @return Paginação de objetos FileInfoDTO contendo metadados de cada arquivo, incluindo nome,
+   *     tipo de conteúdo, tamanho, URL e data de modificação.
    * @throws FileException se ocorrer um erro ao acessar ou listar os arquivos no armazenamento.
    */
-  public List<FileInfoDTO> listFiles() {
+  public PageImpl<FileInfoDTO> listFiles(Pageable pageable) {
     List<FileInfoDTO> files = new ArrayList<>();
+    int totalElements = 0;
+
     try {
-      Iterable<Result<Item>> results =
-          minioClient.listObjects(
-              ListObjectsArgs.builder().bucket(minioConfig.getBucket()).build());
+      ListObjectsArgs.Builder argsBuilder =
+          ListObjectsArgs.builder().bucket(minioConfig.getBucket()).maxKeys(1000);
+
+      Iterable<Result<Item>> results = minioClient.listObjects(argsBuilder.build());
 
       for (Result<Item> result : results) {
-        Item item = result.get();
-        files.add(
-            new FileInfoDTO(
-                item.objectName(),
-                item.objectName(),
-                getContentType(item.objectName()),
-                item.size(),
-                getUrl(item.objectName()),
-                item.lastModified() != null
-                    ? item.lastModified().toLocalDateTime()
-                    : LocalDateTime.now()));
+        totalElements++;
+
+        if (totalElements > pageable.getOffset() && files.size() < pageable.getPageSize()) {
+          Item item = result.get();
+          files.add(
+              new FileInfoDTO(
+                  item.objectName(),
+                  item.objectName(),
+                  getContentType(item.objectName()),
+                  item.size(),
+                  getUrl(item.objectName()),
+                  item.lastModified() != null
+                      ? item.lastModified().toLocalDateTime()
+                      : LocalDateTime.now()));
+        }
       }
-      return files;
+      return new PageImpl<>(files, pageable, totalElements);
     } catch (Exception e) {
       log.error("Erro ao listar os arquivos", e);
       throw new FileException("Erro ao listar os arquivos", e);
     }
-  }
-
-  /**
-   * Exclui um arquivo do armazenamento de forma assíncrona.
-   *
-   * <p>Requer que o usuário possua o papel de ADMIN.
-   *
-   * @param filename nome do arquivo a ser excluído.
-   * @return um CompletableFuture concluído quando a exclusão for finalizada.
-   */
-  @Async
-  @PreAuthorize("hasRole('ADMIN')")
-  public CompletableFuture<Void> asyncDelete(String filename) {
-    deleteFile(filename);
-    return CompletableFuture.completedFuture(null);
   }
 
   /**
