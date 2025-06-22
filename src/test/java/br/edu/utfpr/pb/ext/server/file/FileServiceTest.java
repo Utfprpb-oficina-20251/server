@@ -74,7 +74,9 @@ class FileServiceTest {
     MultipartFile emptyFile = new MockMultipartFile("empty.jpg", new byte[0]);
 
     // Act & Assert
-    assertThrows(FileException.class, () -> fileService.store(emptyFile));
+    RuntimeException ex =
+        assertThrows(IllegalArgumentException.class, () -> fileService.store(emptyFile));
+    assertEquals(FileService.ARQUIVO_VAZIO, ex.getMessage());
   }
 
   @Test

@@ -28,12 +28,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileService {
   public static final String ERRO_CARREGAMENTO_ARQUIVO_EXCEPTION = "Erro ao carregar o arquivo";
   public static final String ERRO_CARREGAR_ARQUIVO_LOG = "Erro ao carregar o arquivo: {}";
+  public static final String ARQUIVO_VAZIO = "Arquivo vazio";
   private final MinioClient minioClient;
   private final MinioConfig minioConfig;
   private final IUsuarioService iusuarioService;
   private final boolean secure;
-
-  private static final long MAX_FILE_SIZE = 1024 * 1024 * 10L;
+  private static final long MAX_MINIO_FILE_SIZE = 1024 * 1024 * 10L;
   private static final Set<String> ALLOWED_CONTENT_TYPES =
       Set.of(
           MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.APPLICATION_PDF_VALUE);
@@ -55,6 +55,26 @@ public class FileService {
         minioClient.makeBucket(MakeBucketArgs.builder().bucket(minioConfig.getBucket()).build());
         log.info("Criado bucket: {}", minioConfig.getBucket());
       }
+
+      String policyJson =
+          """
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {"AWS": ["*"]},
+              "Action": ["s3:GetObject"],
+              "Resource": ["arn:aws:s3:::%s/*"]
+            }
+          ]
+        }
+        """
+              .formatted(minioConfig.getBucket());
+
+      minioClient.setBucketPolicy(
+          SetBucketPolicyArgs.builder().bucket(minioConfig.getBucket()).config(policyJson).build());
+
     } catch (Exception e) {
       log.error("Erro ao criar bucket: {}", minioConfig.getBucket(), e);
       throw new FileException("Não foi possivel inicializar o bucket", e);
@@ -83,6 +103,9 @@ public class FileService {
 
       return new FileInfoDTO(
           filename, originalFilename, contentType, file.getSize(), url, LocalDateTime.now());
+    } catch (IllegalArgumentException e) {
+      log.error(ARQUIVO_VAZIO, e);
+      throw new IllegalArgumentException(ARQUIVO_VAZIO, e);
     } catch (Exception e) {
       log.error("Erro ao armazenar o arquivo: {}", file.getOriginalFilename(), e);
       throw new FileException("Erro ao armazenar o arquivo", e);
@@ -207,8 +230,8 @@ public class FileService {
 
   private void validateFile(MultipartFile file) {
     if (file == null || file.isEmpty()) {
-      log.error("Arquivo vazio");
-      throw new FileException("Arquivo vazio");
+      log.error(ARQUIVO_VAZIO);
+      throw new IllegalArgumentException(ARQUIVO_VAZIO);
     }
 
     if (!ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
@@ -216,11 +239,11 @@ public class FileService {
       throw new FileException("Tipo de conteudo nao permitido");
     }
 
-    if (file.getSize() > MAX_FILE_SIZE) {
+    if (file.getSize() > MAX_MINIO_FILE_SIZE) {
       log.error(
           "tamanho do arquivo: {} excede o limite permitido: {}",
           formatFileSize(file.getSize()),
-          formatFileSize(MAX_FILE_SIZE));
+          formatFileSize(MAX_MINIO_FILE_SIZE));
       throw new FileException("Tamanho do arquivo excede o limite permitido");
     }
     String originalFilename =
