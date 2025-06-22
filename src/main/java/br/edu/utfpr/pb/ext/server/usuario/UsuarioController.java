@@ -21,11 +21,7 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -35,6 +31,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   private final ModelMapper modelMapper;
   private final JwtService jwtService;
   private final AuthorityRepository authorityRepository;
+  private final UsuarioRepository usuarioRepository;
 
   /**
    * Cria uma instância do controlador de usuários, inicializando os serviços necessários para
@@ -49,12 +46,14 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
       IUsuarioService usuarioService,
       ModelMapper modelMapper,
       JwtService jwtService,
-      AuthorityRepository authorityRepository) {
+      AuthorityRepository authorityRepository,
+      UsuarioRepository usuarioRepository) {
     super(Usuario.class, UsuarioServidorResponseDTO.class);
     this.usuarioService = usuarioService;
     this.modelMapper = modelMapper;
     this.jwtService = jwtService;
     this.authorityRepository = authorityRepository;
+    this.usuarioRepository = usuarioRepository;
   }
 
   /**
@@ -175,6 +174,48 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
             .map(usuario -> modelMapper.map(usuario, UsuarioProjetoDTO.class))
             .toList();
     return ResponseEntity.ok(responseList);
+  }
+
+  @Operation(
+      summary = "Get all professors",
+      description = "Returns a list of all users with emails ending with @utfpr.edu.br")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Professors retrieved successfully",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UsuarioProjetoDTO.class)))
+      })
+  @GetMapping("/professores")
+  public ResponseEntity<List<UsuarioProjetoDTO>> getAllProfessors() {
+    List<Usuario> usuarios = usuarioRepository.findAllByEmailEndingWith("@utfpr.edu.br");
+    List<UsuarioProjetoDTO> responseList =
+        usuarios.stream()
+            .map(usuario -> modelMapper.map(usuario, UsuarioProjetoDTO.class))
+            .toList();
+    return ResponseEntity.ok(responseList);
+  }
+
+  @PutMapping("/meu-perfil")
+  public ResponseEntity<UsuarioLogadoInfoDTO> updateProfile(
+      @Valid @RequestBody UsuarioLogadoInfoDTO usuarioDTO) {
+
+    Usuario currentUser = usuarioService.obterUsuarioLogado();
+
+    currentUser.setNome(usuarioDTO.getNome());
+    if (usuarioDTO.getCurso() != null) {
+      currentUser.setCurso(usuarioDTO.getCurso());
+    }
+    if (usuarioDTO.getDepartamento() != null) {
+      currentUser.setDepartamento(usuarioDTO.getDepartamento());
+    }
+    Usuario updatedUser = usuarioService.save(currentUser);
+
+    UsuarioLogadoInfoDTO responseDTO = modelMapper.map(updatedUser, UsuarioLogadoInfoDTO.class);
+    return ResponseEntity.ok(responseDTO);
   }
 
   /**

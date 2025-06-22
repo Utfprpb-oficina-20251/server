@@ -7,6 +7,7 @@ import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,10 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.modelmapper.ModelMapper;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("projeto")
@@ -103,13 +107,15 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     List<String> emails =
         dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmail).toList();
     if (emails.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+      throw new ResponseStatusException(
+          HttpStatus.NOT_ACCEPTABLE, "A equipe executora não pode estar vazia.");
     }
     ArrayList<Optional<Usuario>> usuarios = new ArrayList<>();
     for (String email : emails) {
       Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
       if (usuario.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+        throw new ResponseStatusException(
+            HttpStatus.NOT_ACCEPTABLE, "Usuário com e-mail " + email + " não encontrado.");
       }
       usuarios.add(usuario);
     }
@@ -123,9 +129,21 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
     projeto.setRestricaoPublico(dto.getRestricaoPublico());
     projeto.setEquipeExecutora(usuarios.stream().flatMap(Optional::stream).toList());
     projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
+    projeto.setQtdeVagas(dto.getQtdeVagas());
+    projeto.setCargaHoraria(dto.getCargaHoraria());
     Projeto projetoResponse = projetoService.save(projeto);
     ProjetoDTO projetoDTO = modelMapper.map(projetoResponse, ProjetoDTO.class);
     return ResponseEntity.status(HttpStatus.CREATED).body(projetoDTO);
+  }
+
+  @PreAuthorize("hasRole('SERVIDOR')")
+  @PatchMapping("/{id}/cancelar")
+  public ResponseEntity<Void> cancelar(
+      @PathVariable Long id,
+      @Valid @RequestBody CancelamentoProjetoDTO dto,
+      @AuthenticationPrincipal Usuario usuario) {
+    projetoService.cancelar(id, dto, usuario.getId());
+    return ResponseEntity.noContent().build();
   }
 
   @PutMapping("/{id}")
@@ -142,9 +160,65 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
             description = "Acesso negado. Usuário não autorizado a editar este projeto"),
         @ApiResponse(responseCode = "404", description = "Projeto não encontrado")
       })
+  @Override
   public ResponseEntity<ProjetoDTO> update(
       @PathVariable Long id, @Valid @RequestBody ProjetoDTO dto) {
     ProjetoDTO projetoAtualizado = projetoService.atualizarProjeto(id, dto);
     return ResponseEntity.ok(projetoAtualizado);
+  }
+
+  @Operation(
+      summary = "Busca projetos por filtros",
+      description =
+          "Endpoint para buscar projetos de extensão com base em múltiplos critérios. Todos os parâmetros são opcionais.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Busca realizada com sucesso.",
+        content = {
+          @Content(
+              mediaType = "application/json",
+              array = @ArraySchema(schema = @Schema(implementation = ProjetoDTO.class)))
+        }),
+    @ApiResponse(
+        responseCode = "400",
+        description = "Parâmetros inválidos fornecidos.",
+        content = @Content)
+  })
+  @GetMapping("/buscar")
+  public ResponseEntity<List<ProjetoDTO>> buscarProjetos(
+      @Valid @ParameterObject FiltroProjetoDTO filtros) {
+    List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtros);
+    return ResponseEntity.ok(projetos);
+  }
+
+  @Operation(
+      summary = "Busca os projetos do usuário logado",
+      description =
+          "Retorna uma lista de todos os projetos em que o usuário autenticado faz parte da equipe executora. "
+              + "A autenticação é necessária para acessar este recurso.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "Busca realizada com sucesso. Retorna a lista de projetos do usuário, que pode estar vazia.",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  array = @ArraySchema(schema = @Schema(implementation = ProjetoDTO.class)))
+            }),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Acesso Negado. Este erro ocorre se o usuário não estiver autenticado.",
+            content = @Content)
+      })
+  @GetMapping("/meusprojetos")
+  public ResponseEntity<List<ProjetoDTO>> buscarMeusProjetos(
+      @AuthenticationPrincipal Usuario userDetails) {
+    FiltroProjetoDTO filtroCordenador =
+        new FiltroProjetoDTO(null, null, null, null, userDetails.getId(), null, null);
+    List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtroCordenador);
+    return ResponseEntity.ok(projetos);
   }
 }

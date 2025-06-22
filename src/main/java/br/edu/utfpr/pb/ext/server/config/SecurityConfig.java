@@ -2,7 +2,6 @@ package br.edu.utfpr.pb.ext.server.config;
 
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtAuthenticationFilter;
 import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
-import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +18,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -34,9 +31,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
   private final Environment environment;
-
-  private final UsuarioRepository usuarioRepository;
-
   private final EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
 
   /**
@@ -54,30 +48,25 @@ public class SecurityConfig {
    * ambiente.
    *
    * @param environment ambiente Spring para acesso a propriedades e perfis ativos
-   * @param usuarioRepository repositório de usuários utilizado para autenticação
    * @param emailOtpAuthenticationProvider provedor de autenticação OTP por e-mail
    */
   public SecurityConfig(
-      Environment environment,
-      UsuarioRepository usuarioRepository,
-      EmailOtpAuthenticationProvider emailOtpAuthenticationProvider) {
+      Environment environment, EmailOtpAuthenticationProvider emailOtpAuthenticationProvider) {
     this.environment = environment;
-    this.usuarioRepository = usuarioRepository;
     this.emailOtpAuthenticationProvider = emailOtpAuthenticationProvider;
   }
 
   /**
-   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação,
-   * autorização, CORS, CSRF e gerenciamento de sessão.
+   * Configura a cadeia de filtros de segurança HTTP da aplicação, incluindo autenticação JWT,
+   * autorização baseada em perfis, CORS, CSRF e gerenciamento de sessão sem estado.
    *
-   * <p>Permite acesso público a determinados endpoints, restringe rotas conforme perfil de usuário,
-   * ambiente e configuração de Swagger, e exige autenticação para as demais rotas. O gerenciamento
-   * de sessão é stateless e um filtro de autenticação JWT é adicionado antes do filtro padrão de
-   * autenticação por usuário e senha.
+   * <p>Define regras de acesso público e restrito para diferentes endpoints, considerando métodos
+   * HTTP, perfis ativos e configuração do Swagger. Adiciona o filtro de autenticação JWT antes do
+   * filtro padrão de autenticação por usuário e senha.
    *
    * @param http configuração de segurança HTTP do Spring
-   * @param jwtAuthenticationFilter filtro de autenticação JWT a ser inserido na cadeia
-   * @return a cadeia de filtros de segurança configurada
+   * @param jwtAuthenticationFilter filtro de autenticação JWT a ser adicionado à cadeia
+   * @return cadeia de filtros de segurança configurada
    * @throws Exception se ocorrer erro na configuração da segurança
    */
   @Bean
@@ -89,6 +78,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
+                    .requestMatchers(HttpMethod.GET, "/api/projeto/meusprojetos")
+                    .authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/projeto/**")
                     .permitAll()
                     .requestMatchers("/api/auth/**")
@@ -103,10 +94,18 @@ public class SecurityConfig {
                     .hasRole("SERVIDOR")
                     .requestMatchers(HttpMethod.OPTIONS, "/**") // CORS preflight
                     .permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/departamento/**")
-                    .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/usuarios/executores")
                     .hasRole("SERVIDOR")
+                    .requestMatchers(HttpMethod.GET, "/api/sugestao/minhas-indicacoes")
+                    .hasRole("SERVIDOR")
+                    .requestMatchers(HttpMethod.GET, "/api/departamento/**")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/curso/**")
+                    .permitAll()
+                    .requestMatchers("/api/departamento/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers("/api/curso/**")
+                    .hasRole("ADMIN")
                     .requestMatchers("/error")
                     .permitAll()
                     .anyRequest()
@@ -162,20 +161,6 @@ public class SecurityConfig {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;
-  }
-
-  /**
-   * Cria um serviço que carrega detalhes do usuário a partir do e-mail informado.
-   *
-   * @return um UserDetailsService que busca o usuário no repositório pelo e-mail e lança
-   *     UsernameNotFoundException caso não seja encontrado
-   */
-  @Bean
-  UserDetailsService userDetailsService() {
-    return u ->
-        usuarioRepository
-            .findByEmail(u)
-            .orElseThrow(() -> new UsernameNotFoundException("Credenciais inválidas"));
   }
 
   /**

@@ -147,4 +147,22 @@ class SugestaoDeProjetoServiceImplTest {
     verify(usuarioService).obterUsuarioLogado();
     verify(repository).findByAlunoId(aluno.getId());
   }
+
+  @Test
+  @DisplayName(
+      "listarIndicacoesDoUsuarioLogado deve retornar lista de indicações do usuário logado")
+  void listarIndicacoesDoUsuarioLogado_DeveRetornarListaDeIndicacoesDoUsuarioLogado() {
+    // Arrange
+    when(usuarioService.obterUsuarioLogado()).thenReturn(professor);
+    List<SugestaoDeProjeto> indicacoes = Collections.singletonList(sugestao);
+    when(repository.findByProfessorId(professor.getId())).thenReturn(indicacoes);
+
+    // Act
+    List<SugestaoDeProjeto> result = service.listarIndicacoesDoUsuarioLogado();
+
+    // Assert
+    assertEquals(indicacoes, result);
+    verify(usuarioService).obterUsuarioLogado();
+    verify(repository).findByProfessorId(professor.getId());
+  }
 }

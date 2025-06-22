@@ -68,6 +68,13 @@ public class SugestaoDeProjetoController
     return ResponseEntity.ok(sugestoes.stream().map(this::convertToResponseDTO).toList());
   }
 
+  @GetMapping("/minhas-indicacoes")
+  @Operation(summary = "Listar indicações de projeto do usuário logado")
+  public ResponseEntity<List<SugestaoDeProjetoDTO>> listarIndicacoesDoUsuarioLogado() {
+    List<SugestaoDeProjeto> sugestoes = service.listarIndicacoesDoUsuarioLogado();
+    return ResponseEntity.ok(sugestoes.stream().map(this::convertToResponseDTO).toList());
+  }
+
   /**
    * Converte uma entidade SugestaoDeProjeto para seu DTO correspondente.
    *

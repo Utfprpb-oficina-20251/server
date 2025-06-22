@@ -81,4 +81,14 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
     Usuario usuario = usuarioService.obterUsuarioLogado();
     return repository.findByAlunoId(usuario.getId());
   }
+
+  /**
+   * Recupera todas as sugestões de projeto indicadas para o usuário atualmente autenticado.
+   *
+   * @return lista de sugestões de projeto indicadas para o usuário logado
+   */
+  public List<SugestaoDeProjeto> listarIndicacoesDoUsuarioLogado() {
+    Usuario usuario = usuarioService.obterUsuarioLogado();
+    return repository.findByProfessorId(usuario.getId());
+  }
 }

@@ -267,6 +267,43 @@ class SugestaoDeProjetoControllerTest {
     verify(service).listarSugestoesDoUsuarioLogado();
   }
 
+  @Test
+  void listarIndicacoesDoUsuarioLogado_shouldReturnIndicacoesDoUsuarioLogado() throws Exception {
+    // Arrange
+    Curso curso1 = createCurso(1L, "Ciência da Computação", "DAINF");
+    Curso curso2 = createCurso(2L, "Engenharia da Computação", "DAEGC");
+    CursoDTO curso1DTO = createCursoDTO(1L, "Ciência da Computação", "DAINF");
+    CursoDTO curso2DTO = createCursoDTO(2L, "Engenharia da Computação", "DAEGC");
+
+    SugestaoDeProjeto sugestao1 =
+        createSugestaoDeProjeto(1L, "Indicação 1", "Descrição 1", "Público Alvo 1", curso1);
+    SugestaoDeProjeto sugestao2 =
+        createSugestaoDeProjeto(2L, "Indicação 2", "Descrição 2", "Público Alvo 2", curso2);
+    List<SugestaoDeProjeto> sugestoes = Arrays.asList(sugestao1, sugestao2);
+
+    SugestaoDeProjetoDTO dto1 =
+        createSugestaoDeProjetoDTO(1L, "Indicação 1", "Descrição 1", "Público Alvo 1", curso1DTO);
+    SugestaoDeProjetoDTO dto2 =
+        createSugestaoDeProjetoDTO(2L, "Indicação 2", "Descrição 2", "Público Alvo 2", curso2DTO);
+
+    when(service.listarIndicacoesDoUsuarioLogado()).thenReturn(sugestoes);
+    when(modelMapper.map(sugestao1, SugestaoDeProjetoDTO.class)).thenReturn(dto1);
+    when(modelMapper.map(sugestao2, SugestaoDeProjetoDTO.class)).thenReturn(dto2);
+
+    // Act & Assert
+    mockMvc
+        .perform(get("/sugestao/minhas-indicacoes"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$[0].id", is(1)))
+        .andExpect(jsonPath("$[0].titulo", is("Indicação 1")))
+        .andExpect(jsonPath("$[1].id", is(2)))
+        .andExpect(jsonPath("$[1].titulo", is("Indicação 2")));
+
+    verify(service).listarIndicacoesDoUsuarioLogado();
+  }
+
   // Helper methods to create test objects
   private SugestaoDeProjeto createSugestaoDeProjeto(
       Long id, String titulo, String descricao, String publicoAlvo, Curso curso) {
