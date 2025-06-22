@@ -3,6 +3,9 @@ package br.edu.utfpr.pb.ext.server.usuario;
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.UsuarioLoginDTO;
 import br.edu.utfpr.pb.ext.server.auth.jwt.JwtService;
+import br.edu.utfpr.pb.ext.server.departamento.Departamento;
+import br.edu.utfpr.pb.ext.server.departamento.DepartamentoController;
+import br.edu.utfpr.pb.ext.server.departamento.DepartamentoRepository;
 import br.edu.utfpr.pb.ext.server.generics.CrudController;
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
@@ -32,6 +35,7 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
   private final JwtService jwtService;
   private final AuthorityRepository authorityRepository;
   private final UsuarioRepository usuarioRepository;
+  private final DepartamentoRepository departamentoRepository;
 
   /**
    * Cria uma instância do controlador de usuários, inicializando os serviços necessários para
@@ -43,17 +47,18 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
    * @param authorityRepository repositório para consulta de autoridades (roles)
    */
   public UsuarioController(
-      IUsuarioService usuarioService,
-      ModelMapper modelMapper,
-      JwtService jwtService,
-      AuthorityRepository authorityRepository,
-      UsuarioRepository usuarioRepository) {
+          IUsuarioService usuarioService,
+          ModelMapper modelMapper,
+          JwtService jwtService,
+          AuthorityRepository authorityRepository,
+          UsuarioRepository usuarioRepository, DepartamentoRepository departamentoRepository) {
     super(Usuario.class, UsuarioServidorResponseDTO.class);
     this.usuarioService = usuarioService;
     this.modelMapper = modelMapper;
     this.jwtService = jwtService;
     this.authorityRepository = authorityRepository;
     this.usuarioRepository = usuarioRepository;
+    this.departamentoRepository = departamentoRepository;
   }
 
   /**
@@ -201,17 +206,23 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
 
   @PutMapping("/meu-perfil")
   public ResponseEntity<UsuarioLogadoInfoDTO> updateProfile(
-      @Valid @RequestBody UsuarioLogadoInfoDTO usuarioDTO) {
+          @Valid @RequestBody UsuarioLogadoInfoDTO usuarioDTO) {
 
     Usuario currentUser = usuarioService.obterUsuarioLogado();
 
     currentUser.setNome(usuarioDTO.getNome());
+
     if (usuarioDTO.getCurso() != null) {
       currentUser.setCurso(usuarioDTO.getCurso());
     }
+
     if (usuarioDTO.getDepartamento() != null) {
-      currentUser.setDepartamento(usuarioDTO.getDepartamento());
+      Departamento departamento = departamentoRepository
+              .findById(usuarioDTO.getDepartamento())
+              .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
+      currentUser.setDepartamento(departamento);
     }
+
     Usuario updatedUser = usuarioService.save(currentUser);
 
     UsuarioLogadoInfoDTO responseDTO = modelMapper.map(updatedUser, UsuarioLogadoInfoDTO.class);

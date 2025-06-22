@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.usuario;
 import static org.junit.jupiter.api.Assertions.*;
 
 import br.edu.utfpr.pb.ext.server.auth.dto.RespostaLoginDTO;
+import br.edu.utfpr.pb.ext.server.departamento.Departamento;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioAlunoRequestDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioLogadoInfoDTO;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
@@ -329,7 +330,7 @@ class UsuarioControllerTest {
 
     UsuarioLogadoInfoDTO updateRequest = currentProfile.getBody();
     updateRequest.setNome("Nome Atualizado");
-    updateRequest.setDepartamento(Departamentos.DACOC);
+    updateRequest.setDepartamento(1L);
 
     // Update profile
     ResponseEntity<UsuarioLogadoInfoDTO> response =
@@ -343,7 +344,7 @@ class UsuarioControllerTest {
     assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals("Nome Atualizado", response.getBody().getNome());
-    assertEquals(Departamentos.DACOC, response.getBody().getDepartamento());
+    assertEquals(1L, response.getBody().getDepartamento());
   }
 
   @Test
@@ -475,44 +476,39 @@ class UsuarioControllerTest {
   void updateMeuPerfil_whenDepartamentoIsNull_shouldNotUpdateDepartamento() {
     UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =
-        testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
+            testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
 
     String token = loginResponse.getBody().getToken();
     testRestTemplate
-        .getRestTemplate()
-        .getInterceptors()
-        .add(
-            (httpRequest, bytes, execution) -> {
-              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
-              return execution.execute(httpRequest, bytes);
-            });
+            .getRestTemplate()
+            .getInterceptors()
+            .add(
+                    (httpRequest, bytes, execution) -> {
+                      httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+                      return execution.execute(httpRequest, bytes);
+                    });
 
     ResponseEntity<UsuarioLogadoInfoDTO> currentProfile =
-        testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
+            testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
 
-    Departamentos originalDepartamento = currentProfile.getBody().getDepartamento();
-    assertNotNull(originalDepartamento, "Original department should not be null");
+    Long originalDepartamentoId = currentProfile.getBody().getDepartamento();
+    assertNotNull(originalDepartamentoId, "Original department should not be null");
 
     UsuarioLogadoInfoDTO updateRequest = currentProfile.getBody();
     updateRequest.setNome("Nome Atualizado");
     updateRequest.setDepartamento(null);
 
     ResponseEntity<UsuarioLogadoInfoDTO> response =
-        testRestTemplate.exchange(
-            "/api/usuarios/meu-perfil",
-            org.springframework.http.HttpMethod.PUT,
-            new org.springframework.http.HttpEntity<>(updateRequest),
-            UsuarioLogadoInfoDTO.class);
+            testRestTemplate.exchange(
+                    "/api/usuarios/meu-perfil",
+                    org.springframework.http.HttpMethod.PUT,
+                    new org.springframework.http.HttpEntity<>(updateRequest),
+                    UsuarioLogadoInfoDTO.class);
 
     assertEquals(200, response.getStatusCode().value());
     assertEquals("Nome Atualizado", response.getBody().getNome());
-
-    assertNotNull(
-        response.getBody().getDepartamento(), "Department should not be null after update");
-    assertEquals(
-        originalDepartamento,
-        response.getBody().getDepartamento(),
-        "Department should remain unchanged when null is provided");
+    assertNotNull(response.getBody().getDepartamento(), "Department should not be null after update");
+    assertEquals(originalDepartamentoId, response.getBody().getDepartamento(), "Department should remain unchanged when null is provided");
   }
 
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {

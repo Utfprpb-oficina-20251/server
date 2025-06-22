@@ -23,7 +23,7 @@ public class UsuarioLogadoInfoDTO {
   @NotBlank(message = "Email é obrigatório") @Email(message = "Email inválido") private String email;
 
   private String telefone;
-  private Long departamentoId;
+  private Long departamento;
   private Curso curso;
   private String enderecoCompleto;
 }
