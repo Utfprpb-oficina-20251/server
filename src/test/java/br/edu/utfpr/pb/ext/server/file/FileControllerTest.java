@@ -84,13 +84,13 @@ class FileControllerTest {
 
   private static Stream<Arguments> fileResponseScenarios() {
     return Stream.of(
-        Arguments.of("test.jpg", MediaType.IMAGE_JPEG, false, null, true),
+        Arguments.of("test.jpg", MediaType.IMAGE_JPEG, false, null),
         Arguments.of(
             "document.pdf",
             MediaType.APPLICATION_PDF,
             true,
             "attachment; filename=\"document.pdf\"",
             true),
-        Arguments.of("file.xyz", MediaType.parseMediaType("chemical/x-xyz"), false, null, false));
+        Arguments.of("file.xyz", MediaType.parseMediaType("chemical/x-xyz"), false, null));
   }
 }

@@ -1,13 +1,17 @@
 package br.edu.utfpr.pb.ext.server.config;
 
+import io.minio.MinioClient;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.util.StringUtils;
 
 @Configuration
 @Getter
+@Slf4j
 public class MinioConfig {
   @Value("${minio.url}")
   private String url;
@@ -21,18 +25,21 @@ public class MinioConfig {
   @Value("${minio.bucket}")
   private String bucket;
 
-  @Value("${minio.secure}")
-  private boolean secure;
-
   @Bean
-  public io.minio.MinioClient minioClient() {
+  public MinioClient minioClient() {
     if (!StringUtils.hasText(url)) {
       throw new IllegalArgumentException("Url do Minio deve ser informada.");
     }
     if (!StringUtils.hasText(accessKey) || !StringUtils.hasText(secretKey)) {
-      throw new IllegalArgumentException("Minio access key is required");
+      throw new IllegalArgumentException("Credenciais do Minio devem ser informadas.");
     }
 
-    return io.minio.MinioClient.builder().endpoint(url).credentials(accessKey, secretKey).build();
+    return MinioClient.builder().endpoint(url).credentials(accessKey, secretKey).build();
+  }
+
+  @Bean
+  @Profile("!test")
+  public MinioInitializer minioInitializer(MinioClient minioClient) {
+    return new MinioInitializer(minioClient, this);
   }
 }

@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -32,53 +33,20 @@ public class FileService {
   private final MinioClient minioClient;
   private final MinioConfig minioConfig;
   private final IUsuarioService iusuarioService;
-  private final boolean secure;
   private static final long MAX_MINIO_FILE_SIZE = 1024 * 1024 * 10L;
   private static final Set<String> ALLOWED_CONTENT_TYPES =
       Set.of(
           MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.APPLICATION_PDF_VALUE);
+
+  @Value("${spring.profiles.active:''}")
+  private String activeProfile;
 
   public FileService(
       MinioClient minioClient, MinioConfig minioConfig, IUsuarioService iusuarioService)
       throws FileException {
     this.minioClient = minioClient;
     this.minioConfig = minioConfig;
-    this.secure = minioConfig.isSecure();
     this.iusuarioService = iusuarioService;
-    initializeBucket();
-  }
-
-  private void initializeBucket() {
-    try {
-      if (!minioClient.bucketExists(
-          BucketExistsArgs.builder().bucket(minioConfig.getBucket()).build())) {
-        minioClient.makeBucket(MakeBucketArgs.builder().bucket(minioConfig.getBucket()).build());
-        log.info("Criado bucket: {}", minioConfig.getBucket());
-      }
-
-      String policyJson =
-          """
-        {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {"AWS": ["*"]},
-              "Action": ["s3:GetObject"],
-              "Resource": ["arn:aws:s3:::%s/*"]
-            }
-          ]
-        }
-        """
-              .formatted(minioConfig.getBucket());
-
-      minioClient.setBucketPolicy(
-          SetBucketPolicyArgs.builder().bucket(minioConfig.getBucket()).config(policyJson).build());
-
-    } catch (Exception e) {
-      log.error("Erro ao criar bucket: {}", minioConfig.getBucket(), e);
-      throw new FileException("Não foi possivel inicializar o bucket", e);
-    }
   }
 
   @Timed(value = "file.upload", description = "Tempo de upload de arquivo")
@@ -207,10 +175,12 @@ public class FileService {
 
   private String getContentType(String filename) {
     try {
-      return minioClient
-          .statObject(
-              StatObjectArgs.builder().bucket(minioConfig.getBucket()).object(filename).build())
-          .contentType();
+      String contentType =
+          minioClient
+              .statObject(
+                  StatObjectArgs.builder().bucket(minioConfig.getBucket()).object(filename).build())
+              .contentType();
+      return contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE;
     } catch (Exception e) {
       log.warn("Erro ao obter o contentType do arquivo: {}", filename, e);
       return MediaType.APPLICATION_OCTET_STREAM_VALUE;
@@ -221,11 +191,7 @@ public class FileService {
     String encodedFilename =
         URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
     return String.format(
-        "%s://%s/%s/%s",
-        secure ? "https" : "http",
-        minioConfig.getUrl().replaceAll("^https?://", ""),
-        minioConfig.getBucket(),
-        encodedFilename);
+        "%s/%s/%s", minioConfig.getUrl(), minioConfig.getBucket(), encodedFilename);
   }
 
   private void validateFile(MultipartFile file) {

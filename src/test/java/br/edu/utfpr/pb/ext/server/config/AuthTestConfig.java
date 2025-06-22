@@ -1,4 +1,4 @@
-package br.edu.utfpr.pb.ext.server.auth;
+package br.edu.utfpr.pb.ext.server.config;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;

@@ -42,15 +42,13 @@ class FileServiceTest {
 
   @BeforeEach
   void setUp() {
-    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
-    when(minioConfig.isSecure()).thenReturn(false);
-
     fileService = new FileService(minioClient, minioConfig, usuarioService);
   }
 
   @Test
   void store_ValidFile_ReturnsFileInfo() throws Exception {
     // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     MultipartFile file =
         new MockMultipartFile(TEST_FILENAME, TEST_FILENAME, MediaType.IMAGE_JPEG_VALUE, TEST_BYTES);
     when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
@@ -82,6 +80,7 @@ class FileServiceTest {
   @Test
   void loadFileAsResource_ValidFilename_ReturnsResource() throws Exception {
     // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     GetObjectResponse response = mock(GetObjectResponse.class);
     when(minioClient.getObject(any(GetObjectArgs.class))).thenReturn(response);
     when(response.readAllBytes()).thenReturn(TEST_BYTES);
@@ -108,6 +107,7 @@ class FileServiceTest {
   @Test
   void deleteFile_ValidFilename_DeletesFile() throws Exception {
     // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     when(usuarioService.obterUsuarioLogado())
         .thenReturn(Usuario.builder().nome("Test User").build());
     doNothing().when(minioClient).removeObject(any(RemoveObjectArgs.class));
@@ -121,6 +121,7 @@ class FileServiceTest {
 
   @Test
   void listFiles_ReturnsFileList() {
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
     // Arrange
     Item item = mock(Item.class);
@@ -141,6 +142,7 @@ class FileServiceTest {
   @Test
   void asyncDelete_ValidFilename_CompletesSuccessfully() throws Exception {
     // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     when(usuarioService.obterUsuarioLogado())
         .thenReturn(Usuario.builder().nome("Test User").build());
     doNothing().when(minioClient).removeObject(any(RemoveObjectArgs.class));
@@ -175,6 +177,7 @@ class FileServiceTest {
 
   @Test
   void getUrl_ValidFilename_ReturnsEncodedUrl() {
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
     // Arrange
     String filename = "test file.jpg";
