@@ -78,6 +78,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
+                    .requestMatchers(HttpMethod.GET, "/api/projeto/meusprojetos")
+                    .authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/projeto/**")
                     .permitAll()
                     .requestMatchers("/api/auth/**")

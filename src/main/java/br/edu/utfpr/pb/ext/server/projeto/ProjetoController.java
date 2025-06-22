@@ -7,6 +7,7 @@ import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.modelmapper.ModelMapper;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -163,5 +165,60 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
       @PathVariable Long id, @Valid @RequestBody ProjetoDTO dto) {
     ProjetoDTO projetoAtualizado = projetoService.atualizarProjeto(id, dto);
     return ResponseEntity.ok(projetoAtualizado);
+  }
+
+  @Operation(
+      summary = "Busca projetos por filtros",
+      description =
+          "Endpoint para buscar projetos de extensão com base em múltiplos critérios. Todos os parâmetros são opcionais.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Busca realizada com sucesso.",
+        content = {
+          @Content(
+              mediaType = "application/json",
+              array = @ArraySchema(schema = @Schema(implementation = ProjetoDTO.class)))
+        }),
+    @ApiResponse(
+        responseCode = "400",
+        description = "Parâmetros inválidos fornecidos.",
+        content = @Content)
+  })
+  @GetMapping("/buscar")
+  public ResponseEntity<List<ProjetoDTO>> buscarProjetos(
+      @Valid @ParameterObject FiltroProjetoDTO filtros) {
+    List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtros);
+    return ResponseEntity.ok(projetos);
+  }
+
+  @Operation(
+      summary = "Busca os projetos do usuário logado",
+      description =
+          "Retorna uma lista de todos os projetos em que o usuário autenticado faz parte da equipe executora. "
+              + "A autenticação é necessária para acessar este recurso.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "Busca realizada com sucesso. Retorna a lista de projetos do usuário, que pode estar vazia.",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  array = @ArraySchema(schema = @Schema(implementation = ProjetoDTO.class)))
+            }),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Acesso Negado. Este erro ocorre se o usuário não estiver autenticado.",
+            content = @Content)
+      })
+  @GetMapping("/meusprojetos")
+  public ResponseEntity<List<ProjetoDTO>> buscarMeusProjetos(
+      @AuthenticationPrincipal Usuario userDetails) {
+    FiltroProjetoDTO filtroCordenador =
+        new FiltroProjetoDTO(null, null, null, null, userDetails.getId(), null, null);
+    List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtroCordenador);
+    return ResponseEntity.ok(projetos);
   }
 }

@@ -9,6 +9,7 @@ import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -330,5 +331,110 @@ class ProjetoControllerTest {
     assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     assertEquals("Projeto não encontrado", exception.getReason());
     verify(projetoService).cancelar(projetoId, dto, usuarioId);
+  }
+
+  @Test
+  void buscarMeusProjetos_quandoUsuarioNaoTemProjetos_retornaOkComListaVazia() {
+    // Arrange (Organização) 🕵️
+    Usuario usuarioLogado = new Usuario();
+    usuarioLogado.setId(2L);
+
+    FiltroProjetoDTO filtroEspecifico =
+        new FiltroProjetoDTO(null, null, null, null, 2L, null, null);
+
+    when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
+        .thenReturn(Collections.emptyList());
+
+    // Act (Ação) 🚀
+    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarMeusProjetos(usuarioLogado);
+
+    // Assert (Verificação) ✅
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().isEmpty());
+    verify(projetoService, times(1)).buscarProjetosPorFiltro(any(FiltroProjetoDTO.class));
+  }
+
+  @Test
+  void buscarProjetos_semFiltros_retornaOkComListaDeProjetos() {
+    // Arrange
+    FiltroProjetoDTO filtroVazio = new FiltroProjetoDTO(null, null, null, null, null, null, null);
+    List<ProjetoDTO> listaEsperada = List.of(new ProjetoDTO(), new ProjetoDTO());
+    when(projetoService.buscarProjetosPorFiltro(eq(filtroVazio))).thenReturn(listaEsperada);
+
+    // Act
+    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtroVazio);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(2, response.getBody().size());
+
+    verify(projetoService).buscarProjetosPorFiltro(eq(filtroVazio));
+  }
+
+  @Test
+  void buscarProjetos_comFiltroUnicoDeTitulo_retornaOkComListaFiltrada() {
+    // Arrange 🕵️‍♂️
+    // 1. Cria um filtro específico, apenas com o título.
+    FiltroProjetoDTO filtros = new FiltroProjetoDTO("Robótica", null, null, null, null, null, null);
+
+    // 2. A lista esperada para este filtro específico.
+    List<ProjetoDTO> listaFiltrada = List.of(new ProjetoDTO());
+
+    // 3. Configura o mock para retornar a lista filtrada quando chamado com o filtro exato.
+    when(projetoService.buscarProjetosPorFiltro(filtros)).thenReturn(listaFiltrada);
+
+    // Act 🚀
+    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtros);
+
+    // Assert ✅
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().size());
+
+    // 7. Garante que o serviço foi chamado com o objeto de filtro correto.
+    verify(projetoService).buscarProjetosPorFiltro(filtros);
+  }
+
+  @Test
+  void buscarProjetos_comFiltrosCombinados_retornaOkComListaFiltrada() {
+    // Arrange 🕵️‍♂️
+    // 1. Cria um filtro combinando status e ID de um membro da equipe.
+    FiltroProjetoDTO filtros =
+        new FiltroProjetoDTO(null, StatusProjeto.EM_ANDAMENTO, null, null, 10L, null, null);
+    List<ProjetoDTO> listaFiltrada = List.of(new ProjetoDTO());
+    when(projetoService.buscarProjetosPorFiltro(filtros)).thenReturn(listaFiltrada);
+
+    // Act 🚀
+    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtros);
+
+    // Assert ✅
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().size());
+    verify(projetoService).buscarProjetosPorFiltro(filtros);
+  }
+
+  @Test
+  void buscarProjetos_quandoNenhumProjetoEncontrado_retornaOkComListaVazia() {
+    // Arrange
+    FiltroProjetoDTO filtroInexistente =
+        new FiltroProjetoDTO("Projeto Inexistente", null, null, null, null, null, null);
+
+    when(projetoService.buscarProjetosPorFiltro(eq(filtroInexistente)))
+        .thenReturn(Collections.emptyList());
+
+    // Act
+    ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtroInexistente);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().isEmpty());
+
+    verify(projetoService).buscarProjetosPorFiltro(eq(filtroInexistente));
   }
 }
