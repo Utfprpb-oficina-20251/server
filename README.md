@@ -47,8 +47,6 @@ Url do banco de dados qual a aplicação vai se conectar, opcional para teste
 
 `MINIO_BUCKET` Nome do bucket do Minio para envio de arquivos, opcional para desenvolvimento
 
-`MINIO_SECURE` Define se o Minio deve ser utilizado em HTTPS, opcional
-
 `MAX_FILE_SIZE` Define o tamanho máximo de um arquivo enviado ao servidor, opcional
 
 `MAX_REQUEST_SIZE` Define o tamanho maximo de uma requisição ao servidor, opcional
@@ -69,7 +67,6 @@ MINIO_URL=
 MINIO_ACCESS_KEY=
 MINIO_SECRET_KEY=
 MINIO_BUCKET=
-MINIO_SECURE=
 MAX_FILE_SIZE=
 MAX_REQUEST_SIZE=
 ```
