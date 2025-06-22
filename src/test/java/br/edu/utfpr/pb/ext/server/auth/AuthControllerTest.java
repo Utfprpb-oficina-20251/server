@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.EmailOtpAuthRequestDTO;
 import br.edu.utfpr.pb.ext.server.auth.dto.SolicitacaoCodigoOTPRequestDTO;
+import br.edu.utfpr.pb.ext.server.config.AuthTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

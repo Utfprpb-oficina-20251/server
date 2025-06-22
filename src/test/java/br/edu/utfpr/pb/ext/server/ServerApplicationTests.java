@@ -18,9 +18,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 class ServerApplicationTests {
   @Autowired private MockMvc mockMvc;
 
+  /**
+   * Carrega contexto e dependências do spring no perfil de testes, se você tem problemas aqui,
+   * verifique dependências obrigatórias
+   */
   @Test
+  @DisplayName("Contexto e dependência do sprint devem carregar no perfil de testes")
   void contextLoads() {
-    // Só pra ver se carrega o contexto
+    // esse teste não precisa ser implementado
   }
 
   @Test
