@@ -33,11 +33,13 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   private final ImageUtils imageUtils;
 
   /**
-   * Cria uma nova instância do serviço de projetos com o repositório fornecido.
+   * Constrói o serviço de projetos inicializando os repositórios, utilitários e serviços necessários para operações de negócio relacionadas a projetos.
    *
-   * @param projetoRepository repositório utilizado para operações de persistência de projetos
-   * @param modelMapper mapper para conversão entre objetos
+   * @param projetoRepository repositório para persistência de projetos
+   * @param modelMapper utilitário para conversão entre entidades e DTOs
    * @param usuarioRepository repositório para operações com usuários
+   * @param fileService serviço para armazenamento de arquivos
+   * @param imageUtils utilitário para validação e processamento de imagens
    */
   public ProjetoServiceImpl(
       ProjetoRepository projetoRepository,
@@ -53,15 +55,23 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
   /**
-   * Retorna o repositório JPA utilizado para operações CRUD com a entidade Projeto.
+   * Retorna o repositório JPA responsável pelas operações CRUD da entidade Projeto.
    *
-   * @return o repositório ProjetoRepository associado à entidade Projeto
+   * @return o ProjetoRepository utilizado para persistência de Projetos
    */
   @Override
   protected JpaRepository<Projeto, Long> getRepository() {
     return projetoRepository;
   }
 
+  /**
+   * Prepara a entidade Projeto antes de salvá-la, atribuindo status inicial, responsável, equipe executora e processando a imagem do projeto.
+   *
+   * Se o projeto for novo, define o status como EM_ANDAMENTO. Garante que o responsável e a equipe executora estejam corretamente atribuídos e que a imagem, se fornecida em Base64, seja validada, armazenada e tenha sua URL atualizada.
+   *
+   * @param projeto Entidade Projeto a ser preparada para persistência.
+   * @return A entidade Projeto pronta para ser salva.
+   */
   @Override
   public Projeto preSave(Projeto projeto) {
 
@@ -75,6 +85,11 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     return super.preSave(projeto);
   }
 
+  /**
+   * Processa a URL da imagem do projeto, validando e decodificando uma imagem em Base64, armazenando-a e atualizando a URL do projeto com o endereço do arquivo salvo.
+   *
+   * Caso a imagem não seja válida ou ocorra erro no processamento, lança uma exceção HTTP 500.
+   */
   private void processaImagemUrl(Projeto projeto) {
     String imagemUrl = projeto.getImagemUrl();
     if (imagemUrl == null || imagemUrl.isBlank()) {
@@ -98,6 +113,13 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     }
   }
 
+  /**
+   * Valida e substitui os usuários da equipe executora do projeto pelos respectivos registros completos do banco de dados.
+   *
+   * Para cada usuário informado na equipe executora, verifica se o objeto e o e-mail estão presentes e válidos.
+   * Caso contrário, lança uma exceção HTTP 400. Se o usuário não for encontrado pelo e-mail, lança exceção HTTP 406.
+   * Ao final, atualiza a equipe executora do projeto com a lista de usuários carregados do banco.
+   */
   private void atribuirUsuariosEquipeExecutora(Projeto entity) {
     List<Usuario> entidadesUsuarioCarregadas =
         entity.getEquipeExecutora().stream()
@@ -124,6 +146,11 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     entity.setEquipeExecutora(entidadesUsuarioCarregadas);
   }
 
+  /**
+   * Define o usuário autenticado como responsável pelo projeto caso ainda não esteja definido.
+   *
+   * Lança EntityNotFoundException se o usuário autenticado não for encontrado no banco de dados.
+   */
   private void atribuirResponsavel(Projeto entity) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.isAuthenticated()) {
@@ -205,6 +232,12 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     return modelMapper.map(projetoAtualizado, ProjetoDTO.class);
   }
 
+  /**
+   * Busca projetos aplicando filtros dinâmicos e retorna a lista de resultados como DTOs.
+   *
+   * @param filtros critérios de filtragem para a busca dos projetos
+   * @return lista de projetos encontrados convertidos para DTOs
+   */
   @Override
   @Transactional(readOnly = true)
   public List<ProjetoDTO> buscarProjetosPorFiltro(
@@ -221,11 +254,14 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
   /**
-   * Cria um objeto Specification dinamicamente com base nos filtros fornecidos. A lógica que
-   * estaria na classe ProjetoSpecification agora vive aqui.
+   * Cria dinamicamente uma Specification para a entidade Projeto com base nos filtros informados.
    *
-   * @param filtros DTO com os critérios de busca.
-   * @return Um objeto Specification<Projeto> pronto para ser usado na consulta.
+   * Os filtros suportados incluem título (busca parcial, case-insensitive), status, intervalo de datas de início,
+   * ID do responsável, ID de membro da equipe executora e ID do curso do responsável.
+   * Garante que os resultados sejam distintos.
+   *
+   * @param filtros DTO contendo os critérios de filtragem dos projetos.
+   * @return Specification<Projeto> configurada conforme os filtros fornecidos.
    */
   private Specification<Projeto> criarSpecificationComFiltros(FiltroProjetoDTO filtros) {
     return (root, query, criteriaBuilder) -> {

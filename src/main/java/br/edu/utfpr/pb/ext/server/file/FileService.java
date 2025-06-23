@@ -53,17 +53,14 @@ public class FileService {
   }
 
   /**
-   * Armazena um arquivo enviado no armazenamento MinIO após validação.
+   * Realiza o upload de um arquivo recebido via multipart para o armazenamento MinIO após validação.
    *
-   * <p>Valida o arquivo quanto ao tamanho, tipo de conteúdo permitido e segurança do nome. Gera um
-   * nome único para o arquivo, realiza o upload para o bucket configurado e retorna um objeto com
-   * informações sobre o arquivo armazenado.
+   * Valida o arquivo quanto ao tamanho máximo, tipo de conteúdo permitido e segurança do nome. Gera um nome único preservando a extensão original, faz o upload para o bucket configurado e retorna informações detalhadas do arquivo armazenado.
    *
-   * @param file Arquivo a ser enviado.
-   * @return Informações do arquivo armazenado, incluindo nome, tipo, tamanho, URL de acesso e data
-   *     de upload.
-   * @throws IllegalArgumentException se o arquivo estiver vazio ou inválido.
-   * @throws FileException em caso de falha no armazenamento do arquivo.
+   * @param file Arquivo multipart a ser enviado.
+   * @return Objeto com informações do arquivo armazenado, incluindo nome gerado, nome original, tipo, tamanho, URL de acesso e data de upload.
+   * @throws IllegalArgumentException Se o arquivo estiver vazio ou inválido.
+   * @throws FileException Em caso de falha no armazenamento do arquivo.
    */
   @Timed(value = "file.upload", description = "Tempo de upload de arquivo")
   @PreAuthorize("isAuthenticated()")
@@ -97,13 +94,13 @@ public class FileService {
   }
 
   /**
-   * Armazena dados de um arquivo em bytes no MinIO.
+   * Armazena um arquivo no MinIO a partir de um array de bytes, validando tipo, tamanho e nome.
    *
-   * @param data O conteúdo do arquivo como array de bytes.
-   * @param contentType O tipo de mídia (MIME type) do arquivo.
-   * @param originalFilename O nome original do arquivo.
-   * @return Um {@link FileInfoDTO} com as informações do arquivo armazenado.
-   * @throws FileException se ocorrer um erro durante o upload.
+   * @param data Conteúdo do arquivo em bytes.
+   * @param contentType Tipo MIME do arquivo.
+   * @param originalFilename Nome original do arquivo.
+   * @return Um {@link FileInfoDTO} com informações do arquivo armazenado, incluindo nome, tipo, tamanho, URL de acesso e data de upload.
+   * @throws FileException Se ocorrer erro durante o armazenamento ou se o arquivo não atender às validações.
    */
   @Timed(value = "file.upload.bytes", description = "Tempo de upload de arquivo a partir de bytes")
   @PreAuthorize("isAuthenticated()")
@@ -253,7 +250,7 @@ public class FileService {
   }
 
   /**
-   * Gera um nome de arquivo único baseado em UUID, preservando a extensão do arquivo original.
+   * Gera um nome de arquivo único sanitizando o nome original, substituindo caracteres inválidos e adicionando um timestamp, preservando a extensão original.
    *
    * @param originalFilename nome original do arquivo, incluindo a extensão.
    * @return nome de arquivo único com a mesma extensão do arquivo original.
