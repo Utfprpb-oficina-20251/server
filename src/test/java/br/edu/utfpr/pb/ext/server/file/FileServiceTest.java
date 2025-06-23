@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.file;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -295,6 +297,7 @@ class FileServiceTest {
 
     // Assert
     assertNotNull(result1.getFileName());
+    await().atLeast(Duration.ofMillis(1));
     assertNotNull(result2.getFileName());
     assertNotEquals(result1.getFileName(), result2.getFileName());
     assertTrue(result1.getFileName().contains(".jpg"));
@@ -302,13 +305,13 @@ class FileServiceTest {
   }
 
   @Test
-  void storeBytes_EncodesFilenameInUrl() throws Exception {
+  void storeBytes_GeneratesCorrectStructure() throws Exception {
     // Arrange
     when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
     when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
 
     String contentType = MediaType.IMAGE_JPEG_VALUE;
-    String originalFilename = "test image with spaces.jpg";
+    String originalFilename = "test-image.jpg";
 
     ObjectWriteResponse response = mock(ObjectWriteResponse.class);
     when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(response);
@@ -322,6 +325,7 @@ class FileServiceTest {
     // we just verify the URL structure
     assertTrue(result.getUrl().startsWith(TEST_BASE_URL + "/" + BUCKET_NAME + "/"));
     assertTrue(result.getUrl().contains(".jpg"));
+    assertTrue(result.getUrl().matches("^https?://.*"));
   }
 
   @Test

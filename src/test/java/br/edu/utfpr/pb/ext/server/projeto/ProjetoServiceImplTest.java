@@ -590,7 +590,7 @@ class ProjetoServiceImplTest {
         assertThrows(ResponseStatusException.class, () -> projetoService.preSave(projeto));
 
     assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatusCode());
-    assertEquals("Usuário com email naoexiste@utfpr.edu.brnão encontrado.", exception.getReason());
+    assertEquals("Usuário com email naoexiste@utfpr.edu.br não encontrado.", exception.getReason());
   }
 
   @Test
