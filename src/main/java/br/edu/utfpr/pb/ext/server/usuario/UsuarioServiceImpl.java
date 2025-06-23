@@ -58,11 +58,10 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
   }
 
   /**
-   * Valida se o usuário informado está ativo e possui o perfil de servidor.
+   * Verifica se o usuário possui o perfil de servidor.
    *
    * @param professor usuário a ser validado como professor
-   * @throws IllegalArgumentException se o usuário estiver inativo ou não possuir o perfil de
-   *     servidor
+   * @throws IllegalArgumentException se o usuário não possuir o perfil de servidor
    */
   public void validarProfessor(Usuario professor) {
     boolean temRoleServidor =

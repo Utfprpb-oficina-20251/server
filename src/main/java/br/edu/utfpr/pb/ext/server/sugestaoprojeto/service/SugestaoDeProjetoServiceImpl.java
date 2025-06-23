@@ -37,11 +37,9 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   }
 
   /**
-   * Prepara a entidade SugestaoDeProjeto para persistência, definindo o usuário logado como aluno,
-   * status como AGUARDANDO e validando o professor, se informado.
+   * Prepara a entidade SugestaoDeProjeto para persistência, associando o usuário logado como aluno, definindo o status como AGUARDANDO, validando o professor informado e processando a imagem, se presente.
    *
-   * <p>Caso um professor seja especificado, valida sua existência e papel; lança
-   * EntityNotFoundException se não encontrado.
+   * Caso um professor seja especificado, valida sua existência e papel; lança EntityNotFoundException se não encontrado. Se houver imagem em formato Base64, realiza o processamento e armazenamento, atualizando o campo correspondente.
    *
    * @param entity sugestão de projeto a ser preparada para salvamento
    * @return a entidade SugestaoDeProjeto pronta para persistência
@@ -68,6 +66,14 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
     return super.preSave(entity);
   }
 
+  /**
+   * Processa e armazena a imagem associada à sugestão de projeto, caso o campo imagemUrl contenha uma string em Base64.
+   *
+   * Se a imagem for válida e puder ser decodificada, ela é salva e o campo imagemUrl é atualizado com a URL do arquivo armazenado.
+   * Lança uma ResponseStatusException com status 500 em caso de falha no processamento ou armazenamento da imagem.
+   *
+   * @param sugestao Entidade SugestaoDeProjeto que pode conter uma imagem em Base64 no campo imagemUrl.
+   */
   private void processarImagemUrl(SugestaoDeProjeto sugestao) {
     String imagemUrl = sugestao.getImagemUrl();
     if (imagemUrl == null || imagemUrl.isBlank()) {

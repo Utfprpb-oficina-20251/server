@@ -30,10 +30,10 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   private final ModelMapper modelMapper;
 
   /**
-   * Cria uma instância do controlador REST para gerenciar entidades de Projeto.
+   * Inicializa o controlador REST para gerenciamento de entidades Projeto.
    *
-   * @param projetoService serviço responsável pela lógica de negócios de projetos
-   * @param modelMapper utilitário para conversão entre entidades e DTOs
+   * @param projetoService serviço de negócios para operações com projetos
+   * @param modelMapper utilitário para conversão entre entidades Projeto e DTOs
    */
   public ProjetoController(IProjetoService projetoService, ModelMapper modelMapper) {
     super(Projeto.class, ProjetoDTO.class);
@@ -62,15 +62,12 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   }
 
   /**
-   * Cria um novo projeto a partir dos dados fornecidos e retorna os detalhes do projeto criado.
+   * Cria um novo projeto com base nos dados fornecidos e retorna os detalhes do projeto criado.
    *
-   * <p>Valida se a equipe executora contém e-mails institucionais válidos e existentes no sistema.
-   * Retorna HTTP 406 caso a lista de e-mails esteja vazia ou algum e-mail não corresponda a um
-   * usuário cadastrado.
+   * Valida se a lista de equipe executora não está vazia; caso contrário, retorna HTTP 406.
    *
    * @param dto Dados do projeto a ser criado, incluindo informações da equipe executora.
-   * @return ResponseEntity contendo o ProjetoDTO criado e status HTTP 201 em caso de sucesso, ou
-   *     status HTTP 406 em caso de erro de validação.
+   * @return ResponseEntity contendo o ProjetoDTO criado e status HTTP 201 em caso de sucesso, ou status HTTP 406 se a equipe executora estiver vazia.
    */
   @Override
   @Operation(
