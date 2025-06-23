@@ -44,7 +44,9 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
 
     Usuario aluno = usuarioService.obterUsuarioLogado();
 
-    entity.setStatus(StatusSugestao.AGUARDANDO);
+    if (entity.getId() == null) {
+      entity.setStatus(StatusSugestao.AGUARDANDO);
+    }
     entity.setAluno(aluno);
 
     if (entity.getProfessor() != null && entity.getProfessor().getId() != null) {
