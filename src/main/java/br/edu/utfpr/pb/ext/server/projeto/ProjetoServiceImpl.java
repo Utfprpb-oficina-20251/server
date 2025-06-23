@@ -1,5 +1,8 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
+import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
+import br.edu.utfpr.pb.ext.server.file.FileService;
+import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
 import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
@@ -9,7 +12,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,10 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@Slf4j
 public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implements IProjetoService {
   private final ProjetoRepository projetoRepository;
   private final ModelMapper modelMapper;
   private final UsuarioRepository usuarioRepository;
+  private final FileService fileService;
+  private final ImageUtils imageUtils;
 
   /**
    * Cria uma nova instância do serviço de projetos com o repositório fornecido.
@@ -36,10 +42,14 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   public ProjetoServiceImpl(
       ProjetoRepository projetoRepository,
       ModelMapper modelMapper,
-      UsuarioRepository usuarioRepository) {
+      UsuarioRepository usuarioRepository,
+      FileService fileService,
+      ImageUtils imageUtils) {
     this.projetoRepository = projetoRepository;
     this.modelMapper = modelMapper;
     this.usuarioRepository = usuarioRepository;
+    this.fileService = fileService;
+    this.imageUtils = imageUtils;
   }
 
   /**
@@ -53,7 +63,68 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
   @Override
-  public Projeto preSave(Projeto entity) {
+  public Projeto preSave(Projeto projeto) {
+
+    if (projeto.getId() == null) {
+      projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
+    }
+
+    atribuirResponsavel(projeto);
+    atribuirUsuariosEquipeExecutora(projeto);
+    processaImagemUrl(projeto);
+    return super.preSave(projeto);
+  }
+
+  private void processaImagemUrl(Projeto projeto) {
+    String imagemUrl = projeto.getImagemUrl();
+    if (imagemUrl == null || imagemUrl.isBlank()) {
+      return;
+    }
+
+    ImageUtils.DecodedImage decodedImage = imageUtils.validateAndDecodeBase64Image(imagemUrl);
+
+    if (decodedImage != null) {
+      try {
+        String filename =
+            "projeto-imagem." + ImageUtils.getFileExtensionFromMimeType(decodedImage.contentType());
+        FileInfoDTO fileInfo =
+            fileService.store(decodedImage.data(), decodedImage.contentType(), filename);
+        projeto.setImagemUrl(fileInfo.getUrl());
+      } catch (Exception e) {
+        log.error("Falha ao processar a imagem do projeto.", e);
+        throw new ResponseStatusException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Falha ao processar a imagem do projeto.", e);
+      }
+    }
+  }
+
+  private void atribuirUsuariosEquipeExecutora(Projeto entity) {
+    List<Usuario> entidadesUsuarioCarregadas =
+        entity.getEquipeExecutora().stream()
+            .map(
+                usuario -> {
+                  if (usuario == null) {
+                    throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Usuário inválido na requisição");
+                  }
+                  if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
+                    throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Usuário com email não informado");
+                  }
+
+                  return usuarioRepository
+                      .findByEmail(usuario.getEmail())
+                      .orElseThrow(
+                          () ->
+                              new ResponseStatusException(
+                                  HttpStatus.NOT_ACCEPTABLE,
+                                  "Usuário com email " + usuario.getEmail() + "não encontrado."));
+                })
+            .toList();
+    entity.setEquipeExecutora(entidadesUsuarioCarregadas);
+  }
+
+  private void atribuirResponsavel(Projeto entity) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.isAuthenticated()) {
       String email = authentication.getName();
@@ -67,7 +138,6 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
         entity.setResponsavel(usuarioAutenticado);
       }
     }
-    return super.preSave(entity);
   }
 
   /**
@@ -147,10 +217,9 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     // 3. Mapeia a lista de entidades para uma lista de DTOs usando o ModelMapper
     return projetosEncontrados.stream()
         .map(projeto -> modelMapper.map(projeto, ProjetoDTO.class))
-        .collect(Collectors.toList());
+        .toList();
   }
 
-  // --- NOVO MÉTODO PRIVADO PARA A LÓGICA DA CONSULTA ---
   /**
    * Cria um objeto Specification dinamicamente com base nos filtros fornecidos. A lógica que
    * estaria na classe ProjetoSpecification agora vive aqui.
@@ -201,7 +270,10 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
                 root.join("responsavel").join("curso").get("id"), filtros.idCurso()));
       }
 
-      query.distinct(true);
+      if (query != null) {
+        query.distinct(true);
+      }
+
       return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     };
   }

@@ -6,6 +6,7 @@ import br.edu.utfpr.pb.ext.server.usuario.IUsuarioService;
 import io.micrometer.core.annotation.Timed;
 import io.minio.*;
 import io.minio.messages.Item;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -92,6 +93,57 @@ public class FileService {
     } catch (Exception e) {
       log.error("Erro ao armazenar o arquivo: {}", file.getOriginalFilename(), e);
       throw new FileException("Erro ao armazenar o arquivo", e);
+    }
+  }
+
+  /**
+   * Armazena dados de um arquivo em bytes no MinIO.
+   *
+   * @param data O conteúdo do arquivo como array de bytes.
+   * @param contentType O tipo de mídia (MIME type) do arquivo.
+   * @param originalFilename O nome original do arquivo.
+   * @return Um {@link FileInfoDTO} com as informações do arquivo armazenado.
+   * @throws FileException se ocorrer um erro durante o upload.
+   */
+  @Timed(value = "file.upload.bytes", description = "Tempo de upload de arquivo a partir de bytes")
+  @PreAuthorize("isAuthenticated()")
+  public FileInfoDTO store(byte[] data, String contentType, String originalFilename) {
+    if (data == null || data.length == 0) {
+      throw new IllegalArgumentException(ARQUIVO_VAZIO);
+    }
+    if (data.length > MAX_MINIO_FILE_SIZE) {
+      throw new FileException(
+          "O arquivo excede o tamanho máximo de " + MAX_MINIO_FILE_SIZE + " bytes.");
+    }
+    if (!ALLOWED_CONTENT_TYPES.contains(contentType)) {
+      throw new FileException("Tipo de arquivo não permitido: " + contentType);
+    }
+
+    String filename = generateUniqueFilename(originalFilename);
+    try (InputStream inputStream = new ByteArrayInputStream(data)) {
+      minioClient.putObject(
+          PutObjectArgs.builder().bucket(minioConfig.getBucket()).object(filename).stream(
+                  inputStream, data.length, -1)
+              .contentType(contentType)
+              .build());
+
+      String url =
+          minioConfig.getUrl()
+              + "/"
+              + minioConfig.getBucket()
+              + "/"
+              + URLEncoder.encode(filename, StandardCharsets.UTF_8);
+
+      return FileInfoDTO.builder()
+          .fileName(filename)
+          .contentType(contentType)
+          .size(data.length)
+          .url(url)
+          .uploadDate(LocalDateTime.now())
+          .build();
+    } catch (Exception e) {
+      log.error(ERRO_CARREGAR_ARQUIVO_LOG, e.getMessage());
+      throw new FileException(ERRO_CARREGAMENTO_ARQUIVO_EXCEPTION, e);
     }
   }
 
@@ -206,13 +258,12 @@ public class FileService {
    * @param originalFilename nome original do arquivo, incluindo a extensão.
    * @return nome de arquivo único com a mesma extensão do arquivo original.
    */
-  private String generateUniqueFilename(String originalFilename) {
-    String extension = "";
-    int dotIndex = originalFilename.lastIndexOf('.');
-    if (dotIndex > 0) {
-      extension = originalFilename.substring(dotIndex);
-    }
-    return UUID.randomUUID() + extension;
+  private String generateUniqueFilename(@NotNull String originalFilename) {
+    String cleanFilename = StringUtils.cleanPath(originalFilename);
+    String extension = StringUtils.getFilenameExtension(cleanFilename);
+    String baseName = cleanFilename.replace("." + extension, "");
+    baseName = baseName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+    return baseName + "_" + System.currentTimeMillis() + "." + extension;
   }
 
   /**

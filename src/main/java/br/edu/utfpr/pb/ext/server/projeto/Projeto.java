@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import lombok.*;
+import org.hibernate.validator.constraints.URL;
 
 @Entity
 @Table(name = "tb_projeto")
@@ -33,6 +34,10 @@ public class Projeto extends BaseEntity {
   @NotNull private boolean vinculadoDisciplina;
 
   private String restricaoPublico;
+
+  @URL
+  @Column(name = "imagem_url", length = 2048)
+  private String imagemUrl;
 
   @ManyToOne
   @JoinColumn(name = "responsavel_id")

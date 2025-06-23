@@ -11,7 +11,6 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +35,7 @@ class ProjetoControllerTest {
 
   private ProjetoDTO projetoDTOEntrada;
   private Usuario usuario;
+  private Projeto projeto;
   private Projeto projetoSalvo;
 
   @BeforeEach
@@ -53,6 +53,11 @@ class ProjetoControllerTest {
     usuario.setId(1L);
     usuario.setEmail("membro@utfpr.edu.br");
     usuario.setNome("Membro Teste");
+
+    projeto = new Projeto();
+    projeto.setTitulo("Projeto Teste");
+    projeto.setEquipeExecutora(List.of(usuario));
+    projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
 
     projetoSalvo = new Projeto();
     projetoSalvo.setId(1L);
@@ -72,10 +77,7 @@ class ProjetoControllerTest {
     usuario = new Usuario();
     usuario.setEmail("batata@utfpr.edu.br");
 
-    Projeto projeto = new Projeto();
-    projeto.setTitulo("Projeto Teste");
-
-    when(usuarioRepository.findByEmail("batata@utfpr.edu.br")).thenReturn(Optional.of(usuario));
+    when(modelMapper.map(any(ProjetoDTO.class), eq(Projeto.class))).thenReturn(projeto);
     when(projetoService.save(any(Projeto.class))).thenReturn(projeto);
     when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTO);
 
@@ -86,7 +88,6 @@ class ProjetoControllerTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("Projeto Teste", response.getBody().getTitulo());
-    verify(usuarioRepository).findByEmail("batata@utfpr.edu.br");
     verify(projetoService).save(any(Projeto.class));
     verify(modelMapper).map(any(Projeto.class), eq(ProjetoDTO.class));
   }
@@ -141,8 +142,8 @@ class ProjetoControllerTest {
   @Test
   void create_deveCriarProjeto_quandoDadosSaoValidos() {
     // Arrange (Organizar)
-    when(usuarioRepository.findByEmail(anyString())).thenReturn(Optional.of(usuario));
     when(projetoService.save(any(Projeto.class))).thenReturn(projetoSalvo);
+    when(modelMapper.map(any(ProjetoDTO.class), eq(Projeto.class))).thenReturn(projetoSalvo);
     when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class)))
         .thenReturn(new ProjetoDTO()); // Retorna um DTO mockado/novo
 
@@ -152,7 +153,6 @@ class ProjetoControllerTest {
     // Assert (Verificar)
     assertNotNull(response);
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    verify(usuarioRepository, times(1)).findByEmail("membro@utfpr.edu.br");
     verify(projetoService, times(1)).save(any(Projeto.class));
     verify(modelMapper, times(1)).map(any(Projeto.class), eq(ProjetoDTO.class));
   }
@@ -176,25 +176,191 @@ class ProjetoControllerTest {
   }
 
   @Test
-  void create_deveLancarResponseStatusException_quandoEmailNaoExiste() {
-    // Arrange
-    when(usuarioRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+  void create_deveLancarResponseStatusException_quandoEquipeExecutoraENula() {
+    projetoDTOEntrada.setEquipeExecutora(null);
 
-    // Act + Assert
     ResponseStatusException exception =
         assertThrows(
             ResponseStatusException.class, () -> projetoController.create(projetoDTOEntrada));
 
     assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatusCode());
-    assertNotNull(exception.getReason());
-    assertTrue(
-        exception
-            .getReason()
-            .contains("Usuário com e-mail")); // Pode verificar o início da mensagem
+    assertEquals("A equipe executora não pode estar vazia.", exception.getReason());
+  }
 
-    // Verifica que o repositório foi consultado, mas o serviço de save nunca foi chamado
-    verify(usuarioRepository, times(1)).findByEmail("membro@utfpr.edu.br");
-    verify(projetoService, never()).save(any(Projeto.class));
+  @Test
+  void create_comImagemUrlBase64Valida_deveCriarProjetoComImagemProcessada() {
+    // Arrange
+    String base64Image =
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/epv2AAAAABJRU5ErkJggg==";
+    String finalUrl = "http://storage/projeto-imagem.png";
+
+    projetoDTOEntrada.setImagemUrl(base64Image);
+
+    Projeto projetoComImagemProcessada = new Projeto();
+    projetoComImagemProcessada.setId(1L);
+    projetoComImagemProcessada.setImagemUrl(finalUrl);
+
+    ProjetoDTO projetoDTOResponse = new ProjetoDTO();
+    projetoDTOResponse.setId(1L);
+    projetoDTOResponse.setImagemUrl(finalUrl);
+
+    when(modelMapper.map(any(ProjetoDTO.class), eq(Projeto.class))).thenReturn(projeto);
+    when(projetoService.save(any(Projeto.class))).thenReturn(projetoComImagemProcessada);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTOResponse);
+
+    // Act
+    ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);
+
+    // Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(finalUrl, response.getBody().getImagemUrl());
+    verify(projetoService).save(any(Projeto.class));
+  }
+
+  @Test
+  void create_comImagemUrlHttpValida_deveCriarProjetoSemProcessamento() {
+    // Arrange
+    String httpImageUrl = "https://example.com/image.jpg";
+
+    projetoDTOEntrada.setImagemUrl(httpImageUrl);
+
+    Projeto projetoComImagemHttp = new Projeto();
+    projetoComImagemHttp.setId(1L);
+    projetoComImagemHttp.setImagemUrl(httpImageUrl);
+
+    ProjetoDTO projetoDTOResponse = new ProjetoDTO();
+    projetoDTOResponse.setId(1L);
+    projetoDTOResponse.setImagemUrl(httpImageUrl);
+
+    when(modelMapper.map(any(ProjetoDTO.class), eq(Projeto.class))).thenReturn(projeto);
+    when(projetoService.save(any(Projeto.class))).thenReturn(projetoComImagemHttp);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(projetoDTOResponse);
+
+    // Act
+    ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);
+
+    // Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(httpImageUrl, response.getBody().getImagemUrl());
+    verify(projetoService).save(any(Projeto.class));
+  }
+
+  @Test
+  void create_comImagemUrlNula_deveCriarProjetoSemImagem() {
+    // Arrange
+    projetoDTOEntrada.setImagemUrl(null);
+
+    when(modelMapper.map(any(ProjetoDTO.class), eq(Projeto.class))).thenReturn(projeto);
+    when(projetoService.save(any(Projeto.class))).thenReturn(projetoSalvo);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(new ProjetoDTO());
+
+    // Act
+    ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);
+
+    // Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertNotNull(response.getBody());
+    verify(projetoService).save(any(Projeto.class));
+  }
+
+  @Test
+  void create_comImagemUrlVazia_deveCriarProjetoSemImagem() {
+    // Arrange
+    projetoDTOEntrada.setImagemUrl("");
+
+    when(modelMapper.map(any(ProjetoDTO.class), eq(Projeto.class))).thenReturn(projeto);
+    when(projetoService.save(any(Projeto.class))).thenReturn(projetoSalvo);
+    when(modelMapper.map(any(Projeto.class), eq(ProjetoDTO.class))).thenReturn(new ProjetoDTO());
+
+    // Act
+    ResponseEntity<ProjetoDTO> response = projetoController.create(projetoDTOEntrada);
+
+    // Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertNotNull(response.getBody());
+    verify(projetoService).save(any(Projeto.class));
+  }
+
+  @Test
+  void create_comImagemBase64Invalida_deveLancarResponseStatusException() {
+    // Arrange
+    String imagemBase64Invalida = "data:image/png;base64,invalid-base64";
+    projetoDTOEntrada.setImagemUrl(imagemBase64Invalida);
+
+    when(modelMapper.map(any(ProjetoDTO.class), eq(Projeto.class))).thenReturn(projeto);
+    when(projetoService.save(any(Projeto.class)))
+        .thenThrow(
+            new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR, "Falha ao processar a imagem do projeto."));
+
+    // Act & Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class, () -> projetoController.create(projetoDTOEntrada));
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+    assertEquals("Falha ao processar a imagem do projeto.", exception.getReason());
+    verify(projetoService).save(any(Projeto.class));
+  }
+
+  @Test
+  void update_comNovaImagemUrl_deveAtualizarProjetoComImagemProcessada() {
+    // Arrange
+    Long projetoId = 1L;
+    String novaImagemBase64 = "data:image/jpeg;base64,validBase64String";
+    String finalUrl = "http://storage/projeto-imagem.jpg";
+
+    ProjetoDTO dtoRequest = new ProjetoDTO();
+    dtoRequest.setId(projetoId);
+    dtoRequest.setTitulo("Título Atualizado");
+    dtoRequest.setImagemUrl(novaImagemBase64);
+
+    ProjetoDTO dtoResponse = new ProjetoDTO();
+    dtoResponse.setId(projetoId);
+    dtoResponse.setTitulo("Título Atualizado");
+    dtoResponse.setImagemUrl(finalUrl);
+
+    when(projetoService.atualizarProjeto(eq(projetoId), any(ProjetoDTO.class)))
+        .thenReturn(dtoResponse);
+
+    // Act
+    ResponseEntity<ProjetoDTO> response = projetoController.update(projetoId, dtoRequest);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(finalUrl, response.getBody().getImagemUrl());
+    verify(projetoService).atualizarProjeto(eq(projetoId), any(ProjetoDTO.class));
+  }
+
+  @Test
+  void update_removendoImagemUrl_deveAtualizarProjetoSemImagem() {
+    // Arrange
+    Long projetoId = 1L;
+
+    ProjetoDTO dtoRequest = new ProjetoDTO();
+    dtoRequest.setId(projetoId);
+    dtoRequest.setTitulo("Título Atualizado");
+    dtoRequest.setImagemUrl(null);
+
+    ProjetoDTO dtoResponse = new ProjetoDTO();
+    dtoResponse.setId(projetoId);
+    dtoResponse.setTitulo("Título Atualizado");
+    dtoResponse.setImagemUrl(null);
+
+    when(projetoService.atualizarProjeto(eq(projetoId), any(ProjetoDTO.class)))
+        .thenReturn(dtoResponse);
+
+    // Act
+    ResponseEntity<ProjetoDTO> response = projetoController.update(projetoId, dtoRequest);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertNull(response.getBody().getImagemUrl());
+    verify(projetoService).atualizarProjeto(eq(projetoId), any(ProjetoDTO.class));
   }
 
   @Test
@@ -339,9 +505,6 @@ class ProjetoControllerTest {
     Usuario usuarioLogado = new Usuario();
     usuarioLogado.setId(2L);
 
-    FiltroProjetoDTO filtroEspecifico =
-        new FiltroProjetoDTO(null, null, null, null, 2L, null, null);
-
     when(projetoService.buscarProjetosPorFiltro(any(FiltroProjetoDTO.class)))
         .thenReturn(Collections.emptyList());
 
@@ -362,7 +525,7 @@ class ProjetoControllerTest {
     // Arrange
     FiltroProjetoDTO filtroVazio = new FiltroProjetoDTO(null, null, null, null, null, null, null);
     List<ProjetoDTO> listaEsperada = List.of(new ProjetoDTO(), new ProjetoDTO());
-    when(projetoService.buscarProjetosPorFiltro(eq(filtroVazio))).thenReturn(listaEsperada);
+    when(projetoService.buscarProjetosPorFiltro(filtroVazio)).thenReturn(listaEsperada);
 
     // Act
     ResponseEntity<List<ProjetoDTO>> response = projetoController.buscarProjetos(filtroVazio);
@@ -372,7 +535,7 @@ class ProjetoControllerTest {
     assertNotNull(response.getBody());
     assertEquals(2, response.getBody().size());
 
-    verify(projetoService).buscarProjetosPorFiltro(eq(filtroVazio));
+    verify(projetoService).buscarProjetosPorFiltro(filtroVazio);
   }
 
   @Test
@@ -424,7 +587,7 @@ class ProjetoControllerTest {
     FiltroProjetoDTO filtroInexistente =
         new FiltroProjetoDTO("Projeto Inexistente", null, null, null, null, null, null);
 
-    when(projetoService.buscarProjetosPorFiltro(eq(filtroInexistente)))
+    when(projetoService.buscarProjetosPorFiltro(filtroInexistente))
         .thenReturn(Collections.emptyList());
 
     // Act
@@ -435,6 +598,6 @@ class ProjetoControllerTest {
     assertNotNull(response.getBody());
     assertTrue(response.getBody().isEmpty());
 
-    verify(projetoService).buscarProjetosPorFiltro(eq(filtroInexistente));
+    verify(projetoService).buscarProjetosPorFiltro(filtroInexistente);
   }
 }

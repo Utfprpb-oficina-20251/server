@@ -65,10 +65,6 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
    *     servidor
    */
   public void validarProfessor(Usuario professor) {
-    if (!professor.isAtivo()) {
-      throw new IllegalArgumentException("Professor deve estar ativo");
-    }
-
     boolean temRoleServidor =
         professor.getAuthorities().stream().anyMatch(a -> ROLE_SERVIDOR.equals(a.getAuthority()));
 

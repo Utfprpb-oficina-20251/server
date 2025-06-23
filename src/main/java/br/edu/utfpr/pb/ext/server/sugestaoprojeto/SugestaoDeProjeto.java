@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.validator.constraints.URL;
 
 @Entity
 @Table(name = "tb_sugestao_de_projeto")
@@ -32,6 +33,10 @@ public class SugestaoDeProjeto extends BaseEntity {
   @ManyToOne
   @JoinColumn(name = "professor_id")
   private Usuario professor;
+
+  @URL
+  @Column(length = 2048)
+  private String imagemUrl;
 
   @Enumerated(EnumType.STRING)
   private StatusSugestao status;

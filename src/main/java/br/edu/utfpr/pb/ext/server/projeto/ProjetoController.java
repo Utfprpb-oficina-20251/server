@@ -2,10 +2,7 @@ package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.generics.CrudController;
 import br.edu.utfpr.pb.ext.server.generics.ICrudService;
-import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
-import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
-import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,9 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
@@ -32,7 +27,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long> {
 
   private final IProjetoService projetoService;
-  private final UsuarioRepository usuarioRepository;
   private final ModelMapper modelMapper;
 
   /**
@@ -40,15 +34,10 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
    *
    * @param projetoService serviço responsável pela lógica de negócios de projetos
    * @param modelMapper utilitário para conversão entre entidades e DTOs
-   * @param usuarioRepository repositório para acesso a dados de usuários
    */
-  public ProjetoController(
-      IProjetoService projetoService,
-      ModelMapper modelMapper,
-      UsuarioRepository usuarioRepository) {
+  public ProjetoController(IProjetoService projetoService, ModelMapper modelMapper) {
     super(Projeto.class, ProjetoDTO.class);
     this.projetoService = projetoService;
-    this.usuarioRepository = usuarioRepository;
     this.modelMapper = modelMapper;
   }
 
@@ -103,34 +92,12 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
       })
   @PostMapping
   public ResponseEntity<ProjetoDTO> create(@Valid @RequestBody ProjetoDTO dto) {
-    Projeto projeto = new Projeto();
-    List<String> emails =
-        dto.getEquipeExecutora().stream().map(UsuarioProjetoDTO::getEmail).toList();
-    if (emails.isEmpty()) {
+    if (dto.getEquipeExecutora() == null || dto.getEquipeExecutora().isEmpty()) {
       throw new ResponseStatusException(
           HttpStatus.NOT_ACCEPTABLE, "A equipe executora não pode estar vazia.");
     }
-    ArrayList<Optional<Usuario>> usuarios = new ArrayList<>();
-    for (String email : emails) {
-      Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
-      if (usuario.isEmpty()) {
-        throw new ResponseStatusException(
-            HttpStatus.NOT_ACCEPTABLE, "Usuário com e-mail " + email + " não encontrado.");
-      }
-      usuarios.add(usuario);
-    }
-    projeto.setTitulo(dto.getTitulo());
-    projeto.setDescricao(dto.getDescricao());
-    projeto.setJustificativa(dto.getJustificativa());
-    projeto.setDataInicio(dto.getDataInicio());
-    projeto.setDataFim(dto.getDataFim());
-    projeto.setPublicoAlvo(dto.getPublicoAlvo());
-    projeto.setVinculadoDisciplina(dto.isVinculadoDisciplina());
-    projeto.setRestricaoPublico(dto.getRestricaoPublico());
-    projeto.setEquipeExecutora(usuarios.stream().flatMap(Optional::stream).toList());
-    projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
-    projeto.setQtdeVagas(dto.getQtdeVagas());
-    projeto.setCargaHoraria(dto.getCargaHoraria());
+
+    Projeto projeto = modelMapper.map(dto, Projeto.class);
     Projeto projetoResponse = projetoService.save(projeto);
     ProjetoDTO projetoDTO = modelMapper.map(projetoResponse, ProjetoDTO.class);
     return ResponseEntity.status(HttpStatus.CREATED).body(projetoDTO);

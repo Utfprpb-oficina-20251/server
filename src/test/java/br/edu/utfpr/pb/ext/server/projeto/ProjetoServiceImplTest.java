@@ -3,23 +3,30 @@ package br.edu.utfpr.pb.ext.server.projeto;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
+import br.edu.utfpr.pb.ext.server.file.FileService;
+import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,6 +39,8 @@ class ProjetoServiceImplTest {
   @Mock private ProjetoRepository projetoRepository;
   @Mock private ModelMapper modelMapper;
   @Mock private UsuarioRepository usuarioRepository;
+  @Mock private FileService fileService;
+  @Mock private ImageUtils imageUtils;
 
   private final Long projetoId = 1L;
   private final Long servidorId = 100L;
@@ -112,8 +121,6 @@ class ProjetoServiceImplTest {
 
   @Test
   void atualizarProjeto_quandoProjetoExiste_deveRetornarDTOAtualizado() {
-    Long projetoId = 1L;
-
     ProjetoDTO dadosParaAtualizar = new ProjetoDTO();
     dadosParaAtualizar.setTitulo("Novo Título do Projeto");
     dadosParaAtualizar.setDescricao("Nova descrição.");
@@ -336,19 +343,13 @@ class ProjetoServiceImplTest {
 
   @Test
   void preSave_quandoResponsavelNaoInformado_deveAtribuirUsuarioAutenticado() {
-    Projeto projeto = new Projeto();
-    projeto.setTitulo("Projeto Teste");
-    projeto.setDescricao("Descrição");
-    projeto.setJustificativa("Justificativa");
-    projeto.setDataInicio(new Date());
-    projeto.setPublicoAlvo("Alunos");
-    projeto.setVinculadoDisciplina(false);
-    projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
+    Projeto projeto = criaProjetoGenerico();
 
     String emailAutenticado = "user@utfpr.edu.br";
     Usuario usuarioMock = new Usuario();
     usuarioMock.setId(1L);
     usuarioMock.setEmail(emailAutenticado);
+    projeto.getEquipeExecutora().add(usuarioMock);
 
     Authentication authentication = mock(Authentication.class);
     when(authentication.isAuthenticated()).thenReturn(true);
@@ -362,7 +363,359 @@ class ProjetoServiceImplTest {
 
     assertNotNull(resultado.getResponsavel());
     assertEquals(usuarioMock, resultado.getResponsavel());
-    verify(usuarioRepository).findByEmail(emailAutenticado);
+    verify(usuarioRepository, times(2)).findByEmail(emailAutenticado);
+
+    SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  void presave_QuandoUpdateContendoIdNaoNulo_DeveDevolverProjetoSemAlteracaoDeStatus() {
+    String email = "test@utfpr.edu.br";
+    Projeto projeto = criaProjetoGenerico();
+    projeto.setId(1L);
+    projeto.setStatus(StatusProjeto.FINALIZADO);
+    Usuario usuario = Usuario.builder().email(email).build();
+    projeto.getEquipeExecutora().add(usuario);
+
+    when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(usuario));
+    Projeto resultado = projetoService.preSave(projeto);
+    assertEquals(StatusProjeto.FINALIZADO, resultado.getStatus());
+  }
+
+  @Test
+  @DisplayName("preSave não deve processar imagem quando imagemUrl for nulo")
+  void preSave_quandoImagemUrlNulo_naoDeveProcessarImagem() {
+    // Arrange
+    Projeto projeto = new Projeto();
+    projeto.setImagemUrl(null);
+    projeto.setEquipeExecutora(new ArrayList<>()); // Para evitar NPE em outros métodos
+
+    // Mock do comportamento de outros métodos chamados no preSave
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    when(authentication.isAuthenticated())
+        .thenReturn(false); // Supõe que não há usuário autenticado para simplicidade
+
+    // Act
+    projetoService.preSave(projeto);
+
+    // Assert
+    verify(imageUtils, never()).validateAndDecodeBase64Image(any());
+    verify(fileService, never()).store(any(), any(), any());
+    assertNull(projeto.getImagemUrl());
+
+    SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  @DisplayName("preSave não deve alterar imagemUrl quando for uma URL HTTP")
+  void preSave_quandoImagemUrlForHttp_naoDeveAlterarUrl() {
+    // Arrange
+    String httpUrl = "http://example.com/image.png";
+    Projeto projeto = new Projeto();
+    projeto.setImagemUrl(httpUrl);
+    projeto.setEquipeExecutora(new ArrayList<>());
+
+    when(imageUtils.validateAndDecodeBase64Image(httpUrl)).thenReturn(null);
+    // Mock do comportamento de outros métodos chamados no preSave
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    when(authentication.isAuthenticated()).thenReturn(false);
+
+    // Act
+    projetoService.preSave(projeto);
+
+    // Assert
+    verify(imageUtils, times(1)).validateAndDecodeBase64Image(httpUrl);
+    verify(fileService, never()).store(any(), any(), any());
+    assertEquals(httpUrl, projeto.getImagemUrl());
+
+    SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  @DisplayName("preSave deve lançar ResponseStatusException se o armazenamento do arquivo falhar")
+  void preSave_quandoFileServiceLancaExcecao_deveLancarResponseStatusException() {
+    // Arrange
+    String base64Image = "data:image/png;base64,valid-base64-string";
+    Projeto projeto = new Projeto();
+    projeto.setImagemUrl(base64Image);
+    projeto.setEquipeExecutora(new ArrayList<>());
+
+    byte[] imageData = new byte[] {1, 2, 3};
+    String contentType = "image/png";
+    ImageUtils.DecodedImage decodedImage = new ImageUtils.DecodedImage(imageData, contentType);
+
+    when(imageUtils.validateAndDecodeBase64Image(base64Image)).thenReturn(decodedImage);
+    when(fileService.store(any(), any(), any()))
+        .thenThrow(new RuntimeException("Erro de armazenamento"));
+
+    try (var mockedStatic = mockStatic(ImageUtils.class)) {
+      mockedStatic
+          .when(() -> ImageUtils.getFileExtensionFromMimeType(contentType))
+          .thenReturn("png");
+
+      Authentication authentication = mock(Authentication.class);
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+      when(authentication.isAuthenticated()).thenReturn(false);
+
+      // Act & Assert
+      ResponseStatusException exception =
+          assertThrows(ResponseStatusException.class, () -> projetoService.preSave(projeto));
+
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+      assertEquals("Falha ao processar a imagem do projeto.", exception.getReason());
+
+      verify(imageUtils).validateAndDecodeBase64Image(base64Image);
+      verify(fileService).store(imageData, contentType, "projeto-imagem.png");
+      mockedStatic.verify(() -> ImageUtils.getFileExtensionFromMimeType(contentType));
+    } finally {
+      SecurityContextHolder.clearContext();
+    }
+  }
+
+  @Test
+  @DisplayName("preSave não deve processar imagem quando imagemUrl for uma string vazia")
+  void preSave_quandoImagemUrlVazia_naoDeveProcessarImagem() {
+    // Arrange
+    Projeto projeto = new Projeto();
+    projeto.setImagemUrl("");
+    projeto.setEquipeExecutora(new ArrayList<>());
+
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    when(authentication.isAuthenticated()).thenReturn(false);
+
+    // Act
+    projetoService.preSave(projeto);
+
+    // Assert
+    verify(imageUtils, never()).validateAndDecodeBase64Image(anyString());
+    verify(fileService, never()).store(any(), any(), any());
+
+    assertEquals("", projeto.getImagemUrl());
+
+    SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  @DisplayName("preSave deve processar e atualizar a URL da imagem quando for um Base64 válido")
+  void preSave_quandoImagemBase64Valida_deveAtualizarUrl() {
+    // Arrange
+    String base64Image = "data:image/png;base64,valid-base64-string";
+    String finalUrl = "http://storage/projeto-imagem.png";
+    Projeto projeto = new Projeto();
+    projeto.setImagemUrl(base64Image);
+    projeto.setEquipeExecutora(new ArrayList<>());
+
+    byte[] imageData = new byte[] {1, 2, 3};
+    String contentType = "image/png";
+    ImageUtils.DecodedImage decodedImage = new ImageUtils.DecodedImage(imageData, contentType);
+    FileInfoDTO fileInfoDTO =
+        new FileInfoDTO(
+            "projeto-imagem.png",
+            "projeto-imagem.png",
+            contentType,
+            3L,
+            finalUrl,
+            LocalDateTime.now());
+
+    when(imageUtils.validateAndDecodeBase64Image(base64Image)).thenReturn(decodedImage);
+    when(fileService.store(imageData, contentType, "projeto-imagem.png")).thenReturn(fileInfoDTO);
+
+    try (var mockedStatic = mockStatic(ImageUtils.class)) {
+      mockedStatic
+          .when(() -> ImageUtils.getFileExtensionFromMimeType(contentType))
+          .thenReturn("png");
+
+      // Mock do comportamento de outros métodos chamados no preSave
+      Authentication authentication = mock(Authentication.class);
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+      when(authentication.isAuthenticated()).thenReturn(false);
+
+      // Act
+      projetoService.preSave(projeto);
+
+      // Assert
+      assertEquals(finalUrl, projeto.getImagemUrl());
+      verify(imageUtils).validateAndDecodeBase64Image(base64Image);
+      verify(fileService).store(imageData, contentType, "projeto-imagem.png");
+      mockedStatic.verify(() -> ImageUtils.getFileExtensionFromMimeType(contentType));
+    } finally {
+      SecurityContextHolder.clearContext();
+    }
+  }
+
+  @Test
+  @DisplayName("Deve lançar ResponseStatusException quando usuário da equipe for nulo")
+  void atribuirUsuariosEquipeExecutora_quandoUsuarioNulo_deveLancarExcecao() {
+    Projeto projeto = criaProjetoGenerico();
+    projeto.getEquipeExecutora().add(null);
+
+    ResponseStatusException exception =
+        assertThrows(ResponseStatusException.class, () -> projetoService.preSave(projeto));
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Usuário inválido na requisição", exception.getReason());
+  }
+
+  @ParameterizedTest
+  @DisplayName("Deve lançar ResponseStatusException quando email do usuário for inválido")
+  @NullAndEmptySource
+  @ValueSource(strings = {"   ", "\t", "\n"})
+  void atribuirUsuariosEquipeExecutora_quandoEmailInvalido_deveLancarExcecao(String email) {
+    Projeto projeto = criaProjetoGenerico();
+    Usuario usuario = new Usuario();
+    usuario.setEmail(email);
+    projeto.getEquipeExecutora().add(usuario);
+
+    ResponseStatusException exception =
+        assertThrows(ResponseStatusException.class, () -> projetoService.preSave(projeto));
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Usuário com email não informado", exception.getReason());
+  }
+
+  @Test
+  @DisplayName("Deve lançar ResponseStatusException quando usuário não for encontrado pelo email")
+  void atribuirUsuariosEquipeExecutora_quandoUsuarioNaoEncontrado_deveLancarExcecao() {
+    Projeto projeto = criaProjetoGenerico();
+    Usuario usuario = new Usuario();
+    usuario.setEmail("naoexiste@utfpr.edu.br");
+    projeto.getEquipeExecutora().add(usuario);
+
+    when(usuarioRepository.findByEmail("naoexiste@utfpr.edu.br")).thenReturn(Optional.empty());
+
+    ResponseStatusException exception =
+        assertThrows(ResponseStatusException.class, () -> projetoService.preSave(projeto));
+
+    assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatusCode());
+    assertEquals("Usuário com email naoexiste@utfpr.edu.brnão encontrado.", exception.getReason());
+  }
+
+  @Test
+  @DisplayName("Deve carregar usuários da equipe executora com sucesso")
+  void atribuirUsuariosEquipeExecutora_quandoEmailsValidos_deveCarregarUsuarios() {
+    Projeto projeto = criaProjetoGenerico();
+    Usuario usuarioInput = new Usuario();
+    usuarioInput.setEmail("user1@utfpr.edu.br");
+    projeto.getEquipeExecutora().add(usuarioInput);
+
+    Usuario usuarioCarregado = new Usuario();
+    usuarioCarregado.setId(1L);
+    usuarioCarregado.setEmail("user1@utfpr.edu.br");
+    usuarioCarregado.setNome("Usuario 1");
+
+    when(usuarioRepository.findByEmail("user1@utfpr.edu.br"))
+        .thenReturn(Optional.of(usuarioCarregado));
+
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    when(authentication.isAuthenticated()).thenReturn(false);
+
+    Projeto resultado = projetoService.preSave(projeto);
+
+    assertEquals(1, resultado.getEquipeExecutora().size());
+    assertEquals(usuarioCarregado, resultado.getEquipeExecutora().getFirst());
+    verify(usuarioRepository).findByEmail("user1@utfpr.edu.br");
+
+    SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  @DisplayName("Deve carregar múltiplos usuários da equipe executora com sucesso")
+  void atribuirUsuariosEquipeExecutora_quandoMultiplosEmailsValidos_deveCarregarTodosUsuarios() {
+    Projeto projeto = criaProjetoGenerico();
+
+    Usuario usuarioInput1 = new Usuario();
+    usuarioInput1.setEmail("user1@utfpr.edu.br");
+    Usuario usuarioInput2 = new Usuario();
+    usuarioInput2.setEmail("user2@utfpr.edu.br");
+
+    projeto.getEquipeExecutora().add(usuarioInput1);
+    projeto.getEquipeExecutora().add(usuarioInput2);
+
+    Usuario usuarioCarregado1 = new Usuario();
+    usuarioCarregado1.setId(1L);
+    usuarioCarregado1.setEmail("user1@utfpr.edu.br");
+
+    Usuario usuarioCarregado2 = new Usuario();
+    usuarioCarregado2.setId(2L);
+    usuarioCarregado2.setEmail("user2@utfpr.edu.br");
+
+    when(usuarioRepository.findByEmail("user1@utfpr.edu.br"))
+        .thenReturn(Optional.of(usuarioCarregado1));
+    when(usuarioRepository.findByEmail("user2@utfpr.edu.br"))
+        .thenReturn(Optional.of(usuarioCarregado2));
+
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    when(authentication.isAuthenticated()).thenReturn(false);
+
+    Projeto resultado = projetoService.preSave(projeto);
+
+    assertEquals(2, resultado.getEquipeExecutora().size());
+    assertTrue(resultado.getEquipeExecutora().contains(usuarioCarregado1));
+    assertTrue(resultado.getEquipeExecutora().contains(usuarioCarregado2));
+    verify(usuarioRepository).findByEmail("user1@utfpr.edu.br");
+    verify(usuarioRepository).findByEmail("user2@utfpr.edu.br");
+
+    SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  @DisplayName("Não deve alterar o responsável quando já estiver definido")
+  void atribuirResponsavel_quandoResponsavelJaDefinido_naoDeveAlterar() {
+    String emailAutenticado = "user@utfpr.edu.br";
+    Usuario responsavelExistente = new Usuario();
+    responsavelExistente.setId(10L);
+    responsavelExistente.setEmail("responsavel@utfpr.edu.br");
+
+    Projeto projeto = criaProjetoGenerico();
+    projeto.setResponsavel(responsavelExistente);
+    projeto.getEquipeExecutora().add(new Usuario());
+    projeto.getEquipeExecutora().getFirst().setEmail(emailAutenticado);
+
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    when(authentication.isAuthenticated()).thenReturn(true);
+    when(authentication.getName()).thenReturn(emailAutenticado);
+
+    Usuario usuarioAutenticado = new Usuario();
+    usuarioAutenticado.setId(1L);
+    usuarioAutenticado.setEmail(emailAutenticado);
+    when(usuarioRepository.findByEmail(emailAutenticado))
+        .thenReturn(Optional.of(usuarioAutenticado));
+
+    Projeto resultado = projetoService.preSave(projeto);
+
+    assertEquals(responsavelExistente, resultado.getResponsavel());
+    assertNotEquals(usuarioAutenticado, resultado.getResponsavel());
+
+    SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  @DisplayName("Deve lançar EntityNotFoundException quando usuário autenticado não for encontrado")
+  void atribuirResponsavel_quandoUsuarioAutenticadoNaoEncontrado_deveLancarExcecao() {
+    String emailAutenticado = "inexistente@utfpr.edu.br";
+
+    Projeto projeto = criaProjetoGenerico();
+    projeto.setResponsavel(null);
+    projeto.getEquipeExecutora().add(new Usuario());
+    projeto.getEquipeExecutora().getFirst().setEmail(emailAutenticado);
+
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    when(authentication.isAuthenticated()).thenReturn(true);
+    when(authentication.getName()).thenReturn(emailAutenticado);
+
+    when(usuarioRepository.findByEmail(emailAutenticado)).thenReturn(Optional.empty());
+
+    EntityNotFoundException exception =
+        assertThrows(EntityNotFoundException.class, () -> projetoService.preSave(projeto));
+
+    assertEquals("Usuário autenticado não encontrado", exception.getMessage());
 
     SecurityContextHolder.clearContext();
   }
@@ -495,5 +848,18 @@ class ProjetoServiceImplTest {
     assertNotNull(resultado);
     assertFalse(resultado.isEmpty());
     verify(projetoRepository).findAll(any(Specification.class));
+  }
+
+  @NotNull private static Projeto criaProjetoGenerico() {
+    Projeto projeto = new Projeto();
+    projeto.setTitulo("Projeto Teste");
+    projeto.setDescricao("Descrição");
+    projeto.setJustificativa("Justificativa");
+    projeto.setDataInicio(new Date());
+    projeto.setPublicoAlvo("Alunos");
+    projeto.setVinculadoDisciplina(false);
+    projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
+    projeto.setEquipeExecutora(new ArrayList<>());
+    return projeto;
   }
 }

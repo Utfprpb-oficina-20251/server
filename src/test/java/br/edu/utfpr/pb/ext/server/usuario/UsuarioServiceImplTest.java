@@ -86,18 +86,7 @@ class UsuarioServiceImplTest {
   }
 
   @Test
-  void validarProfessor_QuandoProfessorInativo_DeveLancarIllegalArgumentException() {
-    when(usuario.isAtivo()).thenReturn(false);
-
-    IllegalArgumentException ex =
-        assertThrows(
-            IllegalArgumentException.class, () -> usuarioService.validarProfessor(usuario));
-    assertEquals("Professor deve estar ativo", ex.getMessage());
-  }
-
-  @Test
   void validarProfessor_QuandoProfessorSemRoleServidor_DeveLancarIllegalArgumentException() {
-    when(usuario.isAtivo()).thenReturn(true);
     Set<Authority> auths = new HashSet<>();
     auths.add(Authority.builder().authority("ROLE_ALUNO").build());
     auths.add(Authority.builder().authority("ROLE_OTHER").build());
@@ -111,7 +100,6 @@ class UsuarioServiceImplTest {
 
   @Test
   void validarProfessor_QuandoProfessorValido_NaoDeveLancarExcecao() {
-    when(usuario.isAtivo()).thenReturn(true);
     Set<Authority> auths = new HashSet<>();
     auths.add(Authority.builder().authority("ROLE_SERVIDOR").build());
     auths.add(Authority.builder().authority("ROLE_OTHER").build());
@@ -122,7 +110,6 @@ class UsuarioServiceImplTest {
 
   @Test
   void validarProfessor_QuandoProfessorComApenasRoleServidor_NaoDeveLancarExcecao() {
-    when(usuario.isAtivo()).thenReturn(true);
     Set<Authority> auths = new HashSet<>();
     auths.add(Authority.builder().authority("ROLE_SERVIDOR").build());
     when(usuario.getAuthorities()).thenReturn(auths);

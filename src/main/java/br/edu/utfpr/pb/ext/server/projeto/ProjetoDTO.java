@@ -41,4 +41,10 @@ public class ProjetoDTO {
   private Long cargaHoraria;
 
   private Long qtdeVagas;
+
+  @Schema(
+      description = "Recebe Base64 DataURI ou URL Externa. Projetos salvos só retornam url",
+      example =
+          "https://example.com/image.jpg OU data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/epv2AAAAABJRU5ErkJggg==")
+  private String imagemUrl;
 }

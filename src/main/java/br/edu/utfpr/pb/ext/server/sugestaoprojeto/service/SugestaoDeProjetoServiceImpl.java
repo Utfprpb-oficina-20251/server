@@ -1,5 +1,8 @@
 package br.edu.utfpr.pb.ext.server.sugestaoprojeto.service;
 
+import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
+import br.edu.utfpr.pb.ext.server.file.FileService;
+import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
 import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.*;
 import br.edu.utfpr.pb.ext.server.usuario.*;
@@ -7,8 +10,10 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +23,8 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   private final SugestaoDeProjetoRepository repository;
   private final UsuarioRepository usuarioRepository;
   private final IUsuarioService usuarioService;
+  private final FileService fileService;
+  private final ImageUtils imageUtils;
 
   /**
    * Fornece o repositório específico para operações CRUD da entidade SugestaoDeProjeto.
@@ -56,7 +63,33 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
       usuarioService.validarProfessor(professor);
       entity.setProfessor(professor);
     }
+    processarImagemUrl(entity);
+
     return super.preSave(entity);
+  }
+
+  private void processarImagemUrl(SugestaoDeProjeto sugestao) {
+    String imagemUrl = sugestao.getImagemUrl();
+    if (imagemUrl == null || imagemUrl.isBlank()) {
+      return;
+    }
+
+    ImageUtils.DecodedImage decodedImage = imageUtils.validateAndDecodeBase64Image(imagemUrl);
+    if (decodedImage != null) {
+      try {
+        String filename =
+            "sugestao-imagem."
+                + ImageUtils.getFileExtensionFromMimeType(decodedImage.contentType());
+        FileInfoDTO fileInfo =
+            fileService.store(decodedImage.data(), decodedImage.contentType(), filename);
+        sugestao.setImagemUrl(fileInfo.getUrl());
+      } catch (Exception e) {
+        throw new ResponseStatusException(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "Falha ao processar a imagem da sugestão de projeto.",
+            e);
+      }
+    }
   }
 
   /**
