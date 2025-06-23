@@ -2,6 +2,7 @@ package br.edu.utfpr.pb.ext.server.file.img;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Base64;
@@ -10,12 +11,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class ImageUtils {
   public static final Pattern DATA_URI_PATTERN =
@@ -33,8 +36,9 @@ public class ImageUtils {
     @Override
     public String toString() {
       return "DecodedImage{"
-          + "data="
-          + Arrays.toString(data)
+          + "dataSize="
+          + (data != null ? data.length : 0)
+          + " bytes"
           + ", contentType='"
           + contentType
           + '\''
@@ -74,7 +78,7 @@ public class ImageUtils {
         return null;
       }
     } catch (IllegalArgumentException e) {
-      // URL é inválida, continua
+      // Não é uma URL válida, tratamos como possível Base64
     }
 
     Matcher matcher = DATA_URI_PATTERN.matcher(base64);
@@ -104,7 +108,8 @@ public class ImageUtils {
       }
 
       return new DecodedImage(imageBytes, mimeType);
-    } catch (Exception e) {
+    } catch (IllegalArgumentException | IOException e) {
+      log.debug("Falha ao decodificar imagem Base64: {}", e.getMessage(), e);
       return null;
     }
   }

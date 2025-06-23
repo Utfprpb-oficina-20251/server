@@ -118,7 +118,7 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
                           () ->
                               new ResponseStatusException(
                                   HttpStatus.NOT_ACCEPTABLE,
-                                  "Usuário com email " + usuario.getEmail() + "não encontrado."));
+                                  "Usuário com email " + usuario.getEmail() + " não encontrado."));
                 })
             .toList();
     entity.setEquipeExecutora(entidadesUsuarioCarregadas);

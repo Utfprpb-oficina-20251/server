@@ -110,7 +110,16 @@ class FileServiceTest {
   }
 
   @Test
-  void storeBytes_NullData_ThrowsIllegalArgumentException() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+  void storeBytes_NullData_ThrowsIllegalArgumentException()
+      throws ServerException,
+          InsufficientDataException,
+          ErrorResponseException,
+          IOException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          InvalidResponseException,
+          XmlParserException,
+          InternalException {
     // Arrange
     String contentType = MediaType.IMAGE_JPEG_VALUE;
     String originalFilename = "test-image.jpg";
@@ -126,7 +135,16 @@ class FileServiceTest {
   }
 
   @Test
-  void storeBytes_EmptyData_ThrowsIllegalArgumentException() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+  void storeBytes_EmptyData_ThrowsIllegalArgumentException()
+      throws ServerException,
+          InsufficientDataException,
+          ErrorResponseException,
+          IOException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          InvalidResponseException,
+          XmlParserException,
+          InternalException {
     // Arrange
     byte[] emptyData = new byte[0];
     String contentType = MediaType.IMAGE_JPEG_VALUE;
@@ -143,7 +161,16 @@ class FileServiceTest {
   }
 
   @Test
-  void storeBytes_DataTooLarge_ThrowsFileException() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+  void storeBytes_DataTooLarge_ThrowsFileException()
+      throws ServerException,
+          InsufficientDataException,
+          ErrorResponseException,
+          IOException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          InvalidResponseException,
+          XmlParserException,
+          InternalException {
     // Arrange
     byte[] largeData = new byte[11 * 1024 * 1024]; // 11MB, exceeding the 10MB limit
     String contentType = MediaType.IMAGE_JPEG_VALUE;
@@ -159,7 +186,16 @@ class FileServiceTest {
   }
 
   @Test
-  void storeBytes_InvalidContentType_ThrowsFileException() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+  void storeBytes_InvalidContentType_ThrowsFileException()
+      throws ServerException,
+          InsufficientDataException,
+          ErrorResponseException,
+          IOException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          InvalidResponseException,
+          XmlParserException,
+          InternalException {
     // Arrange
     String invalidContentType = "text/plain";
     String originalFilename = "test.txt";
