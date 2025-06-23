@@ -33,7 +33,8 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   private final ImageUtils imageUtils;
 
   /**
-   * Constrói o serviço de projetos inicializando os repositórios, utilitários e serviços necessários para operações de negócio relacionadas a projetos.
+   * Constrói o serviço de projetos inicializando os repositórios, utilitários e serviços
+   * necessários para operações de negócio relacionadas a projetos.
    *
    * @param projetoRepository repositório para persistência de projetos
    * @param modelMapper utilitário para conversão entre entidades e DTOs
@@ -65,9 +66,12 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
   /**
-   * Prepara a entidade Projeto antes de salvá-la, atribuindo status inicial, responsável, equipe executora e processando a imagem do projeto.
+   * Prepara a entidade Projeto antes de salvá-la, atribuindo status inicial, responsável, equipe
+   * executora e processando a imagem do projeto.
    *
-   * Se o projeto for novo, define o status como EM_ANDAMENTO. Garante que o responsável e a equipe executora estejam corretamente atribuídos e que a imagem, se fornecida em Base64, seja validada, armazenada e tenha sua URL atualizada.
+   * <p>Se o projeto for novo, define o status como EM_ANDAMENTO. Garante que o responsável e a
+   * equipe executora estejam corretamente atribuídos e que a imagem, se fornecida em Base64, seja
+   * validada, armazenada e tenha sua URL atualizada.
    *
    * @param projeto Entidade Projeto a ser preparada para persistência.
    * @return A entidade Projeto pronta para ser salva.
@@ -86,9 +90,10 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
   /**
-   * Processa a URL da imagem do projeto, validando e decodificando uma imagem em Base64, armazenando-a e atualizando a URL do projeto com o endereço do arquivo salvo.
+   * Processa a URL da imagem do projeto, validando e decodificando uma imagem em Base64,
+   * armazenando-a e atualizando a URL do projeto com o endereço do arquivo salvo.
    *
-   * Caso a imagem não seja válida ou ocorra erro no processamento, lança uma exceção HTTP 500.
+   * <p>Caso a imagem não seja válida ou ocorra erro no processamento, lança uma exceção HTTP 500.
    */
   private void processaImagemUrl(Projeto projeto) {
     String imagemUrl = projeto.getImagemUrl();
@@ -114,11 +119,13 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   }
 
   /**
-   * Valida e substitui os usuários da equipe executora do projeto pelos respectivos registros completos do banco de dados.
+   * Valida e substitui os usuários da equipe executora do projeto pelos respectivos registros
+   * completos do banco de dados.
    *
-   * Para cada usuário informado na equipe executora, verifica se o objeto e o e-mail estão presentes e válidos.
-   * Caso contrário, lança uma exceção HTTP 400. Se o usuário não for encontrado pelo e-mail, lança exceção HTTP 406.
-   * Ao final, atualiza a equipe executora do projeto com a lista de usuários carregados do banco.
+   * <p>Para cada usuário informado na equipe executora, verifica se o objeto e o e-mail estão
+   * presentes e válidos. Caso contrário, lança uma exceção HTTP 400. Se o usuário não for
+   * encontrado pelo e-mail, lança exceção HTTP 406. Ao final, atualiza a equipe executora do
+   * projeto com a lista de usuários carregados do banco.
    */
   private void atribuirUsuariosEquipeExecutora(Projeto entity) {
     List<Usuario> entidadesUsuarioCarregadas =
@@ -149,7 +156,7 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   /**
    * Define o usuário autenticado como responsável pelo projeto caso ainda não esteja definido.
    *
-   * Lança EntityNotFoundException se o usuário autenticado não for encontrado no banco de dados.
+   * <p>Lança EntityNotFoundException se o usuário autenticado não for encontrado no banco de dados.
    */
   private void atribuirResponsavel(Projeto entity) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -256,9 +263,9 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   /**
    * Cria dinamicamente uma Specification para a entidade Projeto com base nos filtros informados.
    *
-   * Os filtros suportados incluem título (busca parcial, case-insensitive), status, intervalo de datas de início,
-   * ID do responsável, ID de membro da equipe executora e ID do curso do responsável.
-   * Garante que os resultados sejam distintos.
+   * <p>Os filtros suportados incluem título (busca parcial, case-insensitive), status, intervalo de
+   * datas de início, ID do responsável, ID de membro da equipe executora e ID do curso do
+   * responsável. Garante que os resultados sejam distintos.
    *
    * @param filtros DTO contendo os critérios de filtragem dos projetos.
    * @return Specification<Projeto> configurada conforme os filtros fornecidos.

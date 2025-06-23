@@ -112,16 +112,7 @@ class FileServiceTest {
   }
 
   @Test
-  void storeBytes_NullData_ThrowsIllegalArgumentException()
-      throws ServerException,
-          InsufficientDataException,
-          ErrorResponseException,
-          IOException,
-          NoSuchAlgorithmException,
-          InvalidKeyException,
-          InvalidResponseException,
-          XmlParserException,
-          InternalException {
+  void storeBytes_NullData_ThrowsIllegalArgumentException() throws Exception {
     // Arrange
     String contentType = MediaType.IMAGE_JPEG_VALUE;
     String originalFilename = "test-image.jpg";
@@ -137,16 +128,7 @@ class FileServiceTest {
   }
 
   @Test
-  void storeBytes_EmptyData_ThrowsIllegalArgumentException()
-      throws ServerException,
-          InsufficientDataException,
-          ErrorResponseException,
-          IOException,
-          NoSuchAlgorithmException,
-          InvalidKeyException,
-          InvalidResponseException,
-          XmlParserException,
-          InternalException {
+  void storeBytes_EmptyData_ThrowsIllegalArgumentException() throws Exception {
     // Arrange
     byte[] emptyData = new byte[0];
     String contentType = MediaType.IMAGE_JPEG_VALUE;

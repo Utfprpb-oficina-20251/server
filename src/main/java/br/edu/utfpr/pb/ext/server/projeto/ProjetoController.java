@@ -64,10 +64,11 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   /**
    * Cria um novo projeto com base nos dados fornecidos e retorna os detalhes do projeto criado.
    *
-   * Valida se a lista de equipe executora não está vazia; caso contrário, retorna HTTP 406.
+   * <p>Valida se a lista de equipe executora não está vazia; caso contrário, retorna HTTP 406.
    *
    * @param dto Dados do projeto a ser criado, incluindo informações da equipe executora.
-   * @return ResponseEntity contendo o ProjetoDTO criado e status HTTP 201 em caso de sucesso, ou status HTTP 406 se a equipe executora estiver vazia.
+   * @return ResponseEntity contendo o ProjetoDTO criado e status HTTP 201 em caso de sucesso, ou
+   *     status HTTP 406 se a equipe executora estiver vazia.
    */
   @Override
   @Operation(

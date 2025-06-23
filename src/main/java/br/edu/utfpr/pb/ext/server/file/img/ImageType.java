@@ -26,7 +26,8 @@ public enum ImageType {
    * Verifica se o tipo MIME fornecido é suportado por algum dos formatos de imagem definidos.
    *
    * @param mimeType o tipo MIME a ser verificado
-   * @return {@code true} se o tipo MIME corresponder a um dos formatos suportados; {@code false} caso contrário ou se {@code mimeType} for {@code null}
+   * @return {@code true} se o tipo MIME corresponder a um dos formatos suportados; {@code false}
+   *     caso contrário ou se {@code mimeType} for {@code null}
    */
   public static boolean isSupported(String mimeType) {
     if (mimeType == null) {

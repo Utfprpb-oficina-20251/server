@@ -53,12 +53,16 @@ public class FileService {
   }
 
   /**
-   * Realiza o upload de um arquivo recebido via multipart para o armazenamento MinIO após validação.
+   * Realiza o upload de um arquivo recebido via multipart para o armazenamento MinIO após
+   * validação.
    *
-   * Valida o arquivo quanto ao tamanho máximo, tipo de conteúdo permitido e segurança do nome. Gera um nome único preservando a extensão original, faz o upload para o bucket configurado e retorna informações detalhadas do arquivo armazenado.
+   * <p>Valida o arquivo quanto ao tamanho máximo, tipo de conteúdo permitido e segurança do nome.
+   * Gera um nome único preservando a extensão original, faz o upload para o bucket configurado e
+   * retorna informações detalhadas do arquivo armazenado.
    *
    * @param file Arquivo multipart a ser enviado.
-   * @return Objeto com informações do arquivo armazenado, incluindo nome gerado, nome original, tipo, tamanho, URL de acesso e data de upload.
+   * @return Objeto com informações do arquivo armazenado, incluindo nome gerado, nome original,
+   *     tipo, tamanho, URL de acesso e data de upload.
    * @throws IllegalArgumentException Se o arquivo estiver vazio ou inválido.
    * @throws FileException Em caso de falha no armazenamento do arquivo.
    */
@@ -99,8 +103,10 @@ public class FileService {
    * @param data Conteúdo do arquivo em bytes.
    * @param contentType Tipo MIME do arquivo.
    * @param originalFilename Nome original do arquivo.
-   * @return Um {@link FileInfoDTO} com informações do arquivo armazenado, incluindo nome, tipo, tamanho, URL de acesso e data de upload.
-   * @throws FileException Se ocorrer erro durante o armazenamento ou se o arquivo não atender às validações.
+   * @return Um {@link FileInfoDTO} com informações do arquivo armazenado, incluindo nome, tipo,
+   *     tamanho, URL de acesso e data de upload.
+   * @throws FileException Se ocorrer erro durante o armazenamento ou se o arquivo não atender às
+   *     validações.
    */
   @Timed(value = "file.upload.bytes", description = "Tempo de upload de arquivo a partir de bytes")
   @PreAuthorize("isAuthenticated()")
@@ -250,7 +256,8 @@ public class FileService {
   }
 
   /**
-   * Gera um nome de arquivo único sanitizando o nome original, substituindo caracteres inválidos e adicionando um timestamp, preservando a extensão original.
+   * Gera um nome de arquivo único sanitizando o nome original, substituindo caracteres inválidos e
+   * adicionando um timestamp, preservando a extensão original.
    *
    * @param originalFilename nome original do arquivo, incluindo a extensão.
    * @return nome de arquivo único com a mesma extensão do arquivo original.

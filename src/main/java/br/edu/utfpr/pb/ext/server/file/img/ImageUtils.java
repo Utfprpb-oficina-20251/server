@@ -34,7 +34,8 @@ public class ImageUtils {
 
   public record DecodedImage(byte[] data, String contentType) {
     /**
-     * Retorna uma representação em texto do objeto DecodedImage, incluindo o tamanho dos dados em bytes e o tipo de conteúdo.
+     * Retorna uma representação em texto do objeto DecodedImage, incluindo o tamanho dos dados em
+     * bytes e o tipo de conteúdo.
      *
      * @return uma string descritiva do DecodedImage
      */
@@ -51,10 +52,12 @@ public class ImageUtils {
     }
 
     /**
-     * Compara este objeto DecodedImage com outro para verificar igualdade baseada nos dados da imagem e no tipo de conteúdo.
+     * Compara este objeto DecodedImage com outro para verificar igualdade baseada nos dados da
+     * imagem e no tipo de conteúdo.
      *
      * @param o o objeto a ser comparado com este DecodedImage
-     * @return true se ambos os objetos possuem os mesmos dados e tipo de conteúdo; caso contrário, false
+     * @return true se ambos os objetos possuem os mesmos dados e tipo de conteúdo; caso contrário,
+     *     false
      */
     @Override
     public boolean equals(Object o) {
@@ -71,7 +74,8 @@ public class ImageUtils {
     }
 
     /**
-     * Gera um código hash para o objeto DecodedImage com base nos dados da imagem e no tipo de conteúdo.
+     * Gera um código hash para o objeto DecodedImage com base nos dados da imagem e no tipo de
+     * conteúdo.
      *
      * @return o código hash calculado.
      */
@@ -82,14 +86,17 @@ public class ImageUtils {
   }
 
   /**
-   * Valida e decodifica uma string de imagem em Base64, retornando um objeto {@code DecodedImage} se a imagem for suportada e válida.
+   * Valida e decodifica uma string de imagem em Base64, retornando um objeto {@code DecodedImage}
+   * se a imagem for suportada e válida.
    *
-   * A função rejeita entradas nulas, vazias ou URLs HTTP/HTTPS. Aceita tanto strings em formato data URI quanto Base64 puro.
-   * Decodifica a imagem, verifica o tamanho máximo permitido, detecta o tipo MIME e valida se é suportado.
-   * Retorna {@code null} caso a validação falhe em qualquer etapa.
+   * <p>A função rejeita entradas nulas, vazias ou URLs HTTP/HTTPS. Aceita tanto strings em formato
+   * data URI quanto Base64 puro. Decodifica a imagem, verifica o tamanho máximo permitido, detecta
+   * o tipo MIME e valida se é suportado. Retorna {@code null} caso a validação falhe em qualquer
+   * etapa.
    *
    * @param base64 string contendo a imagem em Base64 ou data URI.
-   * @return um {@code DecodedImage} com os bytes e o tipo MIME da imagem, ou {@code null} se inválida ou não suportada.
+   * @return um {@code DecodedImage} com os bytes e o tipo MIME da imagem, ou {@code null} se
+   *     inválida ou não suportada.
    */
   public DecodedImage validateAndDecodeBase64Image(String base64) {
     if (base64 == null || base64.isBlank()) {
@@ -153,7 +160,8 @@ public class ImageUtils {
   /**
    * Retorna a extensão de arquivo correspondente ao MIME type fornecido.
    *
-   * Se o MIME type for nulo ou não corresponder a nenhum tipo suportado, retorna a extensão padrão para JPEG.
+   * <p>Se o MIME type for nulo ou não corresponder a nenhum tipo suportado, retorna a extensão
+   * padrão para JPEG.
    *
    * @param mimeType o tipo MIME da imagem
    * @return a extensão de arquivo associada ao tipo MIME, ou "jpg" se não reconhecido
