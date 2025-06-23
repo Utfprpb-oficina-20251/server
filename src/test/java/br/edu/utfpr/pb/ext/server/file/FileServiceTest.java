@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.file;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -9,8 +10,14 @@ import br.edu.utfpr.pb.ext.server.file.exception.FileException;
 import br.edu.utfpr.pb.ext.server.usuario.IUsuarioService;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import io.minio.*;
+import io.minio.errors.*;
 import io.minio.messages.Item;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,6 +84,255 @@ class FileServiceTest {
     RuntimeException ex =
         assertThrows(IllegalArgumentException.class, () -> fileService.store(emptyFile));
     assertEquals(FileService.ARQUIVO_VAZIO, ex.getMessage());
+  }
+
+  @Test
+  void storeBytes_ValidData_ReturnsFileInfo() throws Exception {
+    // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
+    when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
+
+    String contentType = MediaType.IMAGE_JPEG_VALUE;
+    String originalFilename = "test-image.jpg";
+
+    ObjectWriteResponse response = mock(ObjectWriteResponse.class);
+    when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(response);
+
+    // Act
+    FileInfoDTO result = fileService.store(TEST_BYTES, contentType, originalFilename);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(contentType, result.getContentType());
+    assertEquals(TEST_BYTES.length, result.getSize());
+    assertTrue(result.getUrl().contains(result.getFileName()));
+    assertTrue(result.getUrl().startsWith(TEST_BASE_URL));
+    assertNotNull(result.getUploadDate());
+    verify(minioClient).putObject(any(PutObjectArgs.class));
+  }
+
+  @Test
+  void storeBytes_NullData_ThrowsIllegalArgumentException() throws Exception {
+    // Arrange
+    String contentType = MediaType.IMAGE_JPEG_VALUE;
+    String originalFilename = "test-image.jpg";
+
+    // Act & Assert
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> fileService.store(null, contentType, originalFilename));
+
+    assertEquals(FileService.ARQUIVO_VAZIO, exception.getMessage());
+    verify(minioClient, never()).putObject(any(PutObjectArgs.class));
+  }
+
+  @Test
+  void storeBytes_EmptyData_ThrowsIllegalArgumentException() throws Exception {
+    // Arrange
+    byte[] emptyData = new byte[0];
+    String contentType = MediaType.IMAGE_JPEG_VALUE;
+    String originalFilename = "test-image.jpg";
+
+    // Act & Assert
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> fileService.store(emptyData, contentType, originalFilename));
+
+    assertEquals(FileService.ARQUIVO_VAZIO, exception.getMessage());
+    verify(minioClient, never()).putObject(any(PutObjectArgs.class));
+  }
+
+  @Test
+  void storeBytes_DataTooLarge_ThrowsFileException()
+      throws ServerException,
+          InsufficientDataException,
+          ErrorResponseException,
+          IOException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          InvalidResponseException,
+          XmlParserException,
+          InternalException {
+    // Arrange
+    byte[] largeData = new byte[11 * 1024 * 1024]; // 11MB, exceeding the 10MB limit
+    String contentType = MediaType.IMAGE_JPEG_VALUE;
+    String originalFilename = "large-image.jpg";
+
+    // Act & Assert
+    FileException exception =
+        assertThrows(
+            FileException.class, () -> fileService.store(largeData, contentType, originalFilename));
+
+    assertTrue(exception.getMessage().contains("O arquivo excede o tamanho máximo"));
+    verify(minioClient, never()).putObject(any(PutObjectArgs.class));
+  }
+
+  @Test
+  void storeBytes_InvalidContentType_ThrowsFileException()
+      throws ServerException,
+          InsufficientDataException,
+          ErrorResponseException,
+          IOException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          InvalidResponseException,
+          XmlParserException,
+          InternalException {
+    // Arrange
+    String invalidContentType = "text/plain";
+    String originalFilename = "test.txt";
+
+    // Act & Assert
+    FileException exception =
+        assertThrows(
+            FileException.class,
+            () -> fileService.store(TEST_BYTES, invalidContentType, originalFilename));
+
+    assertEquals("Tipo de arquivo não permitido: " + invalidContentType, exception.getMessage());
+    verify(minioClient, never()).putObject(any(PutObjectArgs.class));
+  }
+
+  @Test
+  void storeBytes_ValidPngImage_ReturnsFileInfo() throws Exception {
+    // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
+    when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
+
+    String contentType = MediaType.IMAGE_PNG_VALUE;
+    String originalFilename = "test-image.png";
+
+    ObjectWriteResponse response = mock(ObjectWriteResponse.class);
+    when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(response);
+
+    // Act
+    FileInfoDTO result = fileService.store(TEST_BYTES, contentType, originalFilename);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(contentType, result.getContentType());
+    assertEquals(TEST_BYTES.length, result.getSize());
+    assertTrue(result.getUrl().contains(result.getFileName()));
+    verify(minioClient).putObject(any(PutObjectArgs.class));
+  }
+
+  @Test
+  void storeBytes_ValidPdfFile_ReturnsFileInfo() throws Exception {
+    // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
+    when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
+
+    String contentType = MediaType.APPLICATION_PDF_VALUE;
+    String originalFilename = "document.pdf";
+
+    ObjectWriteResponse response = mock(ObjectWriteResponse.class);
+    when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(response);
+
+    // Act
+    FileInfoDTO result = fileService.store(TEST_BYTES, contentType, originalFilename);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(contentType, result.getContentType());
+    assertEquals(TEST_BYTES.length, result.getSize());
+    assertTrue(result.getUrl().contains(result.getFileName()));
+    verify(minioClient).putObject(any(PutObjectArgs.class));
+  }
+
+  @Test
+  void storeBytes_MinioException_ThrowsFileException() throws Exception {
+    // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
+
+    String contentType = MediaType.IMAGE_JPEG_VALUE;
+    String originalFilename = "test-image.jpg";
+
+    when(minioClient.putObject(any(PutObjectArgs.class)))
+        .thenThrow(new RuntimeException("MinIO connection error"));
+
+    // Act & Assert
+    FileException exception =
+        assertThrows(
+            FileException.class,
+            () -> fileService.store(TEST_BYTES, contentType, originalFilename));
+
+    assertEquals(FileService.ERRO_CARREGAMENTO_ARQUIVO_EXCEPTION, exception.getMessage());
+    verify(minioClient).putObject(any(PutObjectArgs.class));
+  }
+
+  @Test
+  void storeBytes_GeneratesUniqueFilename() throws Exception {
+    // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
+    when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
+
+    String contentType = MediaType.IMAGE_JPEG_VALUE;
+    String originalFilename = "test-image.jpg";
+
+    ObjectWriteResponse response = mock(ObjectWriteResponse.class);
+    when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(response);
+
+    // Act
+    FileInfoDTO result1 = fileService.store(TEST_BYTES, contentType, originalFilename);
+    FileInfoDTO result2 = fileService.store(TEST_BYTES, contentType, originalFilename);
+
+    // Assert
+    assertNotNull(result1.getFileName());
+    await().atLeast(Duration.ofMillis(1));
+    assertNotNull(result2.getFileName());
+    assertNotEquals(result1.getFileName(), result2.getFileName());
+    assertTrue(result1.getFileName().contains(".jpg"));
+    assertTrue(result2.getFileName().contains(".jpg"));
+  }
+
+  @Test
+  void storeBytes_GeneratesCorrectStructure() throws Exception {
+    // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
+    when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
+
+    String contentType = MediaType.IMAGE_JPEG_VALUE;
+    String originalFilename = "test-image.jpg";
+
+    ObjectWriteResponse response = mock(ObjectWriteResponse.class);
+    when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(response);
+
+    // Act
+    FileInfoDTO result = fileService.store(TEST_BYTES, contentType, originalFilename);
+
+    // Assert
+    assertNotNull(result.getUrl());
+    // The URL should contain the encoded filename, but since generateUniqueFilename creates a UUID,
+    // we just verify the URL structure
+    assertTrue(result.getUrl().startsWith(TEST_BASE_URL + "/" + BUCKET_NAME + "/"));
+    assertTrue(result.getUrl().contains(".jpg"));
+    assertTrue(result.getUrl().matches("^https?://.*"));
+  }
+
+  @Test
+  void storeBytes_SetsCorrectUploadDate() throws Exception {
+    // Arrange
+    when(minioConfig.getBucket()).thenReturn(BUCKET_NAME);
+    when(minioConfig.getUrl()).thenReturn(TEST_BASE_URL);
+
+    String contentType = MediaType.IMAGE_JPEG_VALUE;
+    String originalFilename = "test-image.jpg";
+
+    ObjectWriteResponse response = mock(ObjectWriteResponse.class);
+    when(minioClient.putObject(any(PutObjectArgs.class))).thenReturn(response);
+
+    LocalDateTime beforeUpload = LocalDateTime.now().minusSeconds(1);
+
+    // Act
+    FileInfoDTO result = fileService.store(TEST_BYTES, contentType, originalFilename);
+
+    LocalDateTime afterUpload = LocalDateTime.now().plusSeconds(1);
+
+    // Assert
+    assertNotNull(result.getUploadDate());
+    assertTrue(result.getUploadDate().isAfter(beforeUpload));
+    assertTrue(result.getUploadDate().isBefore(afterUpload));
   }
 
   @Test

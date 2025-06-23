@@ -3,6 +3,9 @@ package br.edu.utfpr.pb.ext.server.sugestaoprojeto.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
+import br.edu.utfpr.pb.ext.server.file.FileService;
+import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.*;
 import br.edu.utfpr.pb.ext.server.usuario.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,10 +16,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class SugestaoDeProjetoServiceImplTest {
@@ -26,6 +34,10 @@ class SugestaoDeProjetoServiceImplTest {
   @Mock private UsuarioRepository usuarioRepository;
 
   @Mock private IUsuarioService usuarioService;
+
+  @Mock private FileService fileService;
+
+  @Mock private ImageUtils imageUtils;
 
   @InjectMocks private SugestaoDeProjetoServiceImpl service;
 
@@ -96,6 +108,109 @@ class SugestaoDeProjetoServiceImplTest {
     verify(usuarioService).obterUsuarioLogado();
     verify(usuarioRepository).findById(professor.getId());
     verify(usuarioService, never()).validarProfessor(any());
+  }
+
+  @ParameterizedTest
+  @DisplayName("processarImagemUrl não deve processar quando imagemUrl for inválida")
+  @NullAndEmptySource
+  @ValueSource(strings = {"   ", "\t", "\n"})
+  void processarImagemUrl_quandoImagemUrlInvalida_naoDeveProcessar(String imagemUrl) {
+    sugestao.setImagemUrl(imagemUrl);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
+    sugestao.setProfessor(professor);
+    when(usuarioRepository.findById(professor.getId())).thenReturn(Optional.of(professor));
+
+    service.preSave(sugestao);
+
+    verify(imageUtils, never()).validateAndDecodeBase64Image(any());
+    verify(fileService, never()).store(any(), any(), any());
+    assertEquals(imagemUrl, sugestao.getImagemUrl());
+  }
+
+  @Test
+  @DisplayName("processarImagemUrl não deve processar quando decodedImage for null")
+  void processarImagemUrl_quandoDecodedImageNull_naoDeveProcessar() {
+    String imagemUrl = "http://example.com/image.jpg";
+    sugestao.setImagemUrl(imagemUrl);
+    sugestao.setProfessor(professor);
+    when(usuarioRepository.findById(professor.getId())).thenReturn(Optional.of(professor));
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
+    when(imageUtils.validateAndDecodeBase64Image(imagemUrl)).thenReturn(null);
+
+    service.preSave(sugestao);
+
+    verify(imageUtils).validateAndDecodeBase64Image(imagemUrl);
+    verify(fileService, never()).store(any(), any(), any());
+    assertEquals(imagemUrl, sugestao.getImagemUrl());
+  }
+
+  @Test
+  @DisplayName("processarImagemUrl deve processar e atualizar URL quando decodedImage for válida")
+  void processarImagemUrl_quandoDecodedImageValida_deveProcessarEAtualizarUrl() {
+    String base64Image = "data:image/png;base64,valid-base64-string";
+    String finalUrl = "http://storage/sugestao-imagem.png";
+    byte[] imageData = new byte[] {1, 2, 3};
+    String contentType = "image/png";
+
+    sugestao.setProfessor(professor);
+    when(usuarioRepository.findById(professor.getId())).thenReturn(Optional.of(professor));
+
+    sugestao.setImagemUrl(base64Image);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
+
+    ImageUtils.DecodedImage decodedImage = new ImageUtils.DecodedImage(imageData, contentType);
+    when(imageUtils.validateAndDecodeBase64Image(base64Image)).thenReturn(decodedImage);
+
+    FileInfoDTO fileInfoDTO = mock(FileInfoDTO.class);
+    when(fileInfoDTO.getUrl()).thenReturn(finalUrl);
+    when(fileService.store(imageData, contentType, "sugestao-imagem.png")).thenReturn(fileInfoDTO);
+
+    try (var mockedStatic = mockStatic(ImageUtils.class)) {
+      mockedStatic
+          .when(() -> ImageUtils.getFileExtensionFromMimeType(contentType))
+          .thenReturn("png");
+
+      service.preSave(sugestao);
+
+      assertEquals(finalUrl, sugestao.getImagemUrl());
+      verify(imageUtils).validateAndDecodeBase64Image(base64Image);
+      verify(fileService).store(imageData, contentType, "sugestao-imagem.png");
+      mockedStatic.verify(() -> ImageUtils.getFileExtensionFromMimeType(contentType));
+    }
+  }
+
+  @Test
+  @DisplayName("processarImagemUrl deve lançar ResponseStatusException quando armazenamento falhar")
+  void processarImagemUrl_quandoArmazenamentoFalhar_deveLancarResponseStatusException() {
+    String base64Image = "data:image/png;base64,valid-base64-string";
+    byte[] imageData = new byte[] {1, 2, 3};
+    String contentType = "image/png";
+
+    when(usuarioRepository.findById(professor.getId())).thenReturn(Optional.of(professor));
+    sugestao.setProfessor(professor);
+
+    sugestao.setImagemUrl(base64Image);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
+
+    ImageUtils.DecodedImage decodedImage = new ImageUtils.DecodedImage(imageData, contentType);
+    when(imageUtils.validateAndDecodeBase64Image(base64Image)).thenReturn(decodedImage);
+    when(fileService.store(any(), any(), any()))
+        .thenThrow(new RuntimeException("Erro de armazenamento"));
+
+    try (var mockedStatic = mockStatic(ImageUtils.class)) {
+      mockedStatic
+          .when(() -> ImageUtils.getFileExtensionFromMimeType(contentType))
+          .thenReturn("png");
+
+      ResponseStatusException exception =
+          assertThrows(ResponseStatusException.class, () -> service.preSave(sugestao));
+
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+      assertEquals("Falha ao processar a imagem da sugestão de projeto.", exception.getReason());
+      verify(imageUtils).validateAndDecodeBase64Image(base64Image);
+      verify(fileService).store(imageData, contentType, "sugestao-imagem.png");
+      mockedStatic.verify(() -> ImageUtils.getFileExtensionFromMimeType(contentType));
+    }
   }
 
   @Test

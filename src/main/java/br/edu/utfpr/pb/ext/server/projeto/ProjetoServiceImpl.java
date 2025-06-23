@@ -1,5 +1,8 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
+import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
+import br.edu.utfpr.pb.ext.server.file.FileService;
+import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
 import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
@@ -9,7 +12,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,39 +24,141 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@Slf4j
 public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implements IProjetoService {
   private final ProjetoRepository projetoRepository;
   private final ModelMapper modelMapper;
   private final UsuarioRepository usuarioRepository;
+  private final FileService fileService;
+  private final ImageUtils imageUtils;
 
   /**
-   * Cria uma nova instância do serviço de projetos com o repositório fornecido.
+   * Constrói o serviço de projetos inicializando os repositórios, utilitários e serviços
+   * necessários para operações de negócio relacionadas a projetos.
    *
-   * @param projetoRepository repositório utilizado para operações de persistência de projetos
-   * @param modelMapper mapper para conversão entre objetos
+   * @param projetoRepository repositório para persistência de projetos
+   * @param modelMapper utilitário para conversão entre entidades e DTOs
    * @param usuarioRepository repositório para operações com usuários
+   * @param fileService serviço para armazenamento de arquivos
+   * @param imageUtils utilitário para validação e processamento de imagens
    */
   public ProjetoServiceImpl(
       ProjetoRepository projetoRepository,
       ModelMapper modelMapper,
-      UsuarioRepository usuarioRepository) {
+      UsuarioRepository usuarioRepository,
+      FileService fileService,
+      ImageUtils imageUtils) {
     this.projetoRepository = projetoRepository;
     this.modelMapper = modelMapper;
     this.usuarioRepository = usuarioRepository;
+    this.fileService = fileService;
+    this.imageUtils = imageUtils;
   }
 
   /**
-   * Retorna o repositório JPA utilizado para operações CRUD com a entidade Projeto.
+   * Retorna o repositório JPA responsável pelas operações CRUD da entidade Projeto.
    *
-   * @return o repositório ProjetoRepository associado à entidade Projeto
+   * @return o ProjetoRepository utilizado para persistência de Projetos
    */
   @Override
   protected JpaRepository<Projeto, Long> getRepository() {
     return projetoRepository;
   }
 
+  /**
+   * Prepara a entidade Projeto antes de salvá-la, atribuindo status inicial, responsável, equipe
+   * executora e processando a imagem do projeto.
+   *
+   * <p>Se o projeto for novo, define o status como EM_ANDAMENTO. Garante que o responsável e a
+   * equipe executora estejam corretamente atribuídos e que a imagem, se fornecida em Base64, seja
+   * validada, armazenada e tenha sua URL atualizada.
+   *
+   * @param projeto Entidade Projeto a ser preparada para persistência.
+   * @return A entidade Projeto pronta para ser salva.
+   */
   @Override
-  public Projeto preSave(Projeto entity) {
+  public Projeto preSave(Projeto projeto) {
+
+    if (projeto.getId() == null) {
+      projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
+    }
+
+    atribuirResponsavel(projeto);
+    atribuirUsuariosEquipeExecutora(projeto);
+    processaImagemUrl(projeto);
+    return super.preSave(projeto);
+  }
+
+  /**
+   * Processa a URL da imagem do projeto, validando e decodificando uma imagem em Base64,
+   * armazenando-a e atualizando a URL do projeto com o endereço do arquivo salvo.
+   *
+   * <p>Caso a imagem não seja válida ou ocorra erro no processamento, lança uma exceção HTTP 500.
+   */
+  private void processaImagemUrl(Projeto projeto) {
+    String imagemUrl = projeto.getImagemUrl();
+    if (imagemUrl == null || imagemUrl.isBlank()) {
+      return;
+    }
+
+    ImageUtils.DecodedImage decodedImage = imageUtils.validateAndDecodeBase64Image(imagemUrl);
+
+    if (decodedImage != null) {
+      try {
+        String filename =
+            "projeto-imagem." + ImageUtils.getFileExtensionFromMimeType(decodedImage.contentType());
+        FileInfoDTO fileInfo =
+            fileService.store(decodedImage.data(), decodedImage.contentType(), filename);
+        projeto.setImagemUrl(fileInfo.getUrl());
+      } catch (Exception e) {
+        log.error("Falha ao processar a imagem do projeto.", e);
+        throw new ResponseStatusException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Falha ao processar a imagem do projeto.", e);
+      }
+    }
+  }
+
+  /**
+   * Valida e substitui os usuários da equipe executora do projeto pelos respectivos registros
+   * completos do banco de dados.
+   *
+   * <p>Para cada usuário informado na equipe executora, verifica se o objeto e o e-mail estão
+   * presentes e válidos. Caso contrário, lança uma exceção HTTP 400. Se o usuário não for
+   * encontrado pelo e-mail, lança exceção HTTP 406. Ao final, atualiza a equipe executora do
+   * projeto com a lista de usuários carregados do banco.
+   */
+  private void atribuirUsuariosEquipeExecutora(Projeto entity) {
+    List<Usuario> entidadesUsuarioCarregadas =
+        entity.getEquipeExecutora().stream()
+            .map(
+                usuario -> {
+                  if (usuario == null) {
+                    throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Usuário inválido na requisição");
+                  }
+                  if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
+                    throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Usuário com email não informado");
+                  }
+
+                  return usuarioRepository
+                      .findByEmail(usuario.getEmail())
+                      .orElseThrow(
+                          () ->
+                              new ResponseStatusException(
+                                  HttpStatus.NOT_ACCEPTABLE,
+                                  "Usuário com email " + usuario.getEmail() + " não encontrado."));
+                })
+            .toList();
+    entity.setEquipeExecutora(entidadesUsuarioCarregadas);
+  }
+
+  /**
+   * Define o usuário autenticado como responsável pelo projeto caso ainda não esteja definido.
+   *
+   * <p>Lança EntityNotFoundException se o usuário autenticado não for encontrado no banco de dados.
+   */
+  private void atribuirResponsavel(Projeto entity) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.isAuthenticated()) {
       String email = authentication.getName();
@@ -67,7 +172,6 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
         entity.setResponsavel(usuarioAutenticado);
       }
     }
-    return super.preSave(entity);
   }
 
   /**
@@ -135,6 +239,12 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     return modelMapper.map(projetoAtualizado, ProjetoDTO.class);
   }
 
+  /**
+   * Busca projetos aplicando filtros dinâmicos e retorna a lista de resultados como DTOs.
+   *
+   * @param filtros critérios de filtragem para a busca dos projetos
+   * @return lista de projetos encontrados convertidos para DTOs
+   */
   @Override
   @Transactional(readOnly = true)
   public List<ProjetoDTO> buscarProjetosPorFiltro(
@@ -147,16 +257,18 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     // 3. Mapeia a lista de entidades para uma lista de DTOs usando o ModelMapper
     return projetosEncontrados.stream()
         .map(projeto -> modelMapper.map(projeto, ProjetoDTO.class))
-        .collect(Collectors.toList());
+        .toList();
   }
 
-  // --- NOVO MÉTODO PRIVADO PARA A LÓGICA DA CONSULTA ---
   /**
-   * Cria um objeto Specification dinamicamente com base nos filtros fornecidos. A lógica que
-   * estaria na classe ProjetoSpecification agora vive aqui.
+   * Cria dinamicamente uma Specification para a entidade Projeto com base nos filtros informados.
    *
-   * @param filtros DTO com os critérios de busca.
-   * @return Um objeto Specification<Projeto> pronto para ser usado na consulta.
+   * <p>Os filtros suportados incluem título (busca parcial, case-insensitive), status, intervalo de
+   * datas de início, ID do responsável, ID de membro da equipe executora e ID do curso do
+   * responsável. Garante que os resultados sejam distintos.
+   *
+   * @param filtros DTO contendo os critérios de filtragem dos projetos.
+   * @return Specification<Projeto> configurada conforme os filtros fornecidos.
    */
   private Specification<Projeto> criarSpecificationComFiltros(FiltroProjetoDTO filtros) {
     return (root, query, criteriaBuilder) -> {
@@ -201,7 +313,10 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
                 root.join("responsavel").join("curso").get("id"), filtros.idCurso()));
       }
 
-      query.distinct(true);
+      if (query != null) {
+        query.distinct(true);
+      }
+
       return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     };
   }
