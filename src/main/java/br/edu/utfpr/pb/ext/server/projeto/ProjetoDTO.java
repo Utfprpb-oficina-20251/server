@@ -42,6 +42,7 @@ public class ProjetoDTO {
 
   private Long qtdeVagas;
 
+  @Schema(description = "Usuário responsável pelo projeto")
   private UsuarioProjetoDTO responsavel;
 
   @Schema(
