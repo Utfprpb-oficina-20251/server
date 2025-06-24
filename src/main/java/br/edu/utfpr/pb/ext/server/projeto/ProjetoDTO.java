@@ -1,7 +1,6 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
-import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.dto.UsuarioProjetoDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -43,7 +42,7 @@ public class ProjetoDTO {
 
   private Long qtdeVagas;
 
-  private Usuario responsavel;
+  private UsuarioProjetoDTO responsavel;
 
   @Schema(
       description = "Recebe Base64 DataURI ou URL Externa. Projetos salvos só retornam url",
