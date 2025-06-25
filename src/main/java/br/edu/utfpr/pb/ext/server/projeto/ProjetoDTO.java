@@ -42,6 +42,9 @@ public class ProjetoDTO {
 
   private Long qtdeVagas;
 
+  @Schema(description = "Usuário responsável pelo projeto")
+  private UsuarioProjetoDTO responsavel;
+
   @Schema(
       description = "Recebe Base64 DataURI ou URL Externa. Projetos salvos só retornam url",
       example =
