@@ -12,6 +12,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
@@ -259,6 +261,22 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     return projetosEncontrados.stream()
         .map(projeto -> modelMapper.map(projeto, ProjetoDTO.class))
         .toList();
+  }
+
+  @Override
+  public List<String> getAlunosExecutores(List<Long> idsProjeto) {
+    List<String> relatorio = new ArrayList<>();
+    idsProjeto.forEach(idprojeto->{
+      Optional<Projeto> projeto = this.projetoRepository.findById(idprojeto);
+        projeto.ifPresent(value ->
+          value.getEquipeExecutora().forEach(executor -> {
+            if (executor.getAuthorities().stream()
+                    .anyMatch(authority -> authority.getId().equals(3L))) {
+              relatorio.add(executor.getNome() + "-" + executor.getEmail() + "-" + value.getTitulo());
+            }
+        }));
+    });
+    return relatorio;
   }
 
   /**

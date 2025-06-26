@@ -6,6 +6,7 @@ import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -185,5 +186,41 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
         new FiltroProjetoDTO(null, null, null, null, userDetails.getId(), null, null);
     List<ProjetoDTO> projetos = projetoService.buscarProjetosPorFiltro(filtroCordenador);
     return ResponseEntity.ok(projetos);
+  }
+
+  @Operation(
+          summary = "Buscar Alunos executores por IDs de projeto",
+          description = "Retorna uma lista de strings formatadas com os dados dos alunos executores (nome, email) e o título do projeto ao qual pertencem, com base em uma lista de IDs de projeto fornecida."
+  )
+  @ApiResponses({
+          @ApiResponse(
+                  responseCode = "200",
+                  description = "Operação bem-sucedida. Retorna a lista de alunos executores.",
+                  content = @Content(
+                          mediaType = "application/json",
+                          array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                          examples = {
+                                  @ExampleObject(
+                                          name = "Exemplo de Resposta",
+                                          value = "[\"Ana - ana@alunos.utfpr.edu.br - Projeto X\", \"Carlos Lima - carlosLima@alunos.utfpr.edu.br - Projeto X\", \"Maria Andrade - maria@alunos.utfpr.edu.br - Projeto X\"]"
+                                  )
+                          }
+                  )
+          ),
+          @ApiResponse(
+                  responseCode = "400",
+                  description = "Requisição inválida. O parâmetro 'idsProjeto' é obrigatório ou está em formato inválido.",
+                  content = @Content
+          ),
+          @ApiResponse(
+                  responseCode = "500",
+                  description = "Erro interno no servidor.",
+                  content = @Content
+          )
+  })
+  @GetMapping("/alunosexecutores")
+  public ResponseEntity<List<String>> buscarAlunosExecutores(@RequestParam List<Long> idsProjeto){
+     List<String> executores = projetoService.getAlunosExecutores(idsProjeto);
+    return ResponseEntity.ok(executores);
   }
 }

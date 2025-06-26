@@ -11,4 +11,6 @@ public interface IProjetoService extends ICrudService<Projeto, Long> {
   ProjetoDTO atualizarProjeto(Long id, @Valid ProjetoDTO dto);
 
   List<ProjetoDTO> buscarProjetosPorFiltro(FiltroProjetoDTO filtros);
+
+  List<String> getAlunosExecutores(List<Long> idsProjeto);
 }
