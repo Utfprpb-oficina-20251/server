@@ -241,6 +241,16 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return ResponseEntity.ok(responseDTO);
   }
 
+  @GetMapping("/buscar-email/{email}")
+  public ResponseEntity<UsuarioProjetoDTO> buscarPorEmail(@PathVariable String email) {
+    Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+    if (usuario == null) {
+      return ResponseEntity.notFound().build();
+    }
+    UsuarioProjetoDTO responseDTO = modelMapper.map(usuario, UsuarioProjetoDTO.class);
+    return ResponseEntity.ok(responseDTO);
+  }
+
   /**
    * Retorna uma resposta HTTP contendo um token JWT e o tempo de expiração após salvar o usuário
    * com a autoridade informada.
