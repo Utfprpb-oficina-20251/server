@@ -255,9 +255,9 @@ class ProjetoControllerIntegrationTest {
     assertEquals(3, resultado.size());
 
     assertThat(resultado).containsExactlyInAnyOrder(
-            "Ana Aluna-ana@alunos.utfpr.edu.br-Projeto X",
-            "Ana Aluna-ana@alunos.utfpr.edu.br-Projeto Y",
-            "Beto Aluno-beto@alunos.utfpr.edu.br-Projeto Y"
+            "Ana Aluna - ana@alunos.utfpr.edu.br - Projeto X",
+            "Ana Aluna - ana@alunos.utfpr.edu.br - Projeto Y",
+            "Beto Aluno - beto@alunos.utfpr.edu.br - Projeto Y"
     );
     assertThat(resultado).noneMatch(s -> s.contains("Carlos Professor"));
   }

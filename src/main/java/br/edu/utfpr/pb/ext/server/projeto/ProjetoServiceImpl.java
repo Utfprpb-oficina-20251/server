@@ -265,18 +265,22 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
 
   @Override
   public List<String> getAlunosExecutores(List<Long> idsProjeto) {
-    List<String> relatorio = new ArrayList<>();
-    idsProjeto.forEach(idprojeto->{
-      Optional<Projeto> projeto = this.projetoRepository.findById(idprojeto);
-        projeto.ifPresent(value ->
-          value.getEquipeExecutora().forEach(executor -> {
-            if (executor.getAuthorities().stream()
-                    .anyMatch(authority -> authority.getId().equals(3L))) {
-              relatorio.add(executor.getNome() + "-" + executor.getEmail() + "-" + value.getTitulo());
-            }
-        }));
-    });
-    return relatorio;
+    return idsProjeto.stream()
+              .map(projetoRepository::findById)
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .flatMap(projeto -> projeto.getEquipeExecutora().stream()
+                .filter(this::isAluno)
+                .map(executor -> formatarAlunoExecutor(executor, projeto)))
+      .toList();
+  }
+      private boolean isAluno(Usuario usuario) {
+    return usuario.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals("ROLE_ALUNO"));
+  }
+      private String formatarAlunoExecutor(Usuario executor, Projeto projeto) {
+    return String.format("%s - %s - %s",
+              executor.getNome(), executor.getEmail(), projeto.getTitulo());
   }
 
   /**
