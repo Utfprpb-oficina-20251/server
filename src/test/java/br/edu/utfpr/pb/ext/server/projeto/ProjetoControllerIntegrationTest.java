@@ -73,7 +73,6 @@ class ProjetoControllerIntegrationTest {
     projetoRepository.deleteAll();
     usuarioRepository.deleteAll();
     cursoRepository.deleteAll();
-    authorityRepository.deleteAll();
     testRestTemplate.getRestTemplate().getInterceptors().clear();
   }
 
