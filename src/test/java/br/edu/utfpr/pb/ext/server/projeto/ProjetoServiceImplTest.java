@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.projeto;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import br.edu.utfpr.pb.ext.server.event.EventPublisher;
 import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
 import br.edu.utfpr.pb.ext.server.file.FileService;
 import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
@@ -41,7 +42,7 @@ class ProjetoServiceImplTest {
   @Mock private UsuarioRepository usuarioRepository;
   @Mock private FileService fileService;
   @Mock private ImageUtils imageUtils;
-
+  @Mock private EventPublisher eventPublisher;
   private final Long projetoId = 1L;
   private final Long servidorId = 100L;
   private final Long alunoId = 200L;
@@ -848,6 +849,66 @@ class ProjetoServiceImplTest {
     assertNotNull(resultado);
     assertFalse(resultado.isEmpty());
     verify(projetoRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  @DisplayName("postsave deve publicar evento ProjetoCriado para projetos novos (ID nulo)")
+  void postsave_quandoProjetoIdNulo_devePublicarEventoProjetoCriado() {
+    // Arrange
+    Projeto projeto = new Projeto();
+    projeto.setId(null);
+
+    // Act
+    projetoService.postsave(projeto);
+
+    // Assert
+    verify(eventPublisher).publishProjetoCriado(projeto);
+    verify(eventPublisher, never()).publishProjetoAtualizado(any());
+  }
+
+  @Test
+  @DisplayName("postsave deve publicar evento ProjetoCriado para projetos com ID zero")
+  void postsave_quandoProjetoIdZero_devePublicarEventoProjetoCriado() {
+    // Arrange
+    Projeto projeto = new Projeto();
+    projeto.setId(0L);
+
+    // Act
+    projetoService.postsave(projeto);
+
+    // Assert
+    verify(eventPublisher).publishProjetoCriado(projeto);
+    verify(eventPublisher, never()).publishProjetoAtualizado(any());
+  }
+
+  @Test
+  @DisplayName("postsave deve publicar evento ProjetoCriado para projetos com ID negativo")
+  void postsave_quandoProjetoIdNegativo_devePublicarEventoProjetoCriado() {
+    // Arrange
+    Projeto projeto = new Projeto();
+    projeto.setId(-1L);
+
+    // Act
+    projetoService.postsave(projeto);
+
+    // Assert
+    verify(eventPublisher).publishProjetoCriado(projeto);
+    verify(eventPublisher, never()).publishProjetoAtualizado(any());
+  }
+
+  @Test
+  @DisplayName("postsave deve publicar evento ProjetoAtualizado para projetos existentes")
+  void postsave_quandoProjetoIdPositivo_devePublicarEventoProjetoAtualizado() {
+    // Arrange
+    Projeto projeto = new Projeto();
+    projeto.setId(1L);
+
+    // Act
+    projetoService.postsave(projeto);
+
+    // Assert
+    verify(eventPublisher).publishProjetoAtualizado(projeto);
+    verify(eventPublisher, never()).publishProjetoCriado(any());
   }
 
   @NotNull private static Projeto criaProjetoGenerico() {

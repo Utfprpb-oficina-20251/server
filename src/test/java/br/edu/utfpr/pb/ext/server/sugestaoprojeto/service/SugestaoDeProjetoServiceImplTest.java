@@ -3,12 +3,14 @@ package br.edu.utfpr.pb.ext.server.sugestaoprojeto.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import br.edu.utfpr.pb.ext.server.event.EventPublisher;
 import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
 import br.edu.utfpr.pb.ext.server.file.FileService;
 import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.*;
 import br.edu.utfpr.pb.ext.server.usuario.*;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +40,7 @@ class SugestaoDeProjetoServiceImplTest {
   @Mock private FileService fileService;
 
   @Mock private ImageUtils imageUtils;
+  @Mock private EventPublisher eventPublisher;
 
   @InjectMocks private SugestaoDeProjetoServiceImpl service;
 
@@ -279,5 +282,54 @@ class SugestaoDeProjetoServiceImplTest {
     assertEquals(indicacoes, result);
     verify(usuarioService).obterUsuarioLogado();
     verify(repository).findByProfessorId(professor.getId());
+  }
+
+  @Test
+  @DisplayName("postsave deve publicar evento SugestaoCriada para sugestões recém-criadas")
+  void postsave_quandoSugestaoRecemCriada_devePublicarEventoSugestaoCriada() {
+    // Arrange
+    SugestaoDeProjeto sugestao = new SugestaoDeProjeto();
+    sugestao.setDataCriacao(LocalDateTime.now().minusSeconds(5));
+
+    // Act
+    SugestaoDeProjeto result = service.postsave(sugestao);
+
+    // Assert
+    verify(eventPublisher).publishSugestaoCriada(sugestao);
+    verify(eventPublisher, never()).publishSugestaoAtualizada(any());
+    assertEquals(sugestao, result);
+  }
+
+  @Test
+  @DisplayName("postsave deve publicar evento SugestaoAtualizada para sugestões existentes")
+  void postsave_quandoSugestaoExistente_devePublicarEventoSugestaoAtualizada() {
+    // Arrange
+    SugestaoDeProjeto sugestao = new SugestaoDeProjeto();
+    sugestao.setDataCriacao(LocalDateTime.now().minusMinutes(30));
+
+    // Act
+    SugestaoDeProjeto result = service.postsave(sugestao);
+
+    // Assert
+    verify(eventPublisher).publishSugestaoAtualizada(sugestao);
+    verify(eventPublisher, never()).publishSugestaoCriada(any());
+    assertEquals(sugestao, result);
+  }
+
+  @Test
+  @DisplayName(
+      "postsave deve publicar evento SugestaoAtualizada para sugestões sem data de criação")
+  void postsave_quandoSugestaoSemDataCriacao_devePublicarEventoSugestaoAtualizada() {
+    // Arrange
+    SugestaoDeProjeto sugestao = new SugestaoDeProjeto();
+    sugestao.setDataCriacao(null);
+
+    // Act
+    SugestaoDeProjeto result = service.postsave(sugestao);
+
+    // Assert
+    verify(eventPublisher).publishSugestaoAtualizada(sugestao);
+    verify(eventPublisher, never()).publishSugestaoCriada(any());
+    assertEquals(sugestao, result);
   }
 }

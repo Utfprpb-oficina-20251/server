@@ -4,9 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum TipoCodigo {
-  OTP_AUTENTICACAO("autenticacao"),
-  OTP_CADASTRO("cadastro"),
-  OTP_RECUPERACAO("recuperacao");
+  OTP_AUTENTICACAO("Autenticação"),
+  OTP_CADASTRO("Cadastro"),
+  OTP_RECUPERACAO("Recuperação de Senha"),
+  ;
 
   private final String tipo;
 
@@ -17,5 +18,14 @@ public enum TipoCodigo {
    */
   TipoCodigo(String tipo) {
     this.tipo = tipo;
+  }
+
+  /**
+   * Retorna o tipo do código como uma string.
+   *
+   * @return o tipo do código
+   */
+  public String getTipo() {
+    return tipo;
   }
 }

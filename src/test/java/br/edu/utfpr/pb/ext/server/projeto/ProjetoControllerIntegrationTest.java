@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
@@ -7,15 +8,14 @@ import br.edu.utfpr.pb.ext.server.curso.CursoRepository;
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
+import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
+import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
-import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
-import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,15 +26,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class ProjetoControllerIntegrationTest {
 
   private static final String API_PROJETOS_BUSCAR = "/api/projeto/buscar";
-  private static final String API_PROJETOS_ALUNOS_EXECUTORES = "/api/projeto/alunosexecutores"; // <-- NOVO
+  private static final String API_PROJETOS_ALUNOS_EXECUTORES =
+      "/api/projeto/alunosexecutores"; // <-- NOVO
 
   @Autowired private TestRestTemplate testRestTemplate;
   @Autowired private ProjetoRepository projetoRepository;
@@ -210,36 +209,77 @@ class ProjetoControllerIntegrationTest {
   void buscarAlunosExecutores_comIdsDeProjetosValidos_deveRetornarListaDeAlunosFormatada() {
     // Arrange
 
-    Authority managedAuthorityAluno = authorityRepository.findByAuthority("ROLE_ALUNO")
-            .orElseThrow(() -> new IllegalStateException("Authority 'ROLE_ALUNO' não encontrada no banco de dados."));
-    Authority managedAuthorityProfessor = authorityRepository.findByAuthority("ROLE_SERVIDOR")
-            .orElseThrow(() -> new IllegalStateException("Authority 'ROLE_PROFESSOR' não encontrada no banco de dados."));
+    Authority managedAuthorityAluno =
+        authorityRepository
+            .findByAuthority("ROLE_ALUNO")
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        "Authority 'ROLE_ALUNO' não encontrada no banco de dados."));
+    Authority managedAuthorityProfessor =
+        authorityRepository
+            .findByAuthority("ROLE_SERVIDOR")
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        "Authority 'ROLE_PROFESSOR' não encontrada no banco de dados."));
 
     // O curso e o responsável ainda precisam ser gerenciados, mas eles são criados neste teste.
     Curso managedCurso = cursoRepository.findById(this.cursoDeTeste.getId()).get();
     Usuario managedResponsavel = usuarioRepository.findById(this.responsavelDeTeste.getId()).get();
 
-    // 1. Criar usuários com diferentes perfis (alunos e professores) usando as entidades gerenciadas
-    Usuario alunoExecutor1 = this.usuarioRepository.save(Usuario.builder().nome("Ana Aluna").email("ana@alunos.utfpr.edu.br").cpf("111").authorities(Set.of(managedAuthorityAluno)).curso(managedCurso).build());
-    Usuario alunoExecutor2 = usuarioRepository.save(Usuario.builder().nome("Beto Aluno").email("beto@alunos.utfpr.edu.br").cpf("222").authorities(Set.of(managedAuthorityAluno)).curso(managedCurso).build());
-    Usuario professorExecutor = usuarioRepository.save(Usuario.builder().nome("Carlos Professor").email("carlos@prof.utfpr.edu.br").cpf("333").authorities(Set.of(managedAuthorityProfessor)).curso(managedCurso).build());
+    // 1. Criar usuários com diferentes perfis (alunos e professores) usando as entidades
+    // gerenciadas
+    Usuario alunoExecutor1 =
+        this.usuarioRepository.save(
+            Usuario.builder()
+                .nome("Ana Aluna")
+                .email("ana@alunos.utfpr.edu.br")
+                .cpf("111")
+                .authorities(Set.of(managedAuthorityAluno))
+                .curso(managedCurso)
+                .build());
+    Usuario alunoExecutor2 =
+        usuarioRepository.save(
+            Usuario.builder()
+                .nome("Beto Aluno")
+                .email("beto@alunos.utfpr.edu.br")
+                .cpf("222")
+                .authorities(Set.of(managedAuthorityAluno))
+                .curso(managedCurso)
+                .build());
+    Usuario professorExecutor =
+        usuarioRepository.save(
+            Usuario.builder()
+                .nome("Carlos Professor")
+                .email("carlos@prof.utfpr.edu.br")
+                .cpf("333")
+                .authorities(Set.of(managedAuthorityProfessor))
+                .curso(managedCurso)
+                .build());
 
     // 2. Criar projetos e adicionar as equipes executoras, usando o responsável gerenciado
-    Projeto projetoX = criarEsalvarProjeto("Projeto X", StatusProjeto.EM_ANDAMENTO, new Date(), managedResponsavel);
+    Projeto projetoX =
+        criarEsalvarProjeto(
+            "Projeto X", StatusProjeto.EM_ANDAMENTO, new Date(), managedResponsavel);
     projetoX.setEquipeExecutora(List.of(alunoExecutor1, professorExecutor));
     projetoRepository.save(projetoX);
 
-    Projeto projetoY = criarEsalvarProjeto("Projeto Y", StatusProjeto.EM_ANDAMENTO, new Date(), managedResponsavel);
+    Projeto projetoY =
+        criarEsalvarProjeto(
+            "Projeto Y", StatusProjeto.EM_ANDAMENTO, new Date(), managedResponsavel);
     projetoY.setEquipeExecutora(List.of(alunoExecutor1, alunoExecutor2));
     projetoRepository.save(projetoY);
 
-    Projeto projetoZ = criarEsalvarProjeto("Projeto Z - Sem Alunos", StatusProjeto.CONCLUIDO, new Date(), managedResponsavel);
+    Projeto projetoZ =
+        criarEsalvarProjeto(
+            "Projeto Z - Sem Alunos", StatusProjeto.CONCLUIDO, new Date(), managedResponsavel);
     projetoZ.setEquipeExecutora(List.of(professorExecutor));
     projetoRepository.save(projetoZ);
 
-
     // 3. Montar a URL para o endpoint, solicitando os projetos X e Y
-    String url = UriComponentsBuilder.fromPath(API_PROJETOS_ALUNOS_EXECUTORES)
+    String url =
+        UriComponentsBuilder.fromPath(API_PROJETOS_ALUNOS_EXECUTORES)
             .queryParam("idsProjeto", projetoX.getId() + "," + projetoY.getId())
             .toUriString();
 
@@ -254,11 +294,11 @@ class ProjetoControllerIntegrationTest {
 
     assertEquals(3, resultado.size());
 
-    assertThat(resultado).containsExactlyInAnyOrder(
+    assertThat(resultado)
+        .containsExactlyInAnyOrder(
             "Ana Aluna - ana@alunos.utfpr.edu.br - Projeto X",
             "Ana Aluna - ana@alunos.utfpr.edu.br - Projeto Y",
-            "Beto Aluno - beto@alunos.utfpr.edu.br - Projeto Y"
-    );
+            "Beto Aluno - beto@alunos.utfpr.edu.br - Projeto Y");
     assertThat(resultado).noneMatch(s -> s.contains("Carlos Professor"));
   }
 
@@ -266,7 +306,8 @@ class ProjetoControllerIntegrationTest {
   void buscarAlunosExecutores_comIdDeProjetoInexistente_deveRetornarListaVazia() {
     // Arrange
     long idInexistente = 999L;
-    String url = UriComponentsBuilder.fromPath(API_PROJETOS_ALUNOS_EXECUTORES)
+    String url =
+        UriComponentsBuilder.fromPath(API_PROJETOS_ALUNOS_EXECUTORES)
             .queryParam("idsProjeto", idInexistente)
             .toUriString();
 

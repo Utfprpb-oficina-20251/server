@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.sugestaoprojeto.service;
 
+import br.edu.utfpr.pb.ext.server.event.EventPublisher;
 import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
 import br.edu.utfpr.pb.ext.server.file.FileService;
 import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
@@ -7,6 +8,7 @@ import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.*;
 import br.edu.utfpr.pb.ext.server.usuario.*;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +27,7 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
   private final IUsuarioService usuarioService;
   private final FileService fileService;
   private final ImageUtils imageUtils;
+  private final EventPublisher eventPublisher;
 
   /**
    * Fornece o repositório específico para operações CRUD da entidade SugestaoDeProjeto.
@@ -70,6 +73,34 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
     processarImagemUrl(entity);
 
     return super.preSave(entity);
+  }
+
+  /**
+   * Executa ações após salvar uma sugestão de projeto, enviando notificações apropriadas dependendo
+   * se a entidade é nova ou atualizada.
+   *
+   * <p>Este metodo é chamado automaticamente após a persistência da entidade e determina se a
+   * sugestão foi recentemente criada (baseado na data de criação) ou se foi atualizada, publicando
+   * o evento adequado para cada caso.
+   *
+   * @param entity a entidade SugestaoDeProjeto que foi salva
+   * @return a entidade após o processamento de pós-salvamento
+   */
+  @Override
+  public SugestaoDeProjeto postsave(SugestaoDeProjeto entity) {
+    SugestaoDeProjeto savedEntity = super.postsave(entity);
+
+    boolean isNew =
+            entity.getDataCriacao() != null
+                    && entity.getDataCriacao().isAfter(LocalDateTime.now().minusSeconds(10));
+
+    if (isNew) {
+      eventPublisher.publishSugestaoCriada(savedEntity);
+    } else {
+      eventPublisher.publishSugestaoAtualizada(savedEntity);
+    }
+
+    return savedEntity;
   }
 
   /**
