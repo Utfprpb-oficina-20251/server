@@ -12,6 +12,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
@@ -259,6 +261,26 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     return projetosEncontrados.stream()
         .map(projeto -> modelMapper.map(projeto, ProjetoDTO.class))
         .toList();
+  }
+
+  @Override
+  public List<String> getAlunosExecutores(List<Long> idsProjeto) {
+    return idsProjeto.stream()
+              .map(projetoRepository::findById)
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .flatMap(projeto -> projeto.getEquipeExecutora().stream()
+                .filter(this::isAluno)
+                .map(executor -> formatarAlunoExecutor(executor, projeto)))
+      .toList();
+  }
+      private boolean isAluno(Usuario usuario) {
+    return usuario.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals("ROLE_ALUNO"));
+  }
+      private String formatarAlunoExecutor(Usuario executor, Projeto projeto) {
+    return String.format("%s - %s - %s",
+              executor.getNome(), executor.getEmail(), projeto.getTitulo());
   }
 
   /**
