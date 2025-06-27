@@ -189,38 +189,36 @@ public class ProjetoController extends CrudController<Projeto, ProjetoDTO, Long>
   }
 
   @Operation(
-          summary = "Buscar Alunos executores por IDs de projeto",
-          description = "Retorna uma lista de strings formatadas com os dados dos alunos executores (nome, email) e o título do projeto ao qual pertencem, com base em uma lista de IDs de projeto fornecida."
-  )
+      summary = "Buscar Alunos executores por IDs de projeto",
+      description =
+          "Retorna uma lista de strings formatadas com os dados dos alunos executores (nome, email) e o título do projeto ao qual pertencem, com base em uma lista de IDs de projeto fornecida.")
   @ApiResponses({
-          @ApiResponse(
-                  responseCode = "200",
-                  description = "Operação bem-sucedida. Retorna a lista de alunos executores.",
-                  content = @Content(
-                          mediaType = "application/json",
-                          array = @ArraySchema(schema = @Schema(implementation = String.class)),
-                          examples = {
-                                  @ExampleObject(
-                                          name = "Exemplo de Resposta",
-                                          value = "[\"Ana - ana@alunos.utfpr.edu.br - Projeto X\", \"Carlos Lima - carlosLima@alunos.utfpr.edu.br - Projeto X\", \"Maria Andrade - maria@alunos.utfpr.edu.br - Projeto X\"]"
-                                  )
-                          }
-                  )
-          ),
-          @ApiResponse(
-                  responseCode = "400",
-                  description = "Requisição inválida. O parâmetro 'idsProjeto' é obrigatório ou está em formato inválido.",
-                  content = @Content
-          ),
-          @ApiResponse(
-                  responseCode = "500",
-                  description = "Erro interno no servidor.",
-                  content = @Content
-          )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Operação bem-sucedida. Retorna a lista de alunos executores.",
+        content =
+            @Content(
+                mediaType = "application/json",
+                array = @ArraySchema(schema = @Schema(implementation = String.class)),
+                examples = {
+                  @ExampleObject(
+                      name = "Exemplo de Resposta",
+                      value =
+                          "[\"Ana - ana@alunos.utfpr.edu.br - Projeto X\", \"Carlos Lima - carlosLima@alunos.utfpr.edu.br - Projeto X\", \"Maria Andrade - maria@alunos.utfpr.edu.br - Projeto X\"]")
+                })),
+    @ApiResponse(
+        responseCode = "400",
+        description =
+            "Requisição inválida. O parâmetro 'idsProjeto' é obrigatório ou está em formato inválido.",
+        content = @Content),
+    @ApiResponse(
+        responseCode = "500",
+        description = "Erro interno no servidor.",
+        content = @Content)
   })
   @GetMapping("/alunosexecutores")
-  public ResponseEntity<List<String>> buscarAlunosExecutores(@RequestParam List<Long> idsProjeto){
-     List<String> executores = projetoService.getAlunosExecutores(idsProjeto);
+  public ResponseEntity<List<String>> buscarAlunosExecutores(@RequestParam List<Long> idsProjeto) {
+    List<String> executores = projetoService.getAlunosExecutores(idsProjeto);
     return ResponseEntity.ok(executores);
   }
 }

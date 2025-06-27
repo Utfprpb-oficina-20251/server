@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="x-apple-disable-message-reformatting">
     <meta name="format-detection" content="telephone=no">
-    <meta name="description" content="Código de verificação para acesso ao sistema UTFPR.">
-    <title>Código de Verificação</title>
+    <meta name="description" content="Notificação do sistema UTFPR.">
+    <title>Notificação UTFPR</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -48,21 +48,25 @@
             text-align: center;
         }
 
-        .otp-code {
+        .notification-box {
             background-color: #eeeeee;
             border-radius: 8px;
             padding: 15px 20px;
             margin: 0 auto 30px auto;
-            max-width: 250px;
+            max-width: 500px;
         }
 
-        .otp-code p {
-            font-size: 36px;
-            font-family: monospace;
+        .notification-box h2 {
+            font-size: 22px;
             color: #333333;
-            font-weight: bold;
-            letter-spacing: 10px;
-            margin: 0;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .notification-box p {
+            font-size: 16px;
+            color: #555555;
+            margin: 10px 0;
             text-align: center;
         }
 
@@ -95,19 +99,20 @@
                 </tr>
                 <tr>
                     <td class="email-body">
-                        <h1 style="font-size: 24px; color: #333333; margin: 0;">Seu Código de Acesso</h1>
-                        <p style="font-size: 16px; color: #555555; margin: 10px 0 30px 0;">Insira o código abaixo na
-                            tela de verificação para continuar.</p>
+                        <h1 style="font-size: 24px; color: #333333; margin: 0;" th:text="${titulo}">Notificação do Sistema</h1>
+                        <p style="font-size: 16px; color: #555555; margin: 10px 0 30px 0;" th:text="${subtitulo}">Informações sobre sua atividade no sistema.</p>
 
-                        <div class="otp-code">
-                            <p th:text="${otpCode}">1234</p>
+                        <div class="notification-box">
+                            <h2 th:text="${entityTitle}">Nome do Projeto/Sugestão</h2>
+                            <p th:text="${mensagem}">Mensagem de notificação sobre o projeto ou sugestão.</p>
                         </div>
 
-                        <p style="font-size: 14px; color: #888888;">Este código expira em <strong>10 minutos</strong>.
+                        <p style="font-size: 14px; color: #888888;" th:if="${dataHora}">
+                            Data: <strong th:text="${#temporals.format(dataHora, 'dd/MM/yyyy HH:mm')}">01/01/2023 10:00</strong>
                         </p>
-                        <p style="font-size: 12px; color: #aaaaaa; line-height: 1.5;">Se você não solicitou este código,
-                            por favor, ignore esta mensagem. Por segurança, nunca compartilhe este código com
-                            ninguém.</p>
+                        <p style="font-size: 12px; color: #aaaaaa; line-height: 1.5;">
+                            Esta é uma mensagem automática. Por favor, não responda a este email.
+                        </p>
                     </td>
                 </tr>
                 <tr>

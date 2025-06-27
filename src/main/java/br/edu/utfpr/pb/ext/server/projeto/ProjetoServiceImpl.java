@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.projeto;
 
+import br.edu.utfpr.pb.ext.server.event.EventPublisher;
 import br.edu.utfpr.pb.ext.server.file.FileInfoDTO;
 import br.edu.utfpr.pb.ext.server.file.FileService;
 import br.edu.utfpr.pb.ext.server.file.img.ImageUtils;
@@ -13,7 +14,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,6 +34,8 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   private final FileService fileService;
   private final ImageUtils imageUtils;
 
+  private final EventPublisher eventPublisher;
+
   /**
    * Constrói o serviço de projetos inicializando os repositórios, utilitários e serviços
    * necessários para operações de negócio relacionadas a projetos.
@@ -49,12 +51,14 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
       ModelMapper modelMapper,
       UsuarioRepository usuarioRepository,
       FileService fileService,
-      ImageUtils imageUtils) {
+      ImageUtils imageUtils,
+      EventPublisher eventPublisher) {
     this.projetoRepository = projetoRepository;
     this.modelMapper = modelMapper;
     this.usuarioRepository = usuarioRepository;
     this.fileService = fileService;
     this.imageUtils = imageUtils;
+    this.eventPublisher = eventPublisher;
   }
 
   /**
@@ -89,6 +93,32 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
     atribuirUsuariosEquipeExecutora(projeto);
     processaImagemUrl(projeto);
     return super.preSave(projeto);
+  }
+
+  /**
+   * Executa ações após salvar um projeto, enviando notificações apropriadas dependendo se o projeto
+   * é novo ou atualizado.
+   *
+   * <p>Este metodo é chamado automaticamente após a persistência da entidade e determina se o
+   * projeto foi recentemente criado (baseado na data de criação) ou se foi atualizado, publicando o
+   * evento adequado para cada caso.
+   *
+   * @param entity O projeto que foi salvo
+   * @return A entidade após o processamento de pós-salvamento
+   */
+  @Override
+  public Projeto postsave(Projeto entity) {
+    Projeto savedEntity = super.postsave(entity);
+
+    boolean isNew = entity.getId() == null || entity.getId() <= 0L;
+
+    if (isNew) {
+      eventPublisher.publishProjetoCriado(savedEntity);
+    } else {
+      eventPublisher.publishProjetoAtualizado(savedEntity);
+    }
+
+    return savedEntity;
   }
 
   /**
@@ -266,21 +296,25 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
   @Override
   public List<String> getAlunosExecutores(List<Long> idsProjeto) {
     return idsProjeto.stream()
-              .map(projetoRepository::findById)
-              .filter(Optional::isPresent)
-              .map(Optional::get)
-              .flatMap(projeto -> projeto.getEquipeExecutora().stream()
-                .filter(this::isAluno)
-                .map(executor -> formatarAlunoExecutor(executor, projeto)))
-      .toList();
+        .map(projetoRepository::findById)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .flatMap(
+            projeto ->
+                projeto.getEquipeExecutora().stream()
+                    .filter(this::isAluno)
+                    .map(executor -> formatarAlunoExecutor(executor, projeto)))
+        .toList();
   }
-      private boolean isAluno(Usuario usuario) {
+
+  private boolean isAluno(Usuario usuario) {
     return usuario.getAuthorities().stream()
-            .anyMatch(authority -> authority.getAuthority().equals("ROLE_ALUNO"));
+        .anyMatch(authority -> authority.getAuthority().equals("ROLE_ALUNO"));
   }
-      private String formatarAlunoExecutor(Usuario executor, Projeto projeto) {
-    return String.format("%s - %s - %s",
-              executor.getNome(), executor.getEmail(), projeto.getTitulo());
+
+  private String formatarAlunoExecutor(Usuario executor, Projeto projeto) {
+    return String.format(
+        "%s - %s - %s", executor.getNome(), executor.getEmail(), projeto.getTitulo());
   }
 
   /**

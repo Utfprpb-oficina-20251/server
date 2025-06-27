@@ -62,9 +62,7 @@ public class Usuario extends BaseEntity implements UserDetails {
 
   @ManyToMany(
       fetch = FetchType.EAGER,
-      cascade = {
-        CascadeType.MERGE, CascadeType.REFRESH
-      })
+      cascade = {CascadeType.MERGE, CascadeType.REFRESH})
   @JoinTable(
       name = "usuario_roles",
       joinColumns = @JoinColumn(name = "usuario_id"),

@@ -161,7 +161,7 @@ public class EmailServiceImpl {
    */
   private Response enviarEmailDeVerificacao(String email, String code, TipoCodigo type)
       throws IOException {
-    String assunto = "Código de Verificação - " + type.name();
+    String assunto = "Código de Verificação - " + type.getTipo();
 
     Context context = new Context();
     context.setVariable("otpCode", code);
