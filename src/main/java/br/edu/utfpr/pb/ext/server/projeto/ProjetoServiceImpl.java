@@ -9,7 +9,7 @@ import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.*;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -370,10 +370,44 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
                 root.join("responsavel").join("curso").get("id"), filtros.idCurso()));
       }
 
-      if (query != null) {
-        query.distinct(true);
+      if (filtros.cargaHorariaMinima() != null) {
+        predicates.add(
+            criteriaBuilder.greaterThanOrEqualTo(
+                root.get("cargaHoraria"), filtros.cargaHorariaMinima()));
       }
 
+      // NOVO FILTRO: Carga Horária Máxima
+      if (filtros.cargaHorariaMaxima() != null) {
+        predicates.add(
+            criteriaBuilder.lessThanOrEqualTo(
+                root.get("cargaHoraria"), filtros.cargaHorariaMaxima()));
+      }
+
+      // NOVO FILTRO: Nome do Curso (busca parcial)
+      if (filtros.nomeCurso() != null && !filtros.nomeCurso().isEmpty()) {
+        predicates.add(
+            criteriaBuilder.like(
+                criteriaBuilder.lower(root.join("responsavel").join("curso").get("nome")),
+                "%" + filtros.nomeCurso().toLowerCase() + "%"));
+      }
+
+      if (filtros.temVagas() != null) {
+        Subquery<Long> subquery = query.subquery(Long.class);
+        Root<Projeto> subRoot = subquery.from(Projeto.class);
+        Join<Projeto, Usuario> equipeJoin = subRoot.join("equipeExecutora");
+        subquery.select(criteriaBuilder.count(equipeJoin));
+        subquery.where(criteriaBuilder.equal(subRoot, root));
+
+        Path<Long> qtdeVagasPath = root.get("qtdeVagas");
+
+        if (filtros.temVagas()) {
+          predicates.add(criteriaBuilder.greaterThan(qtdeVagasPath, subquery));
+        } else {
+          predicates.add(criteriaBuilder.lessThanOrEqualTo(qtdeVagasPath, subquery));
+        }
+      }
+
+      query.distinct(true);
       return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     };
   }

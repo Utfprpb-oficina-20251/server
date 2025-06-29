@@ -12,10 +12,7 @@ import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
 import br.edu.utfpr.pb.ext.server.usuario.authority.AuthorityRepository;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,8 +29,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 class ProjetoControllerIntegrationTest {
 
   private static final String API_PROJETOS_BUSCAR = "/api/projeto/buscar";
-  private static final String API_PROJETOS_ALUNOS_EXECUTORES =
-      "/api/projeto/alunosexecutores"; // <-- NOVO
+  private static final String API_PROJETOS_ALUNOS_EXECUTORES = "/api/projeto/alunosexecutores";
 
   @Autowired private TestRestTemplate testRestTemplate;
   @Autowired private ProjetoRepository projetoRepository;
@@ -43,7 +39,6 @@ class ProjetoControllerIntegrationTest {
 
   private Curso cursoDeTeste;
   private Usuario responsavelDeTeste;
-  private Usuario alunoDeTeste;
 
   @BeforeEach
   void setUp() {
@@ -320,7 +315,164 @@ class ProjetoControllerIntegrationTest {
     assertEquals(0, response.getBody().length);
   }
 
-  // --- MÉTODOS AUXILIARES ATUALIZADOS ---
+  @Test
+  void buscarProjetos_comFiltroDeCargaHoraria_deveRetornarProjetosNoIntervalo() {
+    // Arrange
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto Curto", StatusProjeto.EM_ANDAMENTO)
+            .cargaHoraria(20L)
+            .build());
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto Médio", StatusProjeto.EM_ANDAMENTO)
+            .cargaHoraria(40L)
+            .build());
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto Longo", StatusProjeto.EM_ANDAMENTO)
+            .cargaHoraria(80L)
+            .build());
+
+    String url =
+        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+            .queryParam("cargaHorariaMinima", 30)
+            .queryParam("cargaHorariaMaxima", 50)
+            .toUriString();
+    // Act
+    ResponseEntity<ProjetoDTO[]> response = testRestTemplate.getForEntity(url, ProjetoDTO[].class);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().length);
+    assertEquals("Projeto Médio", response.getBody()[0].getTitulo());
+  }
+
+  @Test
+  void buscarProjetos_comFiltroDeNomeCurso_deveRetornarProjetosDoCursoCorreto() {
+    // Arrange
+    Curso cursoDesign =
+        cursoRepository.save(Curso.builder().nome("Design Gráfico").codigo("DG").build());
+    Usuario responsavelDesign =
+        usuarioRepository.save(
+            Usuario.builder()
+                .nome("Beto do Design")
+                .email("beto@utfpr.edu.br")
+                .cpf("2222")
+                .curso(cursoDesign)
+                .build());
+
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto de Software", StatusProjeto.EM_ANDAMENTO)
+            .responsavel(responsavelDeTeste)
+            .build());
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto de Design", StatusProjeto.EM_ANDAMENTO)
+            .responsavel(responsavelDesign)
+            .build());
+
+    String url =
+        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+            .queryParam("nomeCurso", "Software")
+            .toUriString();
+    // Act
+    ResponseEntity<ProjetoDTO[]> response = testRestTemplate.getForEntity(url, ProjetoDTO[].class);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().length);
+    assertEquals("Projeto de Software", response.getBody()[0].getTitulo());
+  }
+
+  @Test
+  void buscarProjetos_comFiltroTemVagasTrue_deveRetornarApenasProjetosComVagas() {
+    // Arrange
+    Usuario membro1 = criarUsuarioSimples("membro1@test.com", "111");
+    Usuario membro2 = criarUsuarioSimples("membro2@test.com", "222");
+
+    // Projeto Lotado: 2 vagas, 2 membros na equipe
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto Lotado", StatusProjeto.EM_ANDAMENTO)
+            .qtdeVagas(2L)
+            .equipeExecutora(List.of(membro1, membro2))
+            .build());
+
+    // Projeto com Vagas: 3 vagas, 2 membros na equipe
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto com Vagas", StatusProjeto.EM_ANDAMENTO)
+            .qtdeVagas(3L)
+            .equipeExecutora(List.of(membro1, membro2))
+            .build());
+
+    String url =
+        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+            .queryParam("temVagas", "true")
+            .toUriString();
+    // Act
+    ResponseEntity<ProjetoDTO[]> response = testRestTemplate.getForEntity(url, ProjetoDTO[].class);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().length);
+    assertEquals("Projeto com Vagas", response.getBody()[0].getTitulo());
+  }
+
+  @Test
+  void buscarProjetos_comFiltroTemVagasFalse_deveRetornarApenasProjetosSemVagas() {
+    // Arrange
+    Usuario membro1 = criarUsuarioSimples("membro1@test.com", "111");
+    Usuario membro2 = criarUsuarioSimples("membro2@test.com", "222");
+
+    // Projeto Lotado: 2 vagas, 2 membros na equipe
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto Lotado", StatusProjeto.EM_ANDAMENTO)
+            .qtdeVagas(2L)
+            // Use uma lista mutável para garantir a persistência da relação
+            .equipeExecutora(new ArrayList<>(List.of(membro1, membro2)))
+            .build());
+
+    // Projeto com Vagas: 3 vagas, 2 membros na equipe
+    projetoRepository.save(
+        gerarBuilderDeProjetoPadrao("Projeto com Vagas", StatusProjeto.EM_ANDAMENTO)
+            .qtdeVagas(3L)
+            .equipeExecutora(new ArrayList<>(List.of(membro1, membro2)))
+            .build());
+
+    String url =
+        UriComponentsBuilder.fromPath(API_PROJETOS_BUSCAR)
+            .queryParam("temVagas", "false")
+            .toUriString();
+    // Act
+    ResponseEntity<ProjetoDTO[]> response = testRestTemplate.getForEntity(url, ProjetoDTO[].class);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().length, "Deveria encontrar apenas o projeto lotado.");
+    assertEquals("Projeto Lotado", response.getBody()[0].getTitulo());
+  }
+
+  private Projeto.ProjetoBuilder gerarBuilderDeProjetoPadrao(String titulo, StatusProjeto status) {
+    return Projeto.builder()
+        .titulo(titulo)
+        .status(status)
+        .responsavel(this.responsavelDeTeste)
+        .descricao("Descrição para " + titulo)
+        .justificativa("Justificativa para " + titulo)
+        .dataInicio(new Date())
+        .publicoAlvo("Todos")
+        .vinculadoDisciplina(false);
+  }
+
+  private Usuario criarUsuarioSimples(String email, String cpf) {
+    return usuarioRepository.save(
+        Usuario.builder()
+            .nome("Membro " + cpf)
+            .email(email)
+            .cpf(cpf)
+            .curso(this.cursoDeTeste)
+            .build());
+  }
 
   private Projeto criarEsalvarProjeto(String titulo, StatusProjeto status) {
     // Chama a versão mais completa com valores padrão
