@@ -7,6 +7,5 @@ import lombok.Data;
 public class CandidaturaDTO {
   private Long id;
   private Long projetoId;
-  private Long alunoId;
   private LocalDateTime dataCandidatura;
 }

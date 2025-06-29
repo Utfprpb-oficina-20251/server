@@ -22,15 +22,16 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
   private final ModelMapper modelMapper;
 
   @Override
-  public CandidaturaDTO candidatar(Long projetoId, Long alunoId) {
+  public CandidaturaDTO candidatar(Long projetoId) {
     Projeto projeto = projetoService.findOne(projetoId);
+    Usuario aluno = usuarioService.obterUsuarioLogado();
 
     if (!StatusProjeto.EM_ANDAMENTO.equals(projeto.getStatus())) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Projeto não está aberto para candidaturas");
     }
 
-    if (candidaturaRepository.existsByProjetoIdAndAlunoId(projetoId, alunoId)) {
+    if (candidaturaRepository.existsByProjetoIdAndAlunoId(projetoId, aluno.getId())) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Você já está inscrito neste projeto");
     }
@@ -38,11 +39,6 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
     long totalCandidaturas = candidaturaRepository.countByProjetoId(projetoId);
     if (projeto.getQtdeVagas() != null && totalCandidaturas >= projeto.getQtdeVagas()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vagas preenchidas");
-    }
-
-    Usuario aluno = usuarioService.findOne(alunoId);
-    if (aluno == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Aluno não encontrado");
     }
 
     Candidatura candidatura =

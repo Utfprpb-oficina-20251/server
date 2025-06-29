@@ -49,7 +49,7 @@ class CandidaturaServiceImplTest {
     when(projetoService.findOne(projetoId)).thenReturn(projeto);
     when(candidaturaRepository.existsByProjetoIdAndAlunoId(projetoId, alunoId)).thenReturn(false);
     when(candidaturaRepository.countByProjetoId(projetoId)).thenReturn(2L);
-    when(usuarioService.findOne(alunoId)).thenReturn(aluno);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
 
     Candidatura candidaturaSalva =
         Candidatura.builder()
@@ -61,7 +61,7 @@ class CandidaturaServiceImplTest {
 
     when(candidaturaRepository.save(any(Candidatura.class))).thenReturn(candidaturaSalva);
 
-    CandidaturaDTO dto = candidaturaService.candidatar(projetoId, alunoId);
+    CandidaturaDTO dto = candidaturaService.candidatar(projetoId);
 
     assertNotNull(dto);
     assertEquals(1L, dto.getId());
@@ -75,36 +75,48 @@ class CandidaturaServiceImplTest {
     when(projetoService.findOne(anyLong())).thenReturn(projeto);
 
     ResponseStatusException ex =
-        assertThrows(ResponseStatusException.class, () -> candidaturaService.candidatar(1L, 10L));
+        assertThrows(ResponseStatusException.class, () -> candidaturaService.candidatar(1L));
 
     assertEquals("400 BAD_REQUEST \"Projeto não está aberto para candidaturas\"", ex.getMessage());
   }
 
   @Test
   void candidatar_quandoJaInscrito_entaoBadRequest() {
+    Long alunoId = 10L;
     Projeto projeto = Projeto.builder().status(StatusProjeto.EM_ANDAMENTO).build();
     projeto.setId(1L);
 
+    Usuario aluno = Usuario.builder().nome("Aluno Teste").build();
+    aluno.setId(alunoId);
+
     when(projetoService.findOne(anyLong())).thenReturn(projeto);
-    when(candidaturaRepository.existsByProjetoIdAndAlunoId(anyLong(), anyLong())).thenReturn(true);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
+    when(candidaturaRepository.existsByProjetoIdAndAlunoId(anyLong(), eq(alunoId)))
+        .thenReturn(true);
 
     ResponseStatusException ex =
-        assertThrows(ResponseStatusException.class, () -> candidaturaService.candidatar(1L, 10L));
+        assertThrows(ResponseStatusException.class, () -> candidaturaService.candidatar(1L));
 
     assertEquals("400 BAD_REQUEST \"Você já está inscrito neste projeto\"", ex.getMessage());
   }
 
   @Test
   void candidatar_quandoVagasPreenchidas_entaoBadRequest() {
+    Long alunoId = 10L;
     Projeto projeto = Projeto.builder().status(StatusProjeto.EM_ANDAMENTO).qtdeVagas(2L).build();
     projeto.setId(1L);
 
+    Usuario aluno = Usuario.builder().nome("Aluno Teste").build();
+    aluno.setId(alunoId);
+
     when(projetoService.findOne(anyLong())).thenReturn(projeto);
-    when(candidaturaRepository.existsByProjetoIdAndAlunoId(anyLong(), anyLong())).thenReturn(false);
+    when(usuarioService.obterUsuarioLogado()).thenReturn(aluno);
+    when(candidaturaRepository.existsByProjetoIdAndAlunoId(anyLong(), eq(alunoId)))
+        .thenReturn(false);
     when(candidaturaRepository.countByProjetoId(anyLong())).thenReturn(2L);
 
     ResponseStatusException ex =
-        assertThrows(ResponseStatusException.class, () -> candidaturaService.candidatar(1L, 10L));
+        assertThrows(ResponseStatusException.class, () -> candidaturaService.candidatar(1L));
 
     assertEquals("400 BAD_REQUEST \"Vagas preenchidas\"", ex.getMessage());
   }
