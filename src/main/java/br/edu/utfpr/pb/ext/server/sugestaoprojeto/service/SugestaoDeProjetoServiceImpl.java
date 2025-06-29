@@ -91,8 +91,8 @@ public class SugestaoDeProjetoServiceImpl extends CrudServiceImpl<SugestaoDeProj
     SugestaoDeProjeto savedEntity = super.postsave(entity);
 
     boolean isNew =
-            entity.getDataCriacao() != null
-                    && entity.getDataCriacao().isAfter(LocalDateTime.now().minusSeconds(10));
+        entity.getDataCriacao() != null
+            && entity.getDataCriacao().isAfter(LocalDateTime.now().minusSeconds(10));
 
     if (isNew) {
       eventPublisher.publishSugestaoCriada(savedEntity);

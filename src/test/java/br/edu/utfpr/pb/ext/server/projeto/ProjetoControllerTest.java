@@ -523,7 +523,8 @@ class ProjetoControllerTest {
   @Test
   void buscarProjetos_semFiltros_retornaOkComListaDeProjetos() {
     // Arrange
-    FiltroProjetoDTO filtroVazio = new FiltroProjetoDTO(null, null, null, null, null, null, null);
+    FiltroProjetoDTO filtroVazio =
+        new FiltroProjetoDTO(null, null, null, null, null, null, null, null, null, null, null);
     List<ProjetoDTO> listaEsperada = List.of(new ProjetoDTO(), new ProjetoDTO());
     when(projetoService.buscarProjetosPorFiltro(filtroVazio)).thenReturn(listaEsperada);
 
@@ -542,7 +543,9 @@ class ProjetoControllerTest {
   void buscarProjetos_comFiltroUnicoDeTitulo_retornaOkComListaFiltrada() {
     // Arrange 🕵️‍♂️
     // 1. Cria um filtro específico, apenas com o título.
-    FiltroProjetoDTO filtros = new FiltroProjetoDTO("Robótica", null, null, null, null, null, null);
+    FiltroProjetoDTO filtros =
+        new FiltroProjetoDTO(
+            "Robótica", null, null, null, null, null, null, null, null, null, null);
 
     // 2. A lista esperada para este filtro específico.
     List<ProjetoDTO> listaFiltrada = List.of(new ProjetoDTO());
@@ -567,7 +570,8 @@ class ProjetoControllerTest {
     // Arrange 🕵️‍♂️
     // 1. Cria um filtro combinando status e ID de um membro da equipe.
     FiltroProjetoDTO filtros =
-        new FiltroProjetoDTO(null, StatusProjeto.EM_ANDAMENTO, null, null, 10L, null, null);
+        new FiltroProjetoDTO(
+            null, StatusProjeto.EM_ANDAMENTO, null, null, 10L, null, null, null, null, null, null);
     List<ProjetoDTO> listaFiltrada = List.of(new ProjetoDTO());
     when(projetoService.buscarProjetosPorFiltro(filtros)).thenReturn(listaFiltrada);
 
@@ -585,7 +589,8 @@ class ProjetoControllerTest {
   void buscarProjetos_quandoNenhumProjetoEncontrado_retornaOkComListaVazia() {
     // Arrange
     FiltroProjetoDTO filtroInexistente =
-        new FiltroProjetoDTO("Projeto Inexistente", null, null, null, null, null, null);
+        new FiltroProjetoDTO(
+            "Projeto Inexistente", null, null, null, null, null, null, null, null, null, null);
 
     when(projetoService.buscarProjetosPorFiltro(filtroInexistente))
         .thenReturn(Collections.emptyList());

@@ -39,4 +39,22 @@ public record FiltroProjetoDTO(
             description =
                 "Filtrar por projetos vinculados a um curso específico (usar o ID do curso).",
             example = "5")
-        Long idCurso) {}
+        Long idCurso,
+    @Schema(
+            description = "Filtrar projetos com carga horária MAIOR ou IGUAL a este valor.",
+            example = "20")
+        Long cargaHorariaMinima,
+    @Schema(
+            description = "Filtrar projetos com carga horária MENOR ou IGUAL a este valor.",
+            example = "60")
+        Long cargaHorariaMaxima,
+    @Schema(
+            description =
+                "Filtrar por parte do nome do curso do responsável. A busca é case-insensitive.",
+            example = "Software")
+        String nomeCurso,
+    @Schema(
+            description =
+                "Filtrar por projetos que possuem vagas. `true` para com vagas, `false` para sem vagas, não enviar para ignorar.",
+            example = "true")
+        Boolean temVagas) {}

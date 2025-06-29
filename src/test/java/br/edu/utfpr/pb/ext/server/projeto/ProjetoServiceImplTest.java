@@ -724,7 +724,9 @@ class ProjetoServiceImplTest {
   @Test
   void buscarProjetosPorFiltro_quandoFiltroDeTituloInformado_deveChamarRepositorio() {
     // Arrange
-    FiltroProjetoDTO filtro = new FiltroProjetoDTO("Robótica", null, null, null, null, null, null);
+    FiltroProjetoDTO filtro =
+        new FiltroProjetoDTO(
+            "Robótica", null, null, null, null, null, null, null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
@@ -744,7 +746,8 @@ class ProjetoServiceImplTest {
   void buscarProjetosPorFiltro_quandoFiltroDeStatusInformado_deveChamarRepositorio() {
     // Arrange
     FiltroProjetoDTO filtro =
-        new FiltroProjetoDTO(null, StatusProjeto.EM_ANDAMENTO, null, null, null, null, null);
+        new FiltroProjetoDTO(
+            null, StatusProjeto.EM_ANDAMENTO, null, null, null, null, null, null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
@@ -763,7 +766,8 @@ class ProjetoServiceImplTest {
   void buscarProjetosPorFiltro_quandoFiltroDeDataInicioDeInformado_deveChamarRepositorio() {
     // Arrange
     FiltroProjetoDTO filtro =
-        new FiltroProjetoDTO(null, null, LocalDate.now(), null, null, null, null);
+        new FiltroProjetoDTO(
+            null, null, LocalDate.now(), null, null, null, null, null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
@@ -782,7 +786,8 @@ class ProjetoServiceImplTest {
   void buscarProjetosPorFiltro_quandoFiltroDeDataInicioAteInformado_deveChamarRepositorio() {
     // Arrange
     FiltroProjetoDTO filtro =
-        new FiltroProjetoDTO(null, null, null, LocalDate.now(), null, null, null);
+        new FiltroProjetoDTO(
+            null, null, null, LocalDate.now(), null, null, null, null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
@@ -800,7 +805,8 @@ class ProjetoServiceImplTest {
   @Test
   void buscarProjetosPorFiltro_quandoFiltroDeIdResponsavelInformado_deveChamarRepositorio() {
     // Arrange
-    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, null, null, 1L, null, null);
+    FiltroProjetoDTO filtro =
+        new FiltroProjetoDTO(null, null, null, null, 1L, null, null, null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
@@ -818,7 +824,8 @@ class ProjetoServiceImplTest {
   @Test
   void buscarProjetosPorFiltro_quandoFiltroDeIdMembroEquipeInformado_deveChamarRepositorio() {
     // Arrange
-    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, null, null, null, 2L, null);
+    FiltroProjetoDTO filtro =
+        new FiltroProjetoDTO(null, null, null, null, null, 2L, null, null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
@@ -836,7 +843,8 @@ class ProjetoServiceImplTest {
   @Test
   void buscarProjetosPorFiltro_quandoFiltroDeIdCursoInformado_deveChamarRepositorio() {
     // Arrange
-    FiltroProjetoDTO filtro = new FiltroProjetoDTO(null, null, null, null, null, null, 3L);
+    FiltroProjetoDTO filtro =
+        new FiltroProjetoDTO(null, null, null, null, null, null, 3L, null, null, null, null);
     List<Projeto> listaResultado = List.of(projetoMock);
 
     when(projetoRepository.findAll(any(Specification.class))).thenReturn(listaResultado);
