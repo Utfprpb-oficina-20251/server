@@ -38,6 +38,7 @@ public class NotificacaoServiceImpl extends CrudServiceImpl<Notificacao, Long>
    *     for o proprietário
    */
   @Override
+  @Transactional
   public void marcarComoLida(Long notificacaoId, Usuario usuario) {
     Notificacao notificacao = findOne(notificacaoId);
     if (!notificacao.pertenceAoUsuario(usuario)) {
@@ -80,6 +81,7 @@ public class NotificacaoServiceImpl extends CrudServiceImpl<Notificacao, Long>
    * @return página contendo DTOs das notificações não lidas do usuário
    */
   @Override
+  @Transactional(readOnly = true)
   public Page<NotificacaoDTO> buscarNotificacoesNaoLidas(Usuario usuario, Pageable pageable) {
     Page<Notificacao> notificacoes =
         notificacaoRepository.findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(usuario, pageable);
@@ -96,6 +98,7 @@ public class NotificacaoServiceImpl extends CrudServiceImpl<Notificacao, Long>
    * @return número total de notificações não lidas do usuário
    */
   @Override
+  @Transactional(readOnly = true)
   public long contarNotificacoesNaoLidas(Usuario usuario) {
     return notificacaoRepository.countByUsuarioAndLidaFalse(usuario);
   }
@@ -110,6 +113,7 @@ public class NotificacaoServiceImpl extends CrudServiceImpl<Notificacao, Long>
    * @see br.edu.utfpr.pb.ext.server.notificacao.NotificacaoRepository#marcarTodasComoLidas(Usuario)
    */
   @Override
+  @Transactional
   public void marcarTodasComoLidas(Usuario usuario) {
     notificacaoRepository.marcarTodasComoLidas(usuario);
   }
