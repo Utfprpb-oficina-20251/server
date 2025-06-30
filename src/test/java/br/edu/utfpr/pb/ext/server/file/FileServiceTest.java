@@ -275,8 +275,10 @@ class FileServiceTest {
 
     // Act
     FileInfoDTO result1 = fileService.store(TEST_BYTES, contentType, originalFilename);
-    Thread.sleep(2000);
-    FileInfoDTO result2 = fileService.store(TEST_BYTES, contentType, originalFilename);
+    await().atLeast(Duration.ofSeconds(2)).until(() -> {
+        FileInfoDTO result2 = fileService.store(TEST_BYTES, contentType, originalFilename);
+        return !result1.getFileName().equals(result2.getFileName());
+    });
 
     // Assert
     assertNotNull(result1.getFileName());
