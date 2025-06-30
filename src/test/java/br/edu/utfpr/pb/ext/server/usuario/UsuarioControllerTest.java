@@ -209,30 +209,27 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.getForEntity("/api/usuarios/meu-perfil", Object.class);
 
-    assertEquals(403, response.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
   }
 
   @Test
   void getAllUsers_whenUnauthenticated_receiveForbidden() {
-    // Ensure no authentication headers are present
     testRestTemplate.getRestTemplate().getInterceptors().clear();
 
     ResponseEntity<Object> response =
         testRestTemplate.getForEntity("/api/usuarios/executores", Object.class);
 
-    assertEquals(403, response.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
   }
 
   @Test
   void getAllUsers_whenAuthenticated_receiveListOfUsers() {
-    // Create a user and authenticate
     UsuarioServidorRequestDTO request = createUsuarioServidorRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =
         testRestTemplate.postForEntity(API_USERS, request, RespostaLoginDTO.class);
 
     String token = loginResponse.getBody().getToken();
 
-    // Add authentication header for subsequent requests
     testRestTemplate
         .getRestTemplate()
         .getInterceptors()
@@ -242,16 +239,13 @@ class UsuarioControllerTest {
               return execution.execute(httpRequest, bytes);
             });
 
-    // Call the endpoint
     ResponseEntity<UsuarioProjetoDTO[]> response =
         testRestTemplate.getForEntity("/api/usuarios/executores", UsuarioProjetoDTO[].class);
 
-    // Verify response
     assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().length);
 
-    // Verify user data
     boolean foundFirstUser = false;
 
     for (UsuarioProjetoDTO user : response.getBody()) {
@@ -271,7 +265,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.getForEntity("/api/usuarios/professores", Object.class);
 
-    assertEquals(403, response.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
   }
 
   @Test
@@ -331,7 +325,6 @@ class UsuarioControllerTest {
     updateRequest.setNome("Nome Atualizado");
     updateRequest.setDepartamentoId(1L);
 
-    // Update profile
     ResponseEntity<UsuarioLogadoInfoDTO> response =
         testRestTemplate.exchange(
             "/api/usuarios/meu-perfil",
@@ -339,7 +332,6 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    // Verify response
     assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals("Nome Atualizado", response.getBody().getNome());
@@ -360,7 +352,7 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatusCode().value());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
   }
 
   @Test
@@ -432,7 +424,6 @@ class UsuarioControllerTest {
 
   @Test
   void updateMeuPerfil_whenCursoIsNull_shouldNotUpdateCurso() {
-    // Create and authenticate user
     UsuarioAlunoRequestDTO createRequest = createUsuarioAlunoRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =
         testRestTemplate.postForEntity(API_USERS_ALUNO, createRequest, RespostaLoginDTO.class);
@@ -447,16 +438,13 @@ class UsuarioControllerTest {
               return execution.execute(httpRequest, bytes);
             });
 
-    // Get current profile
     ResponseEntity<UsuarioLogadoInfoDTO> currentProfile =
         testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
 
-    // Set curso to null explicitly
     UsuarioLogadoInfoDTO updateRequest = currentProfile.getBody();
     updateRequest.setNome("Nome Atualizado");
     updateRequest.setCurso(null);
 
-    // Update profile
     ResponseEntity<UsuarioLogadoInfoDTO> response =
         testRestTemplate.exchange(
             "/api/usuarios/meu-perfil",
@@ -464,10 +452,8 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    // Verify response
     assertEquals(200, response.getStatusCode().value());
     assertEquals("Nome Atualizado", response.getBody().getNome());
-    // Curso should remain unchanged
     assertEquals(currentProfile.getBody().getCurso(), response.getBody().getCurso());
   }
 
@@ -515,15 +501,13 @@ class UsuarioControllerTest {
   }
 
   @Test
-  void buscarPorEmail_whenUserExists_receiveListWithUser() {
-    // Create a user first
+  void buscarPorEmail_whenUserExists_receiveUser() {
     UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =
         testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
 
     String token = loginResponse.getBody().getToken();
 
-    // Authenticate for subsequent requests
     testRestTemplate
         .getRestTemplate()
         .getInterceptors()
@@ -533,22 +517,18 @@ class UsuarioControllerTest {
               return execution.execute(httpRequest, bytes);
             });
 
-    // Test the endpoint
-    ResponseEntity<UsuarioProjetoDTO[]> response =
+    ResponseEntity<UsuarioProjetoDTO> response =
         testRestTemplate.getForEntity(
-            "/api/usuarios/buscar-email/" + createRequest.getEmail(), UsuarioProjetoDTO[].class);
+            "/api/usuarios/buscar-email/" + createRequest.getEmail(), UsuarioProjetoDTO.class);
 
-    // Verify response
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(1, response.getBody().length);
-    assertEquals(createRequest.getEmail(), response.getBody()[0].getEmail());
-    assertEquals(createRequest.getNome(), response.getBody()[0].getNome());
+    assertEquals(createRequest.getEmail(), response.getBody().getEmail());
+    assertEquals(createRequest.getNome(), response.getBody().getNome());
   }
 
   @Test
-  void buscarPorEmail_whenUserDoesNotExist_receiveEmptyList() {
-    // Create a user and authenticate
+  void buscarPorEmail_whenUserDoesNotExist_receiveNotFound() {
     UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =
         testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
@@ -564,46 +544,13 @@ class UsuarioControllerTest {
               return execution.execute(httpRequest, bytes);
             });
 
-    // Test with non-existent email
     String nonExistentEmail = "nonexistent@example.com";
 
-    ResponseEntity<UsuarioProjetoDTO[]> response =
+    ResponseEntity<UsuarioProjetoDTO> response =
         testRestTemplate.getForEntity(
-            "/api/usuarios/buscar-email/" + nonExistentEmail, UsuarioProjetoDTO[].class);
+            "/api/usuarios/buscar-email/" + nonExistentEmail, UsuarioProjetoDTO.class);
 
-    // Verify response
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertEquals(0, response.getBody().length);
-  }
-
-  @Test
-  void buscarPorEmail_whenSearchingByPartialName_receiveMatchingUsers() {
-    // Create a user and authenticate
-    UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
-    ResponseEntity<RespostaLoginDTO> loginResponse =
-        testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
-
-    String token = loginResponse.getBody().getToken();
-
-    testRestTemplate
-        .getRestTemplate()
-        .getInterceptors()
-        .add(
-            (httpRequest, bytes, execution) -> {
-              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
-              return execution.execute(httpRequest, bytes);
-            });
-
-    // Test searching by partial name
-    ResponseEntity<UsuarioProjetoDTO[]> response =
-        testRestTemplate.getForEntity("/api/usuarios/buscar-email/test", UsuarioProjetoDTO[].class);
-
-    // Verify response
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertEquals(1, response.getBody().length);
-    assertEquals(createRequest.getNome(), response.getBody()[0].getNome());
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {

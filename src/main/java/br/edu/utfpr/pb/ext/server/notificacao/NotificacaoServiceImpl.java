@@ -2,7 +2,13 @@ package br.edu.utfpr.pb.ext.server.notificacao;
 
 import br.edu.utfpr.pb.ext.server.generics.CrudServiceImpl;
 import br.edu.utfpr.pb.ext.server.notificacao.dto.NotificacaoDTO;
+import br.edu.utfpr.pb.ext.server.notificacao.enums.TipoNotificacao;
+import br.edu.utfpr.pb.ext.server.notificacao.enums.TipoReferencia;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -116,5 +122,44 @@ public class NotificacaoServiceImpl extends CrudServiceImpl<Notificacao, Long>
   @Transactional
   public void marcarTodasComoLidas(Usuario usuario) {
     notificacaoRepository.marcarTodasComoLidas(usuario);
+  }
+
+  /**
+   * Cria notificações para múltiplos usuários simultaneamente.
+   *
+   * @param destinatarios lista de usuários que receberão a notificação
+   * @param titulo título da notificação
+   * @param descricao descrição detalhada da notificação
+   * @param tipo tipo da notificação
+   * @param tipoReferencia tipo da entidade referenciada
+   * @param referenciaId ID da entidade referenciada
+   */
+  @Override
+  @Transactional
+  public void criarNotificacaoParaMultiplosUsuarios(
+      List<Usuario> destinatarios,
+      String titulo,
+      String descricao,
+      TipoNotificacao tipo,
+      TipoReferencia tipoReferencia,
+      Long referenciaId) {
+    List<Notificacao> notificacoes =
+        destinatarios.stream()
+            .filter(Objects::nonNull)
+            .map(
+                destinatario ->
+                    Notificacao.builder()
+                        .titulo(titulo)
+                        .descricao(descricao)
+                        .tipoNotificacao(tipo)
+                        .tipoReferencia(tipoReferencia)
+                        .referenciaId(referenciaId)
+                        .dataCriacao(LocalDateTime.now())
+                        .lida(false)
+                        .usuario(destinatario)
+                        .build())
+            .collect(Collectors.toList());
+
+    notificacaoRepository.saveAll(notificacoes);
   }
 }

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/notificacao")
 @RequiredArgsConstructor
-@PreAuthorize("IsAuthenticated()")
+@PreAuthorize("isAuthenticated()")
 @Tag(name = "Notificacao", description = "Serviços relacionados a notificação do usuário logado")
 public class NotificacaoController {
   private final NotificacaoService service;

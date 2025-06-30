@@ -33,6 +33,8 @@ public class SecurityConfig {
   private final Environment environment;
   private final EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
 
+  private final EntryPointUnauthorizedHandler entryPointUnauthorizedHandler;
+
   /**
    * Injeta a chave app.client.origins e os valores existentes separados por vírgula configurado no
    * yml
@@ -51,9 +53,12 @@ public class SecurityConfig {
    * @param emailOtpAuthenticationProvider provedor de autenticação OTP por e-mail
    */
   public SecurityConfig(
-      Environment environment, EmailOtpAuthenticationProvider emailOtpAuthenticationProvider) {
+      Environment environment,
+      EmailOtpAuthenticationProvider emailOtpAuthenticationProvider,
+      EntryPointUnauthorizedHandler entryPointUnauthorizedHandler) {
     this.environment = environment;
     this.emailOtpAuthenticationProvider = emailOtpAuthenticationProvider;
+    this.entryPointUnauthorizedHandler = entryPointUnauthorizedHandler;
   }
 
   /**
@@ -75,6 +80,8 @@ public class SecurityConfig {
     http.cors(c -> c.configurationSource(corsConfigurationSource()))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/h2-console/**"))
         .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+        .exceptionHandling(
+            exceptions -> exceptions.authenticationEntryPoint(entryPointUnauthorizedHandler))
         .authorizeHttpRequests(
             authorize ->
                 authorize
