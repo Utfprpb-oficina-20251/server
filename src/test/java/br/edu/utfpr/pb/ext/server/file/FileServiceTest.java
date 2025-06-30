@@ -275,14 +275,18 @@ class FileServiceTest {
 
     // Act
     FileInfoDTO result1 = fileService.store(TEST_BYTES, contentType, originalFilename);
-    await().atLeast(Duration.ofSeconds(2)).until(() -> {
-        FileInfoDTO result2 = fileService.store(TEST_BYTES, contentType, originalFilename);
-        return !result1.getFileName().equals(result2.getFileName());
-    });
+    await()
+        .atMost(Duration.ofSeconds(5))
+        .until(
+            () -> {
+              FileInfoDTO result2 = fileService.store(TEST_BYTES, contentType, originalFilename);
+              return !result1.getFileName().equals(result2.getFileName());
+            });
+
+    FileInfoDTO result2 = fileService.store(TEST_BYTES, contentType, originalFilename);
 
     // Assert
     assertNotNull(result1.getFileName());
-    await().atLeast(Duration.ofSeconds(2));
     assertNotNull(result2.getFileName());
     assertNotEquals(result1.getFileName(), result2.getFileName());
     assertTrue(result1.getFileName().contains(".jpg"));
