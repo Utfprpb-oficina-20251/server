@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.br.CPF;
@@ -22,7 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;

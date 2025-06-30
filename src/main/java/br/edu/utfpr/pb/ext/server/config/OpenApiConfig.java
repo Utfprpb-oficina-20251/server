@@ -4,6 +4,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,5 +31,33 @@ public class OpenApiConfig {
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .bearerFormat("JWT")));
+  }
+
+  @Bean
+  public GroupedOpenApi publicApi() {
+    return GroupedOpenApi.builder()
+        .group("public")
+        .pathsToMatch("/api/**")
+        .addOperationCustomizer(
+            (operation, handlerMethod) -> {
+              // Customiza parâmetros do Pageable
+              if (operation.getParameters() != null) {
+                operation
+                    .getParameters()
+                    .forEach(
+                        parameter -> {
+                          if ("page".equals(parameter.getName())) {
+                            parameter.setDescription("Número da página (inicia em 0)");
+                          } else if ("size".equals(parameter.getName())) {
+                            parameter.setDescription("Quantidade de itens por página");
+                          } else if ("sort".equals(parameter.getName())) {
+                            parameter.setDescription(
+                                "Ordenação no formato: propriedade,direção (ex: 'dataCriacao,desc')");
+                          }
+                        });
+              }
+              return operation;
+            })
+        .build();
   }
 }
