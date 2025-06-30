@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.event;
 
+import br.edu.utfpr.pb.ext.server.candidatura.Candidatura;
 import br.edu.utfpr.pb.ext.server.projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.SugestaoDeProjeto;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,13 @@ public class EventPublisher {
 
   public void publishSugestaoAtualizada(SugestaoDeProjeto sugestao) {
     publisher.publishEvent(new SugestaoEvent(sugestao, EntityEvent.EventType.UPDATED));
+  }
+
+  public void publishCandidaturaCriada(Candidatura candidatura) {
+    publisher.publishEvent(new CandidaturaEvent(candidatura, EntityEvent.EventType.CREATED));
+  }
+
+  public void publishCandidaturaAtualizada(Candidatura candidatura) {
+    publisher.publishEvent(new CandidaturaEvent(candidatura, EntityEvent.EventType.UPDATED));
   }
 }

@@ -1,10 +1,12 @@
 package br.edu.utfpr.pb.ext.server.candidatura;
 
+import br.edu.utfpr.pb.ext.server.event.EventPublisher;
 import br.edu.utfpr.pb.ext.server.projeto.IProjetoService;
 import br.edu.utfpr.pb.ext.server.projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.IUsuarioService;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +21,10 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
   private final CandidaturaRepository candidaturaRepository;
   private final IUsuarioService usuarioService;
   private final IProjetoService projetoService;
+  private final EventPublisher eventPublisher;
 
   @Override
+  @Transactional
   public Candidatura candidatar(Long projetoId) {
     Projeto projeto = projetoService.findOne(projetoId);
     Usuario aluno = usuarioService.obterUsuarioLogado();
@@ -61,10 +65,13 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
               .build();
     }
 
-    return candidaturaRepository.save(candidatura);
+    Candidatura candidaturaBD = candidaturaRepository.save(candidatura);
+    eventPublisher.publishCandidaturaCriada(candidaturaBD);
+    return candidaturaBD;
   }
 
   @Override
+  @Transactional
   public void atualizarStatusCandidaturas(List<Candidatura> candidaturas) {
     if (candidaturas == null || candidaturas.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lista de candidaturas vazia");
@@ -92,6 +99,7 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
 
       candidaturaBD.setStatus(candidatura.getStatus());
       candidaturaRepository.save(candidaturaBD);
+      eventPublisher.publishCandidaturaAtualizada(candidaturaBD);
     }
   }
 
