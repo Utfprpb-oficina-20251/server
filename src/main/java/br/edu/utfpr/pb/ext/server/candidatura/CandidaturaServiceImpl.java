@@ -6,8 +6,8 @@ import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
 import br.edu.utfpr.pb.ext.server.usuario.IUsuarioService;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,10 +19,9 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
   private final CandidaturaRepository candidaturaRepository;
   private final IUsuarioService usuarioService;
   private final IProjetoService projetoService;
-  private final ModelMapper modelMapper;
 
   @Override
-  public CandidaturaDTO candidatar(Long projetoId) {
+  public Candidatura candidatar(Long projetoId) {
     Projeto projeto = projetoService.findOne(projetoId);
     Usuario aluno = usuarioService.obterUsuarioLogado();
 
@@ -31,23 +30,92 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
           HttpStatus.BAD_REQUEST, "Projeto não está aberto para candidaturas");
     }
 
-    if (candidaturaRepository.existsByProjetoIdAndAlunoId(projetoId, aluno.getId())) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Você já está inscrito neste projeto");
-    }
-
-    long totalCandidaturas = candidaturaRepository.countByProjetoId(projetoId);
-    if (projeto.getQtdeVagas() != null && totalCandidaturas >= projeto.getQtdeVagas()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vagas preenchidas");
-    }
-
     Candidatura candidatura =
-        Candidatura.builder()
-            .projeto(projeto)
-            .aluno(aluno)
-            .dataCandidatura(LocalDateTime.now())
-            .build();
+        candidaturaRepository.findByProjetoIdAndAlunoId(projetoId, aluno.getId()).orElse(null);
 
-    return modelMapper.map(candidaturaRepository.save(candidatura), CandidaturaDTO.class);
+    if (candidatura != null) {
+      if (StatusCandidatura.APROVADA.equals(candidatura.getStatus())) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Sua candidatura já foi aprovada para este projeto");
+      }
+
+      if (StatusCandidatura.REJEITADA.equals(candidatura.getStatus())) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Sua candidatura foi rejeitada para este projeto");
+      }
+
+      if (StatusCandidatura.PENDENTE.equals(candidatura.getStatus())) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Você já está inscrito neste projeto");
+      }
+
+      candidatura.setStatus(StatusCandidatura.PENDENTE);
+      candidatura.setDataCandidatura(LocalDateTime.now());
+    } else {
+      candidatura = Candidatura.builder().projeto(projeto).aluno(aluno).build();
+    }
+
+    return candidaturaRepository.save(candidatura);
+  }
+
+  @Override
+  public void atualizarStatusCandidaturas(List<Candidatura> candidaturas) {
+    if (candidaturas == null || candidaturas.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lista de candidaturas vazia");
+    }
+
+    for (Candidatura candidatura : candidaturas) {
+      Candidatura candidaturaBD =
+          candidaturaRepository
+              .findById(candidatura.getId())
+              .orElseThrow(
+                  () ->
+                      new ResponseStatusException(
+                          HttpStatus.NOT_FOUND,
+                          "Candidatura com ID " + candidatura.getId() + " não encontrada"));
+
+      if (StatusCandidatura.APROVADA.equals(candidaturaBD.getStatus())) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Candidatura " + candidatura.getId() + " já foi aprovada");
+      }
+
+      if (StatusCandidatura.REJEITADA.equals(candidaturaBD.getStatus())) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Candidatura " + candidatura.getId() + " já foi rejeitada");
+      }
+
+      candidaturaBD.setStatus(candidatura.getStatus());
+      candidaturaRepository.save(candidaturaBD);
+    }
+  }
+
+  @Override
+  public List<Candidatura> findAllByAlunoId(Long alunoId) {
+    return candidaturaRepository
+        .findAllByAlunoId(alunoId)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Candidaturas não encontradas para o aluno"));
+  }
+
+  @Override
+  public List<Candidatura> findAllByProjetoId(Long projetoId) {
+    return candidaturaRepository
+        .findAllByProjetoIdAndStatus(projetoId, StatusCandidatura.PENDENTE)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Candidaturas não encontradas para o projeto"));
+  }
+
+  @Override
+  public Candidatura findById(Long id) {
+    return candidaturaRepository
+        .findById(id)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Candidatura com ID " + id + " não encontrada"));
   }
 }

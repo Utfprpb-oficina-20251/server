@@ -6,9 +6,14 @@ import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "tb_candidatura")
+@EntityListeners(AuditingEntityListener.class)
+@Table(
+    name = "tb_candidatura",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"projeto_id", "aluno_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,5 +29,10 @@ public class Candidatura extends BaseEntity {
   @JoinColumn(name = "projeto_id")
   private Projeto projeto;
 
+  @CreatedDate
+  @Column(nullable = false)
   private LocalDateTime dataCandidatura;
+
+  @Enumerated(EnumType.STRING)
+  private StatusCandidatura status;
 }
