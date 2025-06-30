@@ -279,7 +279,7 @@ class FileServiceTest {
 
     // Assert
     assertNotNull(result1.getFileName());
-    await().atLeast(Duration.ofMillis(1));
+    await().atLeast(Duration.ofSeconds(2));
     assertNotNull(result2.getFileName());
     assertNotEquals(result1.getFileName(), result2.getFileName());
     assertTrue(result1.getFileName().contains(".jpg"));
