@@ -12,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 public class CandidaturaDTO {
   private Long id;
-  private UsuarioProjetoDTO usuarioProjeto;
+  private UsuarioProjetoDTO aluno;
   private Long projetoId;
   private StatusCandidatura statusCandidatura;
   private LocalDateTime dataCandidatura;
