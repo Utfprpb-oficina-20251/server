@@ -66,13 +66,15 @@ public class CandidaturaController {
         @ApiResponse(
             responseCode = "200",
             description = "Lista de candidaturas retornada com sucesso"),
-        @ApiResponse(responseCode = "404", description = "Projeto não encontrado")
+        @ApiResponse(
+            responseCode = "200",
+            description = "Lista vazia quando não há candidaturas para o projeto")
       })
   public ResponseEntity<List<CandidaturaDTO>> listarCandidaturasPorProjeto(
       @PathVariable Long projetoId) {
     List<Candidatura> candidaturas = candidaturaService.findAllPendentesByProjetoId(projetoId);
     if (candidaturas.isEmpty()) {
-      return ResponseEntity.notFound().build();
+      return ResponseEntity.ok(List.of());
     }
     List<CandidaturaDTO> candidaturaDTOs =
         candidaturas.stream()
