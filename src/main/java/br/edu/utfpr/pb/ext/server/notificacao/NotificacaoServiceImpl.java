@@ -64,7 +64,7 @@ public class NotificacaoServiceImpl extends CrudServiceImpl<Notificacao, Long>
   @Transactional(readOnly = true)
   public Page<NotificacaoDTO> buscarNotificacoesDoUsuario(Usuario usuario, Pageable pageable) {
     Page<Notificacao> notificacoes =
-        notificacaoRepository.findByUsuarioIdOrderByDataCriacaoDesc(usuario, pageable);
+        notificacaoRepository.findByUsuarioOrderByDataCriacaoDesc(usuario, pageable);
     return notificacoes.map(element -> modelMapper.map(element, NotificacaoDTO.class));
   }
 
@@ -82,7 +82,7 @@ public class NotificacaoServiceImpl extends CrudServiceImpl<Notificacao, Long>
   @Override
   public Page<NotificacaoDTO> buscarNotificacoesNaoLidas(Usuario usuario, Pageable pageable) {
     Page<Notificacao> notificacoes =
-        notificacaoRepository.findByUsuarioIdAndLidaFalseOrderByDataCriacaoDesc(usuario, pageable);
+        notificacaoRepository.findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(usuario, pageable);
     return notificacoes.map(element -> modelMapper.map(element, NotificacaoDTO.class));
   }
 

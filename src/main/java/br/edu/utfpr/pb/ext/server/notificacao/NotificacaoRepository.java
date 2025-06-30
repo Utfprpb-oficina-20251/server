@@ -9,9 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface NotificacaoRepository extends JpaRepository<Notificacao, Long> {
-  Page<Notificacao> findByUsuarioIdOrderByDataCriacaoDesc(Usuario usuario, Pageable pageable);
+  Page<Notificacao> findByUsuarioOrderByDataCriacaoDesc(Usuario usuario, Pageable pageable);
 
-  Page<Notificacao> findByUsuarioIdAndLidaFalseOrderByDataCriacaoDesc(
+  Page<Notificacao> findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(
       Usuario usuario, Pageable pageable);
 
   long countByUsuarioAndLidaFalse(Usuario usuario);

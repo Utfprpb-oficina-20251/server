@@ -153,7 +153,7 @@ class NotificacaoServiceImplTest {
     // Arrange
     Page<Notificacao> pageNotificacoes =
         new PageImpl<>(List.of(notificacao1, notificacao2), pageable, 2);
-    when(notificacaoRepository.findByUsuarioIdOrderByDataCriacaoDesc(usuario1, pageable))
+    when(notificacaoRepository.findByUsuarioOrderByDataCriacaoDesc(usuario1, pageable))
         .thenReturn(pageNotificacoes);
     when(modelMapper.map(notificacao1, NotificacaoDTO.class)).thenReturn(notificacaoDTO1);
     when(modelMapper.map(notificacao2, NotificacaoDTO.class)).thenReturn(notificacaoDTO2);
@@ -167,7 +167,7 @@ class NotificacaoServiceImplTest {
     assertEquals(2, result.getContent().size());
     assertEquals(notificacaoDTO1.getId(), result.getContent().get(0).getId());
     assertEquals(notificacaoDTO2.getId(), result.getContent().get(1).getId());
-    verify(notificacaoRepository).findByUsuarioIdOrderByDataCriacaoDesc(usuario1, pageable);
+    verify(notificacaoRepository).findByUsuarioOrderByDataCriacaoDesc(usuario1, pageable);
   }
 
   @Test
@@ -175,7 +175,7 @@ class NotificacaoServiceImplTest {
   void buscarNotificacoesNaoLidas_deveRetornarApenasNotificacoesNaoLidas() {
     // Arrange
     Page<Notificacao> pageNotificacoes = new PageImpl<>(List.of(notificacao1), pageable, 1);
-    when(notificacaoRepository.findByUsuarioIdAndLidaFalseOrderByDataCriacaoDesc(
+    when(notificacaoRepository.findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(
             usuario1, pageable))
         .thenReturn(pageNotificacoes);
     when(modelMapper.map(notificacao1, NotificacaoDTO.class)).thenReturn(notificacaoDTO1);
@@ -189,7 +189,7 @@ class NotificacaoServiceImplTest {
     assertEquals(notificacaoDTO1.getId(), result.getContent().getFirst().getId());
     assertFalse(result.getContent().getFirst().isLida());
     verify(notificacaoRepository)
-        .findByUsuarioIdAndLidaFalseOrderByDataCriacaoDesc(usuario1, pageable);
+        .findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(usuario1, pageable);
   }
 
   @Test
@@ -224,7 +224,7 @@ class NotificacaoServiceImplTest {
   void buscarNotificacoesDoUsuario_comPageableNulo_deveFuncionar() {
     // Arrange
     Page<Notificacao> pageNotificacoes = new PageImpl<>(List.of(notificacao1));
-    when(notificacaoRepository.findByUsuarioIdOrderByDataCriacaoDesc(eq(usuario1), isNull()))
+    when(notificacaoRepository.findByUsuarioOrderByDataCriacaoDesc(eq(usuario1), isNull()))
         .thenReturn(pageNotificacoes);
     when(modelMapper.map(notificacao1, NotificacaoDTO.class)).thenReturn(notificacaoDTO1);
 
@@ -234,6 +234,6 @@ class NotificacaoServiceImplTest {
     // Assert
     assertNotNull(result);
     assertEquals(1, result.getContent().size());
-    verify(notificacaoRepository).findByUsuarioIdOrderByDataCriacaoDesc(eq(usuario1), any());
+    verify(notificacaoRepository).findByUsuarioOrderByDataCriacaoDesc(eq(usuario1), any());
   }
 }
