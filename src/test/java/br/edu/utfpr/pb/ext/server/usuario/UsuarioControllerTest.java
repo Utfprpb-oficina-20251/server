@@ -515,7 +515,7 @@ class UsuarioControllerTest {
   }
 
   @Test
-  void buscarPorEmail_whenUserExists_receiveUser() {
+  void buscarPorEmail_whenUserExists_receiveListWithUser() {
     // Create a user first
     UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =
@@ -534,19 +534,20 @@ class UsuarioControllerTest {
             });
 
     // Test the endpoint
-    ResponseEntity<UsuarioProjetoDTO> response =
+    ResponseEntity<UsuarioProjetoDTO[]> response =
         testRestTemplate.getForEntity(
-            "/api/usuarios/buscar-email/" + createRequest.getEmail(), UsuarioProjetoDTO.class);
+            "/api/usuarios/buscar-email/" + createRequest.getEmail(), UsuarioProjetoDTO[].class);
 
     // Verify response
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(createRequest.getEmail(), response.getBody().getEmail());
-    assertEquals(createRequest.getNome(), response.getBody().getNome());
+    assertEquals(1, response.getBody().length);
+    assertEquals(createRequest.getEmail(), response.getBody()[0].getEmail());
+    assertEquals(createRequest.getNome(), response.getBody()[0].getNome());
   }
 
   @Test
-  void buscarPorEmail_whenUserDoesNotExist_receiveNotFound() {
+  void buscarPorEmail_whenUserDoesNotExist_receiveEmptyList() {
     // Create a user and authenticate
     UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
     ResponseEntity<RespostaLoginDTO> loginResponse =
@@ -566,12 +567,43 @@ class UsuarioControllerTest {
     // Test with non-existent email
     String nonExistentEmail = "nonexistent@example.com";
 
-    ResponseEntity<UsuarioProjetoDTO> response =
+    ResponseEntity<UsuarioProjetoDTO[]> response =
         testRestTemplate.getForEntity(
-            "/api/usuarios/buscar-email/" + nonExistentEmail, UsuarioProjetoDTO.class);
+            "/api/usuarios/buscar-email/" + nonExistentEmail, UsuarioProjetoDTO[].class);
 
     // Verify response
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(0, response.getBody().length);
+  }
+
+  @Test
+  void buscarPorEmail_whenSearchingByPartialName_receiveMatchingUsers() {
+    // Create a user and authenticate
+    UsuarioServidorRequestDTO createRequest = createUsuarioServidorRequestDTO();
+    ResponseEntity<RespostaLoginDTO> loginResponse =
+        testRestTemplate.postForEntity(API_USERS, createRequest, RespostaLoginDTO.class);
+
+    String token = loginResponse.getBody().getToken();
+
+    testRestTemplate
+        .getRestTemplate()
+        .getInterceptors()
+        .add(
+            (httpRequest, bytes, execution) -> {
+              httpRequest.getHeaders().add("Authorization", "Bearer " + token);
+              return execution.execute(httpRequest, bytes);
+            });
+
+    // Test searching by partial name
+    ResponseEntity<UsuarioProjetoDTO[]> response =
+        testRestTemplate.getForEntity("/api/usuarios/buscar-email/test", UsuarioProjetoDTO[].class);
+
+    // Verify response
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().length);
+    assertEquals(createRequest.getNome(), response.getBody()[0].getNome());
   }
 
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {

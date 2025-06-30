@@ -175,8 +175,7 @@ class NotificacaoServiceImplTest {
   void buscarNotificacoesNaoLidas_deveRetornarApenasNotificacoesNaoLidas() {
     // Arrange
     Page<Notificacao> pageNotificacoes = new PageImpl<>(List.of(notificacao1), pageable, 1);
-    when(notificacaoRepository.findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(
-            usuario1, pageable))
+    when(notificacaoRepository.findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(usuario1, pageable))
         .thenReturn(pageNotificacoes);
     when(modelMapper.map(notificacao1, NotificacaoDTO.class)).thenReturn(notificacaoDTO1);
 
