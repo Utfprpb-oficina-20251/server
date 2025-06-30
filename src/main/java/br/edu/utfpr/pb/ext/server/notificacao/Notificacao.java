@@ -45,10 +45,25 @@ public class Notificacao extends BaseEntity {
   @JoinColumn(name = "usuario_id")
   private Usuario usuario;
 
+  /**
+   * Marca esta notificação como lida.
+   *
+   * <p>Altera o status da notificação para lida (true), indicando que o usuário já visualizou o
+   * conteúdo da notificação.
+   */
   public void marcarComoLida() {
     this.lida = true;
   }
 
+  /**
+   * Verifica se esta notificação pertence ao usuário especificado.
+   *
+   * <p>Compara o ID do usuário proprietário da notificação com o ID do usuário fornecido para
+   * determinar a propriedade.
+   *
+   * @param usuario usuário a ser verificado como proprietário
+   * @return true se o usuário for o proprietário da notificação, false caso contrário
+   */
   public boolean pertenceAoUsuario(Usuario usuario) {
     return this.usuario != null && this.usuario.getId().equals(usuario.getId());
   }

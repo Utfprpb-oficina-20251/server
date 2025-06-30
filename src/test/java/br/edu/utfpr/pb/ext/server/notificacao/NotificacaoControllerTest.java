@@ -32,7 +32,7 @@ class NotificacaoControllerTest {
 
   private Usuario usuario;
   private NotificacaoDTO notificacaoDTO1;
-    private Page<NotificacaoDTO> pageNotificacoes;
+  private Page<NotificacaoDTO> pageNotificacoes;
   private Pageable pageable;
 
   @BeforeEach
@@ -49,14 +49,15 @@ class NotificacaoControllerTest {
             .lida(false)
             .build();
 
-      NotificacaoDTO notificacaoDTO2 = NotificacaoDTO.builder()
-              .id(2L)
-              .titulo("Notificacao 2")
-              .descricao("Descrição da notificação 2")
-              .tipoNotificacao(TipoNotificacao.ALERTA)
-              .dataCriacao(LocalDateTime.now())
-              .lida(true)
-              .build();
+    NotificacaoDTO notificacaoDTO2 =
+        NotificacaoDTO.builder()
+            .id(2L)
+            .titulo("Notificacao 2")
+            .descricao("Descrição da notificação 2")
+            .tipoNotificacao(TipoNotificacao.ALERTA)
+            .dataCriacao(LocalDateTime.now())
+            .lida(true)
+            .build();
 
     pageable = PageRequest.of(0, 10);
     pageNotificacoes = new PageImpl<>(List.of(notificacaoDTO1, notificacaoDTO2), pageable, 2);
@@ -154,8 +155,7 @@ class NotificacaoControllerTest {
 
     // Act & Assert
     assertThrows(
-        ResponseStatusException.class,
-        () -> notificacaoController.marcarComoLida(1L, usuario));
+        ResponseStatusException.class, () -> notificacaoController.marcarComoLida(1L, usuario));
 
     verify(notificacaoService).marcarComoLida(1L, usuario);
   }

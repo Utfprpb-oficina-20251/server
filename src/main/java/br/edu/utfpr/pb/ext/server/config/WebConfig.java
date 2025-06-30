@@ -38,6 +38,26 @@ public class WebConfig implements WebMvcConfigurer {
     configurer.addPathPrefix("/api/", HandlerTypePredicate.forAssignableType(CrudController.class));
   }
 
+  /**
+   * Configura o resolvedor de argumentos para parâmetros de paginação (Pageable) em controladores.
+   *
+   * <p>Este metodo personaliza o comportamento padrão do Spring Data para resolução de parâmetros
+   * de paginação, definindo nomes específicos para os parâmetros, valores padrão e limitações de
+   * tamanho de página.
+   *
+   * <p>Configurações aplicadas:
+   *
+   * <ul>
+   *   <li><strong>Parâmetro de página</strong>: "page" (baseado em zero)
+   *   <li><strong>Parâmetro de tamanho</strong>: "size"
+   *   <li><strong>Tamanho máximo</strong>: 100 itens por página
+   *   <li><strong>Valores padrão</strong>: página 0 com 20 itens
+   * </ul>
+   *
+   * @param resolvers lista de resolvedores de argumentos onde será adicionado o resolvedor de
+   *     Pageable
+   * @see org.springframework.data.web.PageableHandlerMethodArgumentResolver
+   */
   @Override
   public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
     PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();

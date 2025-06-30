@@ -33,6 +33,27 @@ public class OpenApiConfig {
                         .bearerFormat("JWT")));
   }
 
+  /**
+   * Configura um grupo de endpoints da API pública com customizações específicas para parâmetros de
+   * paginação.
+   *
+   * <p>Este metodo cria um agrupamento de endpoints que correspondem ao padrão "/api/**" e aplica
+   * customizações automáticas nos parâmetros de paginação (Pageable) para melhorar a documentação
+   * OpenAPI/Swagger, traduzindo as descrições para português.
+   *
+   * <p>Customizações aplicadas:
+   *
+   * <ul>
+   *   <li><strong>page</strong>: "Número da página (inicia em 0)"
+   *   <li><strong>size</strong>: "Quantidade de itens por página"
+   *   <li><strong>sort</strong>: "Ordenação no formato: propriedade, direção (ex: 'dataCriacao,
+   *       desc')"
+   * </ul>
+   *
+   * @return instância do GroupedOpenApi configurada para endpoints públicos com parâmetros de
+   *     paginação em português
+   * @see org.springdoc.core.models.GroupedOpenApi
+   */
   @Bean
   public GroupedOpenApi publicApi() {
     return GroupedOpenApi.builder()
