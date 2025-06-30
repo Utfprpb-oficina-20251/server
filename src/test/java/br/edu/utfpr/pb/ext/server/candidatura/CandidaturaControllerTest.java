@@ -196,7 +196,7 @@ class CandidaturaControllerTest {
   }
 
   @Test
-  void listarCandidaturasPorProjeto_quandoNaoExistemCandidaturas_entaoRetornaNotFound() {
+  void listarCandidaturasPorProjeto_quandoNaoExistemCandidaturas_entaoRetornaListaVazia() {
     // Arrange
     Long projetoId = 1L;
     when(candidaturaService.findAllPendentesByProjetoId(projetoId))
@@ -207,7 +207,8 @@ class CandidaturaControllerTest {
         candidaturaController.listarCandidaturasPorProjeto(projetoId);
 
     // Assert
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertTrue(response.getBody().isEmpty());
   }
 
   @Test
@@ -276,19 +277,15 @@ class CandidaturaControllerTest {
   void cancelarCandidatura_quandoCandidaturaNaoExiste_entaoRetornaNotFound() {
     // Arrange
     Long candidaturaId = 1L;
-    when(candidaturaService.findById(candidaturaId))
-        .thenThrow(
-            new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Candidatura com ID " + candidaturaId + " não encontrada"));
+    when(candidaturaService.findById(candidaturaId)).thenReturn(null);
 
-    // Act & Assert
-    ResponseStatusException exception =
-        assertThrows(
-            ResponseStatusException.class,
-            () -> candidaturaController.cancelarCandidatura(candidaturaId, usuarioMock));
+    // Act
+    ResponseEntity<String> response =
+        candidaturaController.cancelarCandidatura(candidaturaId, usuarioMock);
 
-    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-    assertEquals("Candidatura com ID " + candidaturaId + " não encontrada", exception.getReason());
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Candidatura com ID " + candidaturaId + " não encontrada", response.getBody());
     verify(candidaturaService, never()).atualizarStatusCandidaturas(anyList());
   }
 

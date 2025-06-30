@@ -75,16 +75,18 @@ class NotificacaoServiceImplTest {
   }
 
   private Usuario createUsuario(Long id, String nome, String email) {
-    return Usuario.builder()
-        .id(id)
-        .nome(nome)
-        .email(email)
-        .build();
+    return Usuario.builder().id(id).nome(nome).email(email).build();
   }
 
-  private Notificacao createTestNotificacao(Long id, String titulo, String descricao, 
-                                          TipoNotificacao tipo, TipoReferencia tipoReferencia,
-                                          Long referenciaId, Usuario usuario, boolean lida) {
+  private Notificacao createTestNotificacao(
+      Long id,
+      String titulo,
+      String descricao,
+      TipoNotificacao tipo,
+      TipoReferencia tipoReferencia,
+      Long referenciaId,
+      Usuario usuario,
+      boolean lida) {
     return Notificacao.builder()
         .id(id)
         .titulo(titulo)
@@ -99,9 +101,15 @@ class NotificacaoServiceImplTest {
   }
 
   private Notificacao createSimpleNotificacao(Long id, Usuario usuario, boolean lida) {
-    return createTestNotificacao(id, TITULO_TESTE, DESCRICAO_TESTE, 
-                               TipoNotificacao.INFO, TipoReferencia.PROJETO, 
-                               REFERENCIA_ID_TESTE, usuario, lida);
+    return createTestNotificacao(
+        id,
+        TITULO_TESTE,
+        DESCRICAO_TESTE,
+        TipoNotificacao.INFO,
+        TipoReferencia.PROJETO,
+        REFERENCIA_ID_TESTE,
+        usuario,
+        lida);
   }
 
   private List<Notificacao> capturarNotificacoesSalvas() {
@@ -110,8 +118,12 @@ class NotificacaoServiceImplTest {
     return captor.getValue();
   }
 
-  private void assertNotificacaoBasica(Notificacao notificacao, String titulo, String descricao, 
-                                      TipoNotificacao tipo, Usuario usuario) {
+  private void assertNotificacaoBasica(
+      Notificacao notificacao,
+      String titulo,
+      String descricao,
+      TipoNotificacao tipo,
+      Usuario usuario) {
     assertEquals(titulo, notificacao.getTitulo());
     assertEquals(descricao, notificacao.getDescricao());
     assertEquals(tipo, notificacao.getTipoNotificacao());
@@ -146,10 +158,9 @@ class NotificacaoServiceImplTest {
     void deveLancarExceptionQuandoUsuarioNaoEhProprietario() {
       when(notificacaoRepository.findById(1L)).thenReturn(Optional.of(notificacao1));
 
-      ResponseStatusException exception = assertThrows(
-          ResponseStatusException.class,
-          () -> notificacaoService.marcarComoLida(1L, usuario2)
-      );
+      ResponseStatusException exception =
+          assertThrows(
+              ResponseStatusException.class, () -> notificacaoService.marcarComoLida(1L, usuario2));
 
       assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
       assertFalse(notificacao1.isLida());
@@ -162,9 +173,7 @@ class NotificacaoServiceImplTest {
       when(notificacaoRepository.findById(99L)).thenReturn(Optional.empty());
 
       assertThrows(
-          EntityNotFoundException.class,
-          () -> notificacaoService.marcarComoLida(99L, usuario1)
-      );
+          EntityNotFoundException.class, () -> notificacaoService.marcarComoLida(99L, usuario1));
 
       verify(notificacaoRepository, never()).save(any());
     }
@@ -178,14 +187,16 @@ class NotificacaoServiceImplTest {
     @DisplayName("buscarNotificacoesDoUsuario deve retornar page de NotificacaoDTO")
     void buscarNotificacoesDoUsuario_deveRetornarPageDeNotificacaoDTO() {
       List<Notificacao> notificacoes = Arrays.asList(notificacao1, notificacao2);
-      Page<Notificacao> pageNotificacoes = new PageImpl<>(notificacoes, pageable, notificacoes.size());
-      
+      Page<Notificacao> pageNotificacoes =
+          new PageImpl<>(notificacoes, pageable, notificacoes.size());
+
       when(notificacaoRepository.findByUsuarioOrderByDataCriacaoDesc(usuario1, pageable))
           .thenReturn(pageNotificacoes);
       when(modelMapper.map(notificacao1, NotificacaoDTO.class)).thenReturn(notificacaoDTO1);
       when(modelMapper.map(notificacao2, NotificacaoDTO.class)).thenReturn(notificacaoDTO2);
 
-      Page<NotificacaoDTO> result = notificacaoService.buscarNotificacoesDoUsuario(usuario1, pageable);
+      Page<NotificacaoDTO> result =
+          notificacaoService.buscarNotificacoesDoUsuario(usuario1, pageable);
 
       assertEquals(2, result.getContent().size());
       assertEquals(notificacaoDTO1, result.getContent().get(0));
@@ -197,17 +208,21 @@ class NotificacaoServiceImplTest {
     @DisplayName("buscarNotificacoesNaoLidas deve retornar apenas notificacoes nao lidas")
     void buscarNotificacoesNaoLidas_deveRetornarApenasNotificacoesNaoLidas() {
       List<Notificacao> notificacoesNaoLidas = Collections.singletonList(notificacao1);
-      Page<Notificacao> pageNotificacoesNaoLidas = new PageImpl<>(notificacoesNaoLidas, pageable, 1);
-      
-      when(notificacaoRepository.findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(usuario1, pageable))
+      Page<Notificacao> pageNotificacoesNaoLidas =
+          new PageImpl<>(notificacoesNaoLidas, pageable, 1);
+
+      when(notificacaoRepository.findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(
+              usuario1, pageable))
           .thenReturn(pageNotificacoesNaoLidas);
       when(modelMapper.map(notificacao1, NotificacaoDTO.class)).thenReturn(notificacaoDTO1);
 
-      Page<NotificacaoDTO> result = notificacaoService.buscarNotificacoesNaoLidas(usuario1, pageable);
+      Page<NotificacaoDTO> result =
+          notificacaoService.buscarNotificacoesNaoLidas(usuario1, pageable);
 
       assertEquals(1, result.getContent().size());
       assertEquals(notificacaoDTO1, result.getContent().getFirst());
-      verify(notificacaoRepository).findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(usuario1, pageable);
+      verify(notificacaoRepository)
+          .findByUsuarioAndLidaFalseOrderByDataCriacaoDesc(usuario1, pageable);
     }
   }
 
@@ -240,8 +255,12 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Arrays.asList(usuario1, usuario2, usuario3);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertEquals(TOTAL_USUARIOS_TESTE, notificacoesSalvas.size());
@@ -249,8 +268,8 @@ class NotificacaoServiceImplTest {
       for (int i = 0; i < TOTAL_USUARIOS_TESTE; i++) {
         Notificacao notificacao = notificacoesSalvas.get(i);
         Usuario usuarioEsperado = destinatarios.get(i);
-        assertNotificacaoBasica(notificacao, TITULO_TESTE, DESCRICAO_TESTE, 
-                              TipoNotificacao.INFO, usuarioEsperado);
+        assertNotificacaoBasica(
+            notificacao, TITULO_TESTE, DESCRICAO_TESTE, TipoNotificacao.INFO, usuarioEsperado);
       }
     }
 
@@ -260,8 +279,12 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Arrays.asList(usuario1, null, usuario2);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertEquals(2, notificacoesSalvas.size());
@@ -275,8 +298,12 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Collections.emptyList();
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertTrue(notificacoesSalvas.isEmpty());
@@ -288,8 +315,12 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Arrays.asList(null, null, null);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertTrue(notificacoesSalvas.isEmpty());
@@ -301,13 +332,21 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Collections.singletonList(usuario1);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertEquals(1, notificacoesSalvas.size());
-      assertNotificacaoBasica(notificacoesSalvas.getFirst(), TITULO_TESTE, DESCRICAO_TESTE,
-                            TipoNotificacao.INFO, usuario1);
+      assertNotificacaoBasica(
+          notificacoesSalvas.getFirst(),
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          usuario1);
     }
 
     @Test
@@ -317,12 +356,16 @@ class NotificacaoServiceImplTest {
       LocalDateTime antes = LocalDateTime.now().minusSeconds(1);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       LocalDateTime depois = LocalDateTime.now().plusSeconds(1);
-      
+
       Notificacao notificacao = notificacoesSalvas.getFirst();
       assertTrue(notificacao.getDataCriacao().isAfter(antes));
       assertTrue(notificacao.getDataCriacao().isBefore(depois));
@@ -334,8 +377,12 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Arrays.asList(usuario1, usuario2);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       notificacoesSalvas.forEach(notificacao -> assertFalse(notificacao.isLida()));
@@ -347,8 +394,12 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Collections.singletonList(usuario1);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, null);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          null);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertEquals(1, notificacoesSalvas.size());
@@ -362,8 +413,12 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Collections.singletonList(usuario1);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          tipo, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          tipo,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertEquals(1, notificacoesSalvas.size());
@@ -377,8 +432,12 @@ class NotificacaoServiceImplTest {
       List<Usuario> destinatarios = Collections.singletonList(usuario1);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, TITULO_TESTE, DESCRICAO_TESTE, 
-          TipoNotificacao.INFO, tipoReferencia, REFERENCIA_ID_TESTE);
+          destinatarios,
+          TITULO_TESTE,
+          DESCRICAO_TESTE,
+          TipoNotificacao.INFO,
+          tipoReferencia,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertEquals(1, notificacoesSalvas.size());
@@ -387,21 +446,25 @@ class NotificacaoServiceImplTest {
 
     @ParameterizedTest
     @CsvSource({
-        "Título Teste 1, Descrição Teste 1",
-        "Título Teste 2, Descrição Teste 2",
-        "Título Teste 3, Descrição Teste 3"
+      "Título Teste 1, Descrição Teste 1",
+      "Título Teste 2, Descrição Teste 2",
+      "Título Teste 3, Descrição Teste 3"
     })
     @DisplayName("deve criar notificacao com diferentes dados")
     void deveCriarNotificacaoComDiferentesDados(String titulo, String descricao) {
       List<Usuario> destinatarios = Collections.singletonList(usuario1);
 
       notificacaoService.criarNotificacaoParaMultiplosUsuarios(
-          destinatarios, titulo, descricao, 
-          TipoNotificacao.INFO, TipoReferencia.PROJETO, REFERENCIA_ID_TESTE);
+          destinatarios,
+          titulo,
+          descricao,
+          TipoNotificacao.INFO,
+          TipoReferencia.PROJETO,
+          REFERENCIA_ID_TESTE);
 
       List<Notificacao> notificacoesSalvas = capturarNotificacoesSalvas();
       assertEquals(1, notificacoesSalvas.size());
-      
+
       Notificacao notificacao = notificacoesSalvas.getFirst();
       assertEquals(titulo, notificacao.getTitulo());
       assertEquals(descricao, notificacao.getDescricao());

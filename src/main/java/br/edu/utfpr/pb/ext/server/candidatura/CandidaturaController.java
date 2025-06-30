@@ -72,7 +72,7 @@ public class CandidaturaController {
       @PathVariable Long projetoId) {
     List<Candidatura> candidaturas = candidaturaService.findAllPendentesByProjetoId(projetoId);
     if (candidaturas.isEmpty()) {
-      return ResponseEntity.notFound().build();
+      return ResponseEntity.ok(List.of());
     }
     List<CandidaturaDTO> candidaturaDTOs =
         candidaturas.stream()
