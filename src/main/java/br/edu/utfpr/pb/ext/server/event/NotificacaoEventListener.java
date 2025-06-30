@@ -27,10 +27,10 @@ import org.springframework.transaction.event.TransactionalEventListener;
  *
  * <p>As notificações são processadas de forma assíncrona e transacional para garantir performance e
  * consistência dos dados.
- * 
- * <p>Os eventos são processados após o commit da transação principal para garantir que
- * as notificações só sejam criadas quando as operações principais foram bem-sucedidas.
- * 
+ *
+ * <p>Os eventos são processados após o commit da transação principal para garantir que as
+ * notificações só sejam criadas quando as operações principais foram bem-sucedidas.
+ *
  * @author Sistema de Extensão UTFPR-PB
  * @since 1.0
  */
@@ -52,7 +52,7 @@ public class NotificacaoEventListener {
    *
    * <p>Usa {@link TransactionalEventListener} para garantir que as notificações só sejam criadas
    * após o commit da transação principal.
-   * 
+   *
    * @param event evento de projeto contendo a entidade e o tipo de operação
    */
   @Async
@@ -100,7 +100,7 @@ public class NotificacaoEventListener {
    *   <li>Aluno que criou a sugestão
    *   <li>Professor associado à sugestão
    * </ul>
-   * 
+   *
    * @param event evento de sugestão contendo a entidade e o tipo de operação
    */
   @Async
@@ -148,7 +148,7 @@ public class NotificacaoEventListener {
    *   <li>Aluno que fez a candidatura
    *   <li>Responsável do projeto
    * </ul>
-   * 
+   *
    * @param event evento de candidatura contendo a entidade e o tipo de operação
    */
   @Async
@@ -191,9 +191,9 @@ public class NotificacaoEventListener {
 
   /**
    * Coleta os destinatários de notificações para eventos de projeto.
-   * 
+   *
    * <p>Para projetos, apenas os membros da equipe executora recebem notificações.
-   * 
+   *
    * @param projeto projeto do qual coletar os destinatários
    * @return conjunto de usuários que devem receber notificações
    */
@@ -209,9 +209,9 @@ public class NotificacaoEventListener {
 
   /**
    * Coleta os destinatários de notificações para eventos de sugestão.
-   * 
+   *
    * <p>Para sugestões, tanto o aluno quanto o professor associados recebem notificações.
-   * 
+   *
    * @param sugestao sugestão da qual coletar os destinatários
    * @return conjunto de usuários que devem receber notificações
    */
@@ -231,9 +231,9 @@ public class NotificacaoEventListener {
 
   /**
    * Coleta os destinatários de notificações para eventos de candidatura.
-   * 
+   *
    * <p>Para candidaturas, o aluno candidato e o responsável pelo projeto recebem notificações.
-   * 
+   *
    * @param candidatura candidatura da qual coletar os destinatários
    * @return conjunto de usuários que devem receber notificações
    */
@@ -253,7 +253,7 @@ public class NotificacaoEventListener {
 
   /**
    * Cria a configuração de notificação apropriada para eventos de projeto.
-   * 
+   *
    * @param event evento de projeto
    * @param projeto projeto relacionado ao evento
    * @return configuração da notificação ou null se o tipo de evento não for suportado
@@ -285,7 +285,7 @@ public class NotificacaoEventListener {
 
   /**
    * Cria a configuração de notificação apropriada para eventos de sugestão.
-   * 
+   *
    * @param event evento de sugestão
    * @param sugestao sugestão relacionada ao evento
    * @return configuração da notificação ou null se o tipo de evento não for suportado
@@ -317,7 +317,7 @@ public class NotificacaoEventListener {
 
   /**
    * Cria a configuração de notificação apropriada para eventos de candidatura.
-   * 
+   *
    * @param event evento de candidatura
    * @param candidatura candidatura relacionada ao evento
    * @return configuração da notificação ou null se o tipo de evento não for suportado
@@ -352,10 +352,10 @@ public class NotificacaoEventListener {
 
   /**
    * Método centralizado para criação de notificações em lote.
-   * 
-   * <p>Este método coordena a criação das notificações através do serviço e registra
-   * logs informativos sobre o processo.
-   * 
+   *
+   * <p>Este método coordena a criação das notificações através do serviço e registra logs
+   * informativos sobre o processo.
+   *
    * @param destinatarios lista de usuários que receberão a notificação
    * @param config configuração da notificação (título, descrição, tipo)
    * @param tipoReferencia tipo de referência da entidade
@@ -405,10 +405,10 @@ public class NotificacaoEventListener {
 
   /**
    * Record que encapsula a configuração de uma notificação.
-   * 
-   * <p>Contém as informações básicas necessárias para criar uma notificação:
-   * título, descrição e tipo.
-   * 
+   *
+   * <p>Contém as informações básicas necessárias para criar uma notificação: título, descrição e
+   * tipo.
+   *
    * @param titulo título da notificação
    * @param descricao descrição detalhada da notificação
    * @param tipo tipo da notificação (INFO, SUCESSO, etc.)
