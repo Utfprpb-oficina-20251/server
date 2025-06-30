@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.event;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
+import br.edu.utfpr.pb.ext.server.candidatura.Candidatura;
 import br.edu.utfpr.pb.ext.server.projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.SugestaoDeProjeto;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ class EventPublisherTest {
 
   private Projeto projeto;
   private SugestaoDeProjeto sugestao;
+  private Candidatura candidatura;
 
   @BeforeEach
   void setUp() {
@@ -33,6 +35,9 @@ class EventPublisherTest {
     sugestao = new SugestaoDeProjeto();
     sugestao.setId(1L);
     sugestao.setTitulo("Sugestão Teste");
+
+    candidatura = new Candidatura();
+    candidatura.setId(1L);
   }
 
   @Test
@@ -61,5 +66,19 @@ class EventPublisherTest {
   void publishSugestaoAtualizada_shouldPublishUpdatedEvent() {
     eventPublisher.publishSugestaoAtualizada(sugestao);
     verify(publisher).publishEvent(any(SugestaoEvent.class));
+  }
+
+  @Test
+  @DisplayName("Should publish CandidaturaEvent with CREATED type")
+  void publishCandidaturaCriada_shouldPublishCreatedEvent() {
+    eventPublisher.publishCandidaturaCriada(candidatura);
+    verify(publisher).publishEvent(any(CandidaturaEvent.class));
+  }
+
+  @Test
+  @DisplayName("Should publish CandidaturaEvent with UPDATED type")
+  void publishCandidaturaAtualizada_shouldPublishUpdatedEvent() {
+    eventPublisher.publishCandidaturaAtualizada(candidatura);
+    verify(publisher).publishEvent(any(CandidaturaEvent.class));
   }
 }

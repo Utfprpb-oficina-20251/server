@@ -3,6 +3,7 @@ package br.edu.utfpr.pb.ext.server.candidatura;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import br.edu.utfpr.pb.ext.server.event.EventPublisher;
 import br.edu.utfpr.pb.ext.server.projeto.IProjetoService;
 import br.edu.utfpr.pb.ext.server.projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.projeto.enums.StatusProjeto;
@@ -25,6 +26,8 @@ class CandidaturaServiceImplTest {
   private IProjetoService projetoService;
   private CandidaturaServiceImpl candidaturaService;
 
+  private EventPublisher eventPublisher;
+
   private Usuario aluno;
   private Projeto projeto;
 
@@ -33,9 +36,11 @@ class CandidaturaServiceImplTest {
     candidaturaRepository = mock(CandidaturaRepository.class);
     usuarioService = mock(IUsuarioService.class);
     projetoService = mock(IProjetoService.class);
+    eventPublisher = mock(EventPublisher.class);
 
     candidaturaService =
-        new CandidaturaServiceImpl(candidaturaRepository, usuarioService, projetoService);
+        new CandidaturaServiceImpl(
+            candidaturaRepository, usuarioService, projetoService, eventPublisher);
 
     aluno = Usuario.builder().nome("Aluno Teste").build();
     aluno.setId(1L);

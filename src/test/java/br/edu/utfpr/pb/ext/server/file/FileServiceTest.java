@@ -275,6 +275,7 @@ class FileServiceTest {
 
     // Act
     FileInfoDTO result1 = fileService.store(TEST_BYTES, contentType, originalFilename);
+    Thread.sleep(2000);
     FileInfoDTO result2 = fileService.store(TEST_BYTES, contentType, originalFilename);
 
     // Assert

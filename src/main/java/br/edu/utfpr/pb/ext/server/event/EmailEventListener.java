@@ -1,5 +1,6 @@
 package br.edu.utfpr.pb.ext.server.event;
 
+import br.edu.utfpr.pb.ext.server.candidatura.Candidatura;
 import br.edu.utfpr.pb.ext.server.email.impl.EmailServiceImpl;
 import br.edu.utfpr.pb.ext.server.projeto.Projeto;
 import br.edu.utfpr.pb.ext.server.sugestaoprojeto.SugestaoDeProjeto;
@@ -120,6 +121,60 @@ public class EmailEventListener {
             "Sugestão atualizada: " + sugestao.getTitulo(),
             "notification-template",
             context);
+      }
+    }
+  }
+
+  @Async
+  @EventListener
+  public void handleCandidaturaEvent(CandidaturaEvent event) {
+    Candidatura candidatura = event.getEntity();
+    List<String> recipients = new ArrayList<>();
+
+    if (candidatura.getAluno() != null && candidatura.getAluno().getEmail() != null) {
+      recipients.add(candidatura.getAluno().getEmail());
+    }
+
+    if (candidatura.getProjeto() != null
+        && candidatura.getProjeto().getResponsavel() != null
+        && candidatura.getProjeto().getResponsavel().getEmail() != null) {
+      recipients.add(candidatura.getProjeto().getResponsavel().getEmail());
+    }
+
+    if (recipients.isEmpty()) {
+      log.warn(
+          "Nenhum destinatário encontrado para a candidatura do projeto: {}",
+          candidatura.getProjeto() != null ? candidatura.getProjeto().getTitulo() : "N/A");
+      return;
+    }
+
+    Context context = new Context();
+    context.setVariable(
+        "entityTitle",
+        candidatura.getProjeto() != null ? candidatura.getProjeto().getTitulo() : "Projeto");
+    context.setVariable(
+        "nomeAluno", candidatura.getAluno() != null ? candidatura.getAluno().getNome() : "N/A");
+    context.setVariable("statusCandidatura", candidatura.getStatus());
+    context.setVariable("dataHora", LocalDateTime.now());
+
+    switch (event.getEventType()) {
+      case CREATED -> {
+        String subject =
+            "Nova candidatura recebida - "
+                + (candidatura.getProjeto() != null
+                    ? candidatura.getProjeto().getTitulo()
+                    : "Projeto");
+        sendTemplateEmailToMultipleRecipients(recipients, subject, "candidatura-created", context);
+        log.info("Email de nova candidatura enviado para: {}", recipients);
+      }
+      case UPDATED -> {
+        String subject =
+            "Status da candidatura atualizado - "
+                + (candidatura.getProjeto() != null
+                    ? candidatura.getProjeto().getTitulo()
+                    : "Projeto");
+        sendTemplateEmailToMultipleRecipients(recipients, subject, "candidatura-updated", context);
+        log.info("Email de atualização de candidatura enviado para: {}", recipients);
       }
     }
   }
