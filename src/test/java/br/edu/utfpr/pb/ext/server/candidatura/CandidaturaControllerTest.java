@@ -182,9 +182,9 @@ class CandidaturaControllerTest {
     List<Candidatura> candidaturas =
         Arrays.asList(
             createCandidatura(1L, StatusCandidatura.PENDENTE),
-            createCandidatura(2L, StatusCandidatura.APROVADA));
+            createCandidatura(2L, StatusCandidatura.PENDENTE));
 
-    when(candidaturaService.findAllByProjetoId(projetoId)).thenReturn(candidaturas);
+    when(candidaturaService.findAllPendentesByProjetoId(projetoId)).thenReturn(candidaturas);
 
     // Act
     ResponseEntity<List<CandidaturaDTO>> response =
@@ -199,7 +199,8 @@ class CandidaturaControllerTest {
   void listarCandidaturasPorProjeto_quandoNaoExistemCandidaturas_entaoRetornaNotFound() {
     // Arrange
     Long projetoId = 1L;
-    when(candidaturaService.findAllByProjetoId(projetoId)).thenReturn(Collections.emptyList());
+    when(candidaturaService.findAllPendentesByProjetoId(projetoId))
+        .thenReturn(Collections.emptyList());
 
     // Act
     ResponseEntity<List<CandidaturaDTO>> response =
@@ -275,15 +276,19 @@ class CandidaturaControllerTest {
   void cancelarCandidatura_quandoCandidaturaNaoExiste_entaoRetornaNotFound() {
     // Arrange
     Long candidaturaId = 1L;
-    when(candidaturaService.findById(candidaturaId)).thenReturn(null);
+    when(candidaturaService.findById(candidaturaId))
+        .thenThrow(
+            new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Candidatura com ID " + candidaturaId + " não encontrada"));
 
-    // Act
-    ResponseEntity<String> response =
-        candidaturaController.cancelarCandidatura(candidaturaId, usuarioMock);
+    // Act & Assert
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> candidaturaController.cancelarCandidatura(candidaturaId, usuarioMock));
 
-    // Assert
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    assertEquals("Candidatura com ID " + candidaturaId + " não encontrada", response.getBody());
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertEquals("Candidatura com ID " + candidaturaId + " não encontrada", exception.getReason());
     verify(candidaturaService, never()).atualizarStatusCandidaturas(anyList());
   }
 

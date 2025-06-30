@@ -70,7 +70,7 @@ public class CandidaturaController {
       })
   public ResponseEntity<List<CandidaturaDTO>> listarCandidaturasPorProjeto(
       @PathVariable Long projetoId) {
-    List<Candidatura> candidaturas = candidaturaService.findAllByProjetoId(projetoId);
+    List<Candidatura> candidaturas = candidaturaService.findAllPendentesByProjetoId(projetoId);
     if (candidaturas.isEmpty()) {
       return ResponseEntity.notFound().build();
     }

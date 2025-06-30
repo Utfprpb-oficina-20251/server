@@ -267,20 +267,20 @@ class CandidaturaServiceImplTest {
   }
 
   @Test
-  void findAllByAlunoId_quandoNaoEncontrado_entaoLancaExcecao() {
+  void findAllByAlunoId_retornaListaVazia_quandoNaoEncontrado() {
     // Arrange
     when(candidaturaRepository.findAllByAlunoId(1L)).thenReturn(Optional.empty());
 
-    // Act & Assert
-    ResponseStatusException exception =
-        assertThrows(ResponseStatusException.class, () -> candidaturaService.findAllByAlunoId(1L));
+    // Act
+    List<Candidatura> resultado = candidaturaService.findAllByAlunoId(1L);
 
-    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-    assertEquals("Candidaturas não encontradas para o aluno", exception.getReason());
+    // Assert
+    assertTrue(resultado.isEmpty());
+    verify(candidaturaRepository).findAllByAlunoId(1L);
   }
 
   @Test
-  void findAllByAlunoId_quandoEncontrado_entaoRetornaLista() {
+  void findAllByAlunoId_retornaLista_quandoEncontrado() {
     // Arrange
     List<Candidatura> candidaturas =
         Arrays.asList(
@@ -298,22 +298,21 @@ class CandidaturaServiceImplTest {
   }
 
   @Test
-  void findAllByProjetoId_quandoNaoEncontrado_entaoLancaExcecao() {
+  void findAllPendentesByProjetoId_retornaListaVazia_quandoNaoEncontrado() {
     // Arrange
     when(candidaturaRepository.findAllByProjetoIdAndStatus(1L, StatusCandidatura.PENDENTE))
         .thenReturn(Optional.empty());
 
-    // Act & Assert
-    ResponseStatusException exception =
-        assertThrows(
-            ResponseStatusException.class, () -> candidaturaService.findAllByProjetoId(1L));
+    // Act
+    List<Candidatura> resultado = candidaturaService.findAllPendentesByProjetoId(1L);
 
-    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-    assertEquals("Candidaturas não encontradas para o projeto", exception.getReason());
+    // Assert
+    assertTrue(resultado.isEmpty());
+    verify(candidaturaRepository).findAllByProjetoIdAndStatus(1L, StatusCandidatura.PENDENTE);
   }
 
   @Test
-  void findAllByProjetoId_quandoEncontrado_entaoRetornaLista() {
+  void findAllPendentesByProjetoId_retornaLista_quandoEncontrado() {
     // Arrange
     List<Candidatura> candidaturas =
         Arrays.asList(
@@ -324,7 +323,7 @@ class CandidaturaServiceImplTest {
         .thenReturn(Optional.of(candidaturas));
 
     // Act
-    List<Candidatura> resultado = candidaturaService.findAllByProjetoId(1L);
+    List<Candidatura> resultado = candidaturaService.findAllPendentesByProjetoId(1L);
 
     // Assert
     assertEquals(2, resultado.size());

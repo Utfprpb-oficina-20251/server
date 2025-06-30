@@ -52,7 +52,13 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
       candidatura.setStatus(StatusCandidatura.PENDENTE);
       candidatura.setDataCandidatura(LocalDateTime.now());
     } else {
-      candidatura = Candidatura.builder().projeto(projeto).aluno(aluno).build();
+      candidatura =
+          Candidatura.builder()
+              .projeto(projeto)
+              .aluno(aluno)
+              .status(StatusCandidatura.PENDENTE)
+              .dataCandidatura(LocalDateTime.now())
+              .build();
     }
 
     return candidaturaRepository.save(candidatura);
@@ -91,22 +97,14 @@ public class CandidaturaServiceImpl implements ICandidaturaService {
 
   @Override
   public List<Candidatura> findAllByAlunoId(Long alunoId) {
-    return candidaturaRepository
-        .findAllByAlunoId(alunoId)
-        .orElseThrow(
-            () ->
-                new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Candidaturas não encontradas para o aluno"));
+    return candidaturaRepository.findAllByAlunoId(alunoId).orElse(List.of());
   }
 
   @Override
-  public List<Candidatura> findAllByProjetoId(Long projetoId) {
+  public List<Candidatura> findAllPendentesByProjetoId(Long projetoId) {
     return candidaturaRepository
         .findAllByProjetoIdAndStatus(projetoId, StatusCandidatura.PENDENTE)
-        .orElseThrow(
-            () ->
-                new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Candidaturas não encontradas para o projeto"));
+        .orElse(List.of());
   }
 
   @Override

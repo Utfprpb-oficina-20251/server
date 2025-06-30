@@ -9,7 +9,7 @@ public interface ICandidaturaService {
 
   List<Candidatura> findAllByAlunoId(Long alunoId);
 
-  List<Candidatura> findAllByProjetoId(Long projetoId);
+  List<Candidatura> findAllPendentesByProjetoId(Long projetoId);
 
   Candidatura findById(Long id);
 }
