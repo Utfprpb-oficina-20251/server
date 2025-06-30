@@ -23,6 +23,9 @@ import org.thymeleaf.context.Context;
 @RequiredArgsConstructor
 public class EmailEventListener {
 
+  public static final String ENTITY_TITLE = "entityTitle";
+  public static final String DATA_HORA = "dataHora";
+  public static final String PROJETO = "Projeto";
   private final EmailServiceImpl emailService;
   private final TemplateEngine templateEngine;
 
@@ -51,30 +54,27 @@ public class EmailEventListener {
     }
 
     Context context = new Context();
-    context.setVariable("entityTitle", projeto.getTitulo());
-    context.setVariable("dataHora", LocalDateTime.now());
+    context.setVariable(ENTITY_TITLE, projeto.getTitulo());
+    context.setVariable(DATA_HORA, LocalDateTime.now());
 
-    switch (event.getEventType()) {
-      case CREATED -> {
-        context.setVariable("titulo", "Novo Projeto Criado");
-        context.setVariable("subtitulo", "Um projeto foi criado com sucesso");
-        context.setVariable("mensagem", "O projeto foi registrado com sucesso no sistema.");
-        sendTemplateEmailToMultipleRecipients(
-            recipients,
-            "Novo projeto criado: " + projeto.getTitulo(),
-            "notification-template",
-            context);
-      }
-      case UPDATED -> {
-        context.setVariable("titulo", "Projeto Atualizado");
-        context.setVariable("subtitulo", "Um projeto foi atualizado");
-        context.setVariable("mensagem", "As alterações no projeto foram salvas com sucesso.");
-        sendTemplateEmailToMultipleRecipients(
-            recipients,
-            "Projeto atualizado: " + projeto.getTitulo(),
-            "notification-template",
-            context);
-      }
+    if (event.getEventType() == EntityEvent.EventType.CREATED) {
+      context.setVariable("titulo", "Novo Projeto Criado");
+      context.setVariable("subtitulo", "Um projeto foi criado com sucesso");
+      context.setVariable("mensagem", "O projeto foi registrado com sucesso no sistema.");
+      sendTemplateEmailToMultipleRecipients(
+          recipients,
+          "Novo projeto criado: " + projeto.getTitulo(),
+          "notification-template",
+          context);
+    } else if (event.getEventType() == EntityEvent.EventType.UPDATED) {
+      context.setVariable("titulo", "Projeto Atualizado");
+      context.setVariable("subtitulo", "Um projeto foi atualizado");
+      context.setVariable("mensagem", "As alterações no projeto foram salvas com sucesso.");
+      sendTemplateEmailToMultipleRecipients(
+          recipients,
+          "Projeto atualizado: " + projeto.getTitulo(),
+          "notification-template",
+          context);
     }
   }
 
@@ -100,30 +100,27 @@ public class EmailEventListener {
     }
 
     Context context = new Context();
-    context.setVariable("entityTitle", sugestao.getTitulo());
-    context.setVariable("dataHora", LocalDateTime.now());
+    context.setVariable(ENTITY_TITLE, sugestao.getTitulo());
+    context.setVariable(DATA_HORA, LocalDateTime.now());
 
-    switch (event.getEventType()) {
-      case CREATED -> {
-        context.setVariable("titulo", "Nova Sugestão Registrada");
-        context.setVariable("subtitulo", "Uma sugestão foi registrada com sucesso");
-        context.setVariable("mensagem", "A sugestão foi compartilhada com sucesso no sistema.");
-        sendTemplateEmailToMultipleRecipients(
-            recipients,
-            "Nova sugestão registrada: " + sugestao.getTitulo(),
-            "notification-template",
-            context);
-      }
-      case UPDATED -> {
-        context.setVariable("titulo", "Sugestão Atualizada");
-        context.setVariable("subtitulo", "Uma sugestão foi atualizada");
-        context.setVariable("mensagem", "As alterações na sugestão foram salvas com sucesso.");
-        sendTemplateEmailToMultipleRecipients(
-            recipients,
-            "Sugestão atualizada: " + sugestao.getTitulo(),
-            "notification-template",
-            context);
-      }
+    if (event.getEventType() == EntityEvent.EventType.CREATED) {
+      context.setVariable("titulo", "Nova Sugestão Registrada");
+      context.setVariable("subtitulo", "Uma sugestão foi registrada com sucesso");
+      context.setVariable("mensagem", "A sugestão foi compartilhada com sucesso no sistema.");
+      sendTemplateEmailToMultipleRecipients(
+          recipients,
+          "Nova sugestão registrada: " + sugestao.getTitulo(),
+          "notification-template",
+          context);
+    } else if (event.getEventType() == EntityEvent.EventType.UPDATED) {
+      context.setVariable("titulo", "Sugestão Atualizada");
+      context.setVariable("subtitulo", "Uma sugestão foi atualizada");
+      context.setVariable("mensagem", "As alterações na sugestão foram salvas com sucesso.");
+      sendTemplateEmailToMultipleRecipients(
+          recipients,
+          "Sugestão atualizada: " + sugestao.getTitulo(),
+          "notification-template",
+          context);
     }
   }
 
@@ -153,32 +150,25 @@ public class EmailEventListener {
 
     Context context = new Context();
     context.setVariable(
-        "entityTitle",
-        candidatura.getProjeto() != null ? candidatura.getProjeto().getTitulo() : "Projeto");
+        ENTITY_TITLE,
+        candidatura.getProjeto() != null ? candidatura.getProjeto().getTitulo() : PROJETO);
     context.setVariable(
         "nomeAluno", candidatura.getAluno() != null ? candidatura.getAluno().getNome() : "N/A");
     context.setVariable("statusCandidatura", candidatura.getStatus());
-    context.setVariable("dataHora", LocalDateTime.now());
+    context.setVariable(DATA_HORA, LocalDateTime.now());
 
-    switch (event.getEventType()) {
-      case CREATED -> {
-        String subject =
-            "Nova candidatura recebida - "
-                + (candidatura.getProjeto() != null
-                    ? candidatura.getProjeto().getTitulo()
-                    : "Projeto");
-        sendTemplateEmailToMultipleRecipients(recipients, subject, "candidatura-created", context);
-        log.info("Email de nova candidatura enviado para: {}", recipients);
-      }
-      case UPDATED -> {
-        String subject =
-            "Status da candidatura atualizado - "
-                + (candidatura.getProjeto() != null
-                    ? candidatura.getProjeto().getTitulo()
-                    : "Projeto");
-        sendTemplateEmailToMultipleRecipients(recipients, subject, "candidatura-updated", context);
-        log.info("Email de atualização de candidatura enviado para: {}", recipients);
-      }
+    if (event.getEventType() == EntityEvent.EventType.CREATED) {
+      String subject =
+          "Nova candidatura recebida - "
+              + (candidatura.getProjeto() != null ? candidatura.getProjeto().getTitulo() : PROJETO);
+      sendTemplateEmailToMultipleRecipients(recipients, subject, "candidatura-created", context);
+      log.info("Email de nova candidatura enviado para: {}", recipients);
+    } else if (event.getEventType() == EntityEvent.EventType.UPDATED) {
+      String subject =
+          "Status da candidatura atualizado - "
+              + (candidatura.getProjeto() != null ? candidatura.getProjeto().getTitulo() : PROJETO);
+      sendTemplateEmailToMultipleRecipients(recipients, subject, "candidatura-updated", context);
+      log.info("Email de atualização de candidatura enviado para: {}", recipients);
     }
   }
 
