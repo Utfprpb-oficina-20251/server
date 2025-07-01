@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import lombok.*;
+import org.hibernate.validator.constraints.URL;
 
 @Entity
 @Table(name = "tb_projeto")
@@ -34,6 +35,14 @@ public class Projeto extends BaseEntity {
 
   private String restricaoPublico;
 
+  @URL
+  @Column(name = "imagem_url", length = 2048)
+  private String imagemUrl;
+
+  @ManyToOne
+  @JoinColumn(name = "responsavel_id")
+  private Usuario responsavel;
+
   @ManyToMany
   @JoinTable(
       name = "tb_equipe_servidor",
@@ -42,4 +51,13 @@ public class Projeto extends BaseEntity {
   private List<Usuario> equipeExecutora;
 
   @NotNull private StatusProjeto status;
+
+  @Column(length = 1000)
+  private String justificativaCancelamento;
+
+  @Column(name = "carga_horaria")
+  private Long cargaHoraria;
+
+  @Column(name = "qtde_vagas")
+  private Long qtdeVagas;
 }

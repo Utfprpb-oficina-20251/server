@@ -1,19 +1,20 @@
 package br.edu.utfpr.pb.ext.server.usuario;
 
 import br.edu.utfpr.pb.ext.server.curso.Curso;
+import br.edu.utfpr.pb.ext.server.departamento.Departamento;
 import br.edu.utfpr.pb.ext.server.generics.BaseEntity;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
-import br.edu.utfpr.pb.ext.server.usuario.enums.Departamentos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import java.util.*;
+import java.util.stream.Collectors;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.br.CPF;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -22,7 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class Usuario extends BaseEntity implements UserDetails {
 
   @NotNull private String nome;
@@ -42,7 +43,9 @@ public class Usuario extends BaseEntity implements UserDetails {
   @JoinColumn(name = "curso_id")
   private Curso curso;
 
-  private Departamentos departamento;
+  @ManyToOne
+  @JoinColumn(name = "departamento_id")
+  private Departamento departamento;
 
   @Column(name = "ativo")
   private boolean ativo;
@@ -55,12 +58,12 @@ public class Usuario extends BaseEntity implements UserDetails {
   @Column(name = "data_atualizacao")
   private Date dataAtualizacao;
 
+  @Column(name = "endereco_completo")
+  private String enderecoCompleto;
+
   @ManyToMany(
       fetch = FetchType.EAGER,
-      cascade = {
-        CascadeType.DETACH, CascadeType.MERGE,
-        CascadeType.PERSIST, CascadeType.REFRESH
-      })
+      cascade = {CascadeType.MERGE, CascadeType.REFRESH})
   @JoinTable(
       name = "usuario_roles",
       joinColumns = @JoinColumn(name = "usuario_id"),
@@ -68,19 +71,29 @@ public class Usuario extends BaseEntity implements UserDetails {
   private Set<Authority> authorities;
 
   /**
-   * Retorna as permissões associadas ao usuário.
+   * Retorna uma cópia das autoridades (permissões) atribuídas ao usuário.
    *
    * @return um novo conjunto contendo as autoridades do usuário
    */
   @Override
   @Transient
   @JsonIgnore
-  public Collection<? extends GrantedAuthority> getAuthorities() {
+  public Collection<Authority> getAuthorities() {
     return new HashSet<>(authorities);
   }
 
   /**
-   * Retorna sempre null, pois a autenticação do usuário é feita exclusivamente por OTP ou JWT, sem armazenamento ou uso de senha.
+   * Retorna um conjunto com os nomes das autoridades (permissões) atribuídas ao usuário.
+   *
+   * @return um conjunto de strings representando os nomes das autoridades do usuário
+   */
+  public Set<String> getAuthoritiesStrings() {
+    return authorities.stream().map(Authority::getAuthority).collect(Collectors.toSet());
+  }
+
+  /**
+   * Retorna sempre null, pois a autenticação do usuário é feita exclusivamente por OTP ou JWT, sem
+   * armazenamento ou uso de senha.
    *
    * @return null, indicando ausência de senha para autenticação.
    */
@@ -125,7 +138,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   /**
    * Indica que as credenciais do usuário nunca expiram.
    *
-   * @return sempre retorna {@code true}, sinalizando que as credenciais estão permanentemente válidas
+   * @return sempre retorna {@code true}, sinalizando que as credenciais estão permanentemente
+   *     válidas
    */
   @Override
   @Transient
@@ -136,7 +150,8 @@ public class Usuario extends BaseEntity implements UserDetails {
   /**
    * Indica se a conta do usuário está habilitada.
    *
-   * @return sempre retorna {@code true}, indicando que a conta está habilitada, independentemente do estado real do usuário.
+   * @return sempre retorna {@code true}, indicando que a conta está habilitada, independentemente
+   *     do estado real do usuário.
    */
   @Override
   @Transient

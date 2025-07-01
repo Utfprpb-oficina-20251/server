@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import br.edu.utfpr.pb.ext.server.auth.dto.CadastroUsuarioDTO;
+import br.edu.utfpr.pb.ext.server.auth.otp.EmailOtpAuthenticationProvider;
 import br.edu.utfpr.pb.ext.server.usuario.Usuario;
 import br.edu.utfpr.pb.ext.server.usuario.UsuarioRepository;
 import br.edu.utfpr.pb.ext.server.usuario.authority.Authority;
@@ -23,15 +24,16 @@ import org.springframework.web.server.ResponseStatusException;
 class AuthServiceTest {
   @Mock UsuarioRepository usuarioRepository;
   @Mock AuthorityRepository authorityRepository;
+  @Mock EmailOtpAuthenticationProvider emailOtpAuthenticationProvider;
   @InjectMocks AuthService authService;
 
   @Test
-  @DisplayName(
-      "Solicitar código OTP quando ocorrer erro deve lançar ResponseStatusException")
+  @DisplayName("Solicitar código OTP quando ocorrer erro deve lançar ResponseStatusException")
   void solicitarCodigoOtp_whenErroOcorrer_deveRetornarResponseStatusException() {
     String email = "testuser@alunos.utfpr.edu.br";
     when(usuarioRepository.findByEmail(email)).thenThrow(new RuntimeException());
-    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> authService.solicitarCodigoOtp(email));
+    ResponseStatusException exception =
+        assertThrows(ResponseStatusException.class, () -> authService.solicitarCodigoOtp(email));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
     verify(usuarioRepository, times(1)).findByEmail(email);
   }
@@ -86,7 +88,8 @@ class AuthServiceTest {
             .email("testuser@alunos.utfpr.edu.br")
             .registro("12345678901")
             .build();
-    when(usuarioRepository.findByEmail(cadastroDTO.getEmail())).thenReturn(Optional.of(new Usuario()));
+    when(usuarioRepository.findByEmail(cadastroDTO.getEmail()))
+        .thenReturn(Optional.of(new Usuario()));
     assertThrows(ResponseStatusException.class, () -> authService.cadastro(cadastroDTO));
   }
 }

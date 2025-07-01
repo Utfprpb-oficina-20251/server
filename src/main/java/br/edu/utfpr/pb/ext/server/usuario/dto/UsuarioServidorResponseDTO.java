@@ -7,13 +7,13 @@ public class UsuarioServidorResponseDTO {
 
   private Long id;
 
-  private String nomeCompleto;
+  private String nome;
 
-  private String emailInstitucional;
+  private String email;
 
   private String telefone;
 
   private String enderecoCompleto;
 
-  private String departamento;
+  private Long departamentoId;
 }

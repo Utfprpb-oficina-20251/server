@@ -23,7 +23,8 @@ public class SugestaoDeProjetoController
   private final ModelMapper modelMapper;
 
   /**
-   * Inicializa o controlador REST para sugestões de projeto com o serviço e o model mapper fornecidos.
+   * Inicializa o controlador REST para sugestões de projeto com o serviço e o model mapper
+   * fornecidos.
    *
    * @param service implementação do serviço responsável pelas operações de sugestão de projeto
    * @param modelMapper instância utilizada para conversão entre entidades e DTOs
@@ -64,6 +65,13 @@ public class SugestaoDeProjetoController
   @GetMapping("/minhas-sugestoes")
   public ResponseEntity<List<SugestaoDeProjetoDTO>> listarSugestoesDoUsuarioLogado() {
     List<SugestaoDeProjeto> sugestoes = service.listarSugestoesDoUsuarioLogado();
+    return ResponseEntity.ok(sugestoes.stream().map(this::convertToResponseDTO).toList());
+  }
+
+  @GetMapping("/minhas-indicacoes")
+  @Operation(summary = "Listar indicações de projeto do usuário logado")
+  public ResponseEntity<List<SugestaoDeProjetoDTO>> listarIndicacoesDoUsuarioLogado() {
+    List<SugestaoDeProjeto> sugestoes = service.listarIndicacoesDoUsuarioLogado();
     return ResponseEntity.ok(sugestoes.stream().map(this::convertToResponseDTO).toList());
   }
 
