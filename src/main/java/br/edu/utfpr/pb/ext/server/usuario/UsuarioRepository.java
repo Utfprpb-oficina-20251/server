@@ -46,4 +46,20 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
    * @return @return lista de usuários que atendem ao critério; lista vazia se nenhum encontrado
    */
   List<Usuario> findAllByEmailEndingWith(String dominioEmail);
+
+  /**
+   * Busca usuários cujo e-mail contém a substring informada.
+   *
+   * @param emailParcial parte do e-mail a ser pesquisada
+   * @return lista de Optional contendo os usuários encontrados
+   */
+  List<Usuario> findByEmailContaining(String emailParcial);
+
+  /**
+   * Busca usuários cujo nome contém a substring informada (case insensitive).
+   *
+   * @param nomeParcial parte do nome a ser pesquisada
+   * @return lista de Optional contendo os usuários encontrados
+   */
+  List<Usuario> findByNomeContainingIgnoreCase(String nomeParcial);
 }
