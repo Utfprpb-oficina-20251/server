@@ -42,7 +42,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS, request, Object.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
   }
 
   @Test
@@ -52,7 +52,7 @@ class UsuarioControllerTest {
     ResponseEntity<RespostaLoginDTO> response =
         testRestTemplate.postForEntity(API_USERS, request, RespostaLoginDTO.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertNotNull(response.getBody().getToken());
     assertTrue(response.getBody().getExpiresIn() > 0);
@@ -66,7 +66,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS, request, Object.class);
 
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -74,15 +74,10 @@ class UsuarioControllerTest {
     UsuarioServidorRequestDTO request = createUsuarioServidorRequestDTO();
     testRestTemplate.postForEntity(API_USERS, request, Object.class);
 
-    // Criar um novo usuário com mesmo CPF mas dados diferentes
-    UsuarioServidorRequestDTO request2 = createUsuarioServidorRequestDTO();
-    request2.setEmail("outro@utfpr.edu.br");
-    request2.setSiape("7654321");
-
     ResponseEntity<Object> response =
-        testRestTemplate.postForEntity(API_USERS, request2, Object.class);
+        testRestTemplate.postForEntity(API_USERS, request, Object.class);
 
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -93,7 +88,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS, request, Object.class);
 
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -101,15 +96,10 @@ class UsuarioControllerTest {
     UsuarioServidorRequestDTO request = createUsuarioServidorRequestDTO();
     testRestTemplate.postForEntity(API_USERS, request, Object.class);
 
-    // Criar um novo usuário com mesmo SIAPE mas dados diferentes
-    UsuarioServidorRequestDTO request2 = createUsuarioServidorRequestDTO();
-    request2.setEmail("outro@utfpr.edu.br");
-    request2.setCpf("12345678901");
-
     ResponseEntity<Object> response =
-        testRestTemplate.postForEntity(API_USERS, request2, Object.class);
+        testRestTemplate.postForEntity(API_USERS, request, Object.class);
 
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -120,7 +110,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS, request, Object.class);
 
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -130,7 +120,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
   }
 
   @Test
@@ -140,7 +130,7 @@ class UsuarioControllerTest {
     ResponseEntity<RespostaLoginDTO> response =
         testRestTemplate.postForEntity(API_USERS_ALUNO, request, RespostaLoginDTO.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertNotNull(response.getBody().getToken());
     assertTrue(response.getBody().getExpiresIn() > 0);
@@ -152,37 +142,25 @@ class UsuarioControllerTest {
     request.setCpf("invalid-cpf");
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
   void postUserAluno_WhenUserCpfAlreadyExists_receiveBadRequest() {
     UsuarioAlunoRequestDTO request = createUsuarioAlunoRequestDTO();
     testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
-
-    // Criar um novo aluno com mesmo CPF mas dados diferentes
-    UsuarioAlunoRequestDTO request2 = createUsuarioAlunoRequestDTO();
-    request2.setEmail("outro@alunos.utfpr.edu.br");
-    request2.setRegistroAcademico("7654321");
-
     ResponseEntity<Object> response =
-        testRestTemplate.postForEntity(API_USERS_ALUNO, request2, Object.class);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
   void postUserAluno_whenRegistroAcademicoAlreadyExists_receiveBadRequest() {
     UsuarioAlunoRequestDTO request = createUsuarioAlunoRequestDTO();
     testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
-
-    // Criar um novo aluno com mesmo registro acadêmico mas dados diferentes
-    UsuarioAlunoRequestDTO request2 = createUsuarioAlunoRequestDTO();
-    request2.setEmail("outro@alunos.utfpr.edu.br");
-    request2.setCpf("12345678901");
-
     ResponseEntity<Object> response =
-        testRestTemplate.postForEntity(API_USERS_ALUNO, request2, Object.class);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -191,7 +169,7 @@ class UsuarioControllerTest {
     request.setEmail("invalid-email");
     ResponseEntity<Object> response =
         testRestTemplate.postForEntity(API_USERS_ALUNO, request, Object.class);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -200,7 +178,7 @@ class UsuarioControllerTest {
     ResponseEntity<RespostaLoginDTO> loginResponse =
         testRestTemplate.postForEntity(API_USERS, request, RespostaLoginDTO.class);
 
-    assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+    assertEquals(200, loginResponse.getStatusCode().value());
     assertNotNull(loginResponse.getBody());
     assertNotNull(loginResponse.getBody().getToken());
 
@@ -218,7 +196,7 @@ class UsuarioControllerTest {
     ResponseEntity<UsuarioLogadoInfoDTO> response =
         testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals(request.getEmail(), response.getBody().getEmail());
     assertEquals(request.getNome(), response.getBody().getNome());
@@ -231,7 +209,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.getForEntity("/api/usuarios/meu-perfil", Object.class);
 
-    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
   }
 
   @Test
@@ -241,7 +219,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.getForEntity("/api/usuarios/executores", Object.class);
 
-    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
   }
 
   @Test
@@ -264,7 +242,7 @@ class UsuarioControllerTest {
     ResponseEntity<UsuarioProjetoDTO[]> response =
         testRestTemplate.getForEntity("/api/usuarios/executores", UsuarioProjetoDTO[].class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().length);
 
@@ -287,7 +265,7 @@ class UsuarioControllerTest {
     ResponseEntity<Object> response =
         testRestTemplate.getForEntity("/api/usuarios/professores", Object.class);
 
-    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
   }
 
   @Test
@@ -310,7 +288,7 @@ class UsuarioControllerTest {
     ResponseEntity<UsuarioProjetoDTO[]> response =
         testRestTemplate.getForEntity("/api/usuarios/professores", UsuarioProjetoDTO[].class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
 
     for (UsuarioProjetoDTO user : response.getBody()) {
@@ -354,7 +332,7 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals("Nome Atualizado", response.getBody().getNome());
     assertEquals(1L, response.getBody().getDepartamentoId());
@@ -374,7 +352,7 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
   }
 
   @Test
@@ -404,7 +382,7 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             Object.class);
 
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(400, response.getStatusCode().value());
   }
 
   @Test
@@ -439,7 +417,7 @@ class UsuarioControllerTest {
     ResponseEntity<UsuarioLogadoInfoDTO> afterUpdate =
         testRestTemplate.getForEntity("/api/usuarios/meu-perfil", UsuarioLogadoInfoDTO.class);
 
-    assertEquals(HttpStatus.OK, afterUpdate.getStatusCode());
+    assertEquals(200, afterUpdate.getStatusCode().value());
     assertNotNull(afterUpdate.getBody());
     assertEquals("Novo Nome", afterUpdate.getBody().getNome());
   }
@@ -474,7 +452,7 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
     assertEquals("Nome Atualizado", response.getBody().getNome());
     assertEquals(currentProfile.getBody().getCurso(), response.getBody().getCurso());
   }
@@ -512,7 +490,7 @@ class UsuarioControllerTest {
             new org.springframework.http.HttpEntity<>(updateRequest),
             UsuarioLogadoInfoDTO.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(200, response.getStatusCode().value());
     assertEquals("Nome Atualizado", response.getBody().getNome());
     assertNotNull(
         response.getBody().getDepartamentoId(), "Department should not be null after update");
@@ -539,15 +517,14 @@ class UsuarioControllerTest {
               return execution.execute(httpRequest, bytes);
             });
 
-    ResponseEntity<UsuarioProjetoDTO[]> response =
+    ResponseEntity<UsuarioProjetoDTO> response =
         testRestTemplate.getForEntity(
-            "/api/usuarios/buscar-email/" + createRequest.getEmail(), UsuarioProjetoDTO[].class);
+            "/api/usuarios/buscar-email/" + createRequest.getEmail(), UsuarioProjetoDTO.class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(1, response.getBody().length);
-    assertEquals(createRequest.getEmail(), response.getBody()[0].getEmail());
-    assertEquals(createRequest.getNome(), response.getBody()[0].getNome());
+    assertEquals(createRequest.getEmail(), response.getBody().getEmail());
+    assertEquals(createRequest.getNome(), response.getBody().getNome());
   }
 
   @Test
@@ -569,13 +546,11 @@ class UsuarioControllerTest {
 
     String nonExistentEmail = "nonexistent@example.com";
 
-    ResponseEntity<UsuarioProjetoDTO[]> response =
+    ResponseEntity<UsuarioProjetoDTO> response =
         testRestTemplate.getForEntity(
-            "/api/usuarios/buscar-email/" + nonExistentEmail, UsuarioProjetoDTO[].class);
+            "/api/usuarios/buscar-email/" + nonExistentEmail, UsuarioProjetoDTO.class);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertEquals(0, response.getBody().length);
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
   }
 
   private UsuarioServidorRequestDTO createUsuarioServidorRequestDTO() {

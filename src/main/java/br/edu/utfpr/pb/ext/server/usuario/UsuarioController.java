@@ -241,31 +241,13 @@ public class UsuarioController extends CrudController<Usuario, UsuarioServidorRe
     return ResponseEntity.ok(responseDTO);
   }
 
-  /**
-   * Busca usuários que contenham a string informada parcialmente no email ou nome.
-   *
-   * <p>Realiza busca tanto no campo email quanto no campo nome (case insensitive) e retorna uma
-   * lista única sem duplicatas dos usuários encontrados. A busca é feita por substring, permitindo
-   * correspondências parciais.
-   *
-   * @param email string a ser pesquisada nos campos email e nome dos usuários
-   * @return ResponseEntity contendo lista de UsuarioProjetoDTO com os usuários encontrados, ou
-   *     lista vazia se nenhum usuário corresponder aos critérios de busca
-   */
   @GetMapping("/buscar-email/{email}")
-  public ResponseEntity<List<UsuarioProjetoDTO>> buscarPorEmailOuNomeParcial(
-      @PathVariable String email) {
-    List<Usuario> usuariosEmail = usuarioRepository.findByEmailContaining(email);
-    List<Usuario> usuariosNome = usuarioRepository.findByNomeContainingIgnoreCase(email);
-    Set<Usuario> usuariosUnicos = new HashSet<>();
-    usuariosUnicos.addAll(usuariosEmail);
-    usuariosUnicos.addAll(usuariosNome);
-
-    List<UsuarioProjetoDTO> responseDTO =
-        usuariosUnicos.stream()
-            .map(usuario -> modelMapper.map(usuario, UsuarioProjetoDTO.class))
-            .toList();
-
+  public ResponseEntity<UsuarioProjetoDTO> buscarPorEmail(@PathVariable String email) {
+    Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+    if (usuario == null) {
+      return ResponseEntity.notFound().build();
+    }
+    UsuarioProjetoDTO responseDTO = modelMapper.map(usuario, UsuarioProjetoDTO.class);
     return ResponseEntity.ok(responseDTO);
   }
 
