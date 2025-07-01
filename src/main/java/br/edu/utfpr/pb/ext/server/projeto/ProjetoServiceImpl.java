@@ -267,7 +267,6 @@ public class ProjetoServiceImpl extends CrudServiceImpl<Projeto, Long> implement
                 () -> new EntityNotFoundException("Projeto com ID " + id + " não encontrado."));
     modelMapper.map(dto, projeto);
     processaImagemUrl(projeto);
-    atribuirResponsavel(projeto);
     Projeto projetoAtualizado = getRepository().save(projeto);
 
     return modelMapper.map(projetoAtualizado, ProjetoDTO.class);
